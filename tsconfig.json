@@ -8,6 +8,12 @@
     },
     {
       "path": "./apps/api"
+    },
+    {
+      "path": "./libs/api-lib"
+    },
+    {
+      "path": "./libs/enums"
     }
   ]
 }
