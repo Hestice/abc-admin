@@ -11,6 +11,9 @@
     },
     {
       "path": "./libs/api-lib"
+    },
+    {
+      "path": "./libs/enums"
     }
   ]
 }
