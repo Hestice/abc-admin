@@ -1,0 +1,16 @@
+# docker-compose -f docker-compose.local.postgres.yml up -d
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: abc_admin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: postgres -c 'max_connections=300'
+
+volumes:
+  postgres_data:
