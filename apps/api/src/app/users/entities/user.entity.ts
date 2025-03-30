@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 import { UserRole } from "@abc-admin/enums";
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
