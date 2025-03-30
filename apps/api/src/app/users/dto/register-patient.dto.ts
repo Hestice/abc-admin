@@ -9,11 +9,11 @@ export class RegisterPatientDto {
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => CreateUserDto)
-  user: CreateUserDto;
+  user!: CreateUserDto;
 
   @ApiProperty()
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => CreatePatientProfileDto)
-  profile: CreatePatientProfileDto;
+  profile!: CreatePatientProfileDto;
 } 

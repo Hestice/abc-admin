@@ -10,36 +10,36 @@ export enum Sex {
 @Entity('patient_profiles')
 export class PatientProfile {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  firstName: string;
+  firstName!: string;
 
   @Column()
-  middleName: string;
+  middleName?: string;
 
   @Column()
-  lastName: string;
+  lastName!: string;
 
   @Column({ type: 'date' })
-  dateOfBirth: Date;
+  dateOfBirth!: Date;
   
   @Column({
     type: 'enum',
     enum: Sex,
   })
-  sex: Sex;
+  sex!: Sex;
 
   @Column()
-  address: string;
+  address!: string;
 
   @OneToOne(() => User, user => user.patientProfile)
   @JoinColumn()
-  user: User;
+  user!: User;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

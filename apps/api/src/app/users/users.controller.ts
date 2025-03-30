@@ -35,6 +35,18 @@ export class UsersController {
     return this.usersService.createPatientWithProfile(registerPatientDto);
   }
 
+  @Post('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new admin user (admin only)' })
+  @ApiResponse({ status: 201, description: 'Admin user has been created successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiResponse({ status: 409, description: 'Username or email already exists.' })
+  async createAdmin(@Body() createUserDto: CreateUserDto): Promise<User> {
+    return this.usersService.createAdminUser(createUserDto);
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

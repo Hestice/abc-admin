@@ -39,16 +39,16 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  async createAdminUser(createUserDto: CreateUserDto): Promise<User> {
+    createUserDto.role = UserRole.ADMIN;
+    return this.createUser(createUserDto);
+  }
+
   async createPatientWithProfile(registerPatientDto: RegisterPatientDto): Promise<User> {
     const { user: userDto, profile: profileDto } = registerPatientDto;
-    
-    // Ensure role is set to patient
     userDto.role = UserRole.PATIENT;
-    
-    // First create the user
     const user = await this.createUser(userDto);
     
-    // Then create the patient profile
     await this.createPatientProfile(user.id, profileDto);
     
     return this.findOneWithProfile(user.id);
@@ -101,4 +101,8 @@ export class UsersService {
     return user || undefined;
   }
 
+  async findByUsername(username: string): Promise<User | undefined> {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    return user || undefined;
+  }
 }
