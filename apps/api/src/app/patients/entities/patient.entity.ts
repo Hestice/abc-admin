@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from "typeorm";
-import { User } from "./user.entity";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { User } from "../../users/entities/user.entity";
 
 export enum Sex {
   MALE = 'male',
@@ -7,15 +7,15 @@ export enum Sex {
   OTHER = 'other',
 }
 
-@Entity('patient_profiles')
-export class PatientProfile {
+@Entity('patients')
+export class Patient {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column()
   firstName!: string;
 
-  @Column()
+  @Column({ nullable: true })
   middleName?: string;
 
   @Column()
@@ -32,10 +32,12 @@ export class PatientProfile {
 
   @Column()
   address!: string;
+  
+  @Column({ nullable: true })
+  email?: string;
 
-  @OneToOne(() => User, user => user.patientProfile)
-  @JoinColumn()
-  user!: User;
+  @ManyToOne(() => User, { nullable: true })
+  managedBy?: User;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;
