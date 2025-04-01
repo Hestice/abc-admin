@@ -10,7 +10,23 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'User login' })
-  @ApiResponse({ status: 200, description: 'User logged in successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    schema: {
+      properties: {
+        access_token: { type: 'string' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            email: { type: 'string' },
+            role: { type: 'string' }
+          }
+        }
+      }
+    }
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials.' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

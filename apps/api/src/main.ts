@@ -14,6 +14,7 @@ async function bootstrap() {
     .setDescription('API for Animal Bite Clinic Admin App')
     .setVersion('1.0')
     .addTag('abc-admin')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, documentFactory);
