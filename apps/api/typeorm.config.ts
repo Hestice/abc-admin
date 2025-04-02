@@ -16,17 +16,17 @@ const migrations = [
 const connectionSource = new DataSource({
   database: DB_DATABASE,
   entities: entities,
-  // extra: {
-  //   ssl: {
-  //     rejectUnauthorized: false,
-  //   },
-  // },
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
   host: DB_HOST,
   migrations: migrations,
   namingStrategy: new SnakeNamingStrategy(),
   password: DB_PASSWORD,
   port: Number(DB_PORT),
-  // ssl: false,
+  ssl: true,
   synchronize: false,
   type: 'postgres',
   username: DB_USERNAME,

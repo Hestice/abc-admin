@@ -25,6 +25,12 @@ import { PatientsModule } from './patients/patients.module';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         autoLoadEntities: true,
         synchronize: configService.get('NODE_ENV') !== 'production',
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
       }),
     }),
     UsersModule,

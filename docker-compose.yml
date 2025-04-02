@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # NestJS API service (Production with Supabase)
+  # NestJS API service (Production with Amazon RDS)
   api:
     build:
       context: .
@@ -13,12 +13,12 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
-      # Supabase connection
-      - USE_SUPABASE=true
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
+      # Amazon RDS connection
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_DATABASE=${DB_DATABASE:-postgres}
+      - DB_DATABASE=${DB_DATABASE:-abc_admin}
       # JWT settings
       - JWT_SECRET=${JWT_SECRET}
     restart: unless-stopped
