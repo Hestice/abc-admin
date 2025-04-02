@@ -24,7 +24,7 @@ async function bootstrap() {
   const port = process.env.PORT || 8080;
 
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:3000'],
+    origin: [process.env.FRONTEND_URL || 'https://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   });
