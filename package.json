@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "update-sources": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8080/api-docs-json -g typescript-axios -o libs/api-lib/src"
+    "update-sources": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8080/api-docs-json -g typescript-axios -o libs/api-lib/src",
+    "build:api": "nx build api",
+    "start:prod": "node dist/apps/api/main.js",
+    "postinstall": "npx nx --version && node ./tools/scripts/patch-nx.js"
   },
   "private": true,
   "dependencies": {
