@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # NestJS API service (Production with Amazon RDS)
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+      target: production
+    container_name: abc-api-prod
+    ports:
+      - '${API_PORT:-8080}:8080'
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      # Amazon RDS connection
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE:-abc_admin}
+      # JWT settings
+      - JWT_SECRET=${JWT_SECRET}
+    restart: unless-stopped
+    command: node dist/main
+
+  # Nginx for SSL termination and reverse proxy (optional but recommended)
+  nginx:
+    image: nginx:alpine
+    container_name: abc-nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    depends_on:
+      - api
+    restart: unless-stopped
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+
+  # Certbot for SSL certificates (optional but recommended)
+  certbot:
+    image: certbot/certbot
+    container_name: abc-certbot
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    restart: unless-stopped
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"

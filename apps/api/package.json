@@ -38,6 +38,38 @@
             "buildTarget": "@abc-admin/api:build:production"
           }
         }
+      },
+      "seed-create": {
+        "executor": "nx:run-commands",
+        "outputs": [],
+        "options": {
+          "command": "npx ts-node --project tsconfig.typeorm.json ../../node_modules/typeorm/cli.js migration:create",
+          "cwd": "apps/api"
+        }
+      },
+      "seed-run": {
+        "executor": "nx:run-commands",
+        "outputs": [],
+        "options": {
+          "command": "npx ts-node --project tsconfig.typeorm.json ../../node_modules/typeorm/cli.js migration:run -d typeorm.config.seed.ts",
+          "cwd": "apps/api"
+        }
+      },
+      "migration-create": {
+        "executor": "nx:run-commands",
+        "outputs": [],
+        "options": {
+          "command": "npx ts-node --project tsconfig.typeorm.json ../../node_modules/typeorm/cli.js migration:create",
+          "cwd": "apps/api"
+        }
+      },
+      "migration-run": {
+        "executor": "nx:run-commands",
+        "outputs": [],
+        "options": {
+          "command": "npx ts-node --project tsconfig.typeorm.json ../../node_modules/typeorm/cli.js migration:run -d typeorm.config.ts --transaction all",
+          "cwd": "apps/api"
+        }
       }
     }
   }
