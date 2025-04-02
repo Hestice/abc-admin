@@ -2,7 +2,9 @@
   "name": "@abc-admin/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "update-sources": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8080/api-docs-json -g typescript-axios -o libs/api-lib/src"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",

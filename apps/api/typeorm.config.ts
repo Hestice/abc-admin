@@ -4,7 +4,20 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 config({ path: '.env' });
 
-const { DB_HOST, DB_DATABASE, DB_PASSWORD, DB_PORT, DB_USERNAME } = process.env;
+const { DB_HOST, DB_DATABASE, DB_PASSWORD, DB_PORT, DB_USERNAME, NODE_ENV } = process.env;
+
+const isDevelopment = NODE_ENV === 'development';
+const isLocalhost = DB_HOST === 'localhost';
+
+// Only apply SSL for non-local, non-development environments
+const sslConfig = !isLocalhost && !isDevelopment ? {
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  }
+} : {};
 
 const entities = ['src/**/*.entity{.ts,.js}', '**/*.entity{.ts,.js}'];
 const migrations = [
@@ -14,22 +27,17 @@ const migrations = [
 ];
 
 const connectionSource = new DataSource({
+  type: 'postgres',
+  host: DB_HOST,
+  port: Number(DB_PORT),
+  username: DB_USERNAME,
+  password: DB_PASSWORD,
   database: DB_DATABASE,
   entities: entities,
-  // extra: {
-  //   ssl: {
-  //     rejectUnauthorized: false,
-  //   },
-  // },
-  host: DB_HOST,
   migrations: migrations,
   namingStrategy: new SnakeNamingStrategy(),
-  password: DB_PASSWORD,
-  port: Number(DB_PORT),
-  // ssl: false,
   synchronize: false,
-  type: 'postgres',
-  username: DB_USERNAME,
+  ...sslConfig
 });
 
 export default connectionSource;
