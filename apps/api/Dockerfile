@@ -5,13 +5,12 @@ WORKDIR /app
 COPY package*.json ./
 COPY nx.json ./
 COPY tsconfig*.json ./
-COPY workspace.json ./
 
 RUN npm install
 
 COPY . .
 
-RUN npm run build api
+RUN npx nx run api:build
 
 FROM node:18-alpine as production
 
