@@ -1,5 +1,5 @@
 try {
-  const app = require('../../dist/apps/api/main');
+  const app = require('./src/main');
   module.exports = app;
 } catch (error) {
   module.exports = (req, res) => {
