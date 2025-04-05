@@ -1,10 +1,15 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "apps/api/serverless.js",
+      "use": "@vercel/node"
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/api/serverless.js",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+      "dest": "apps/api/serverless.js"
     }
   ]
 }
