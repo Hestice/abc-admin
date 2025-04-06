@@ -9,7 +9,7 @@ export default function Index() {
   const testApiConnection = async () => {
     setIsLoading(true);
     const testApiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
-    console.log('Testing API connection to:', testApiUrl);
+
     try {
       const response = await fetch(testApiUrl, {
         method: 'GET',
