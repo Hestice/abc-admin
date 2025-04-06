@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import { AuthApi, Configuration } from '@abc-admin/api-lib';
+import cookie from 'js-cookie';
 
 interface LoginResponse {
   user?: {
@@ -21,15 +21,41 @@ const createAuthApiClient = () => {
   return new AuthApi(config);
 };
 
+const authTokenName = process.env.NEXT_PUBLIC_COOKIE_NAME || 'auth_token';
+
 export async function login(email: string, password: string): Promise<LoginResponse> {
   try {
     const authApi = createAuthApiClient();
+    console.log("Sending login request to:", process.env.NEXT_PUBLIC_BACKEND_URL);
+    
     const response = await authApi.authControllerLogin({
       data: { email, password },
       headers: {
         'Content-Type': 'application/json',
       },
     });
+    
+    console.log("Login response:", response);
+    console.log("Cookies after login:", document.cookie);
+    
+      if (!cookie.get(authTokenName)) {
+      try {
+        await authApi.authControllerGetToken({
+          data: { email, password },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!cookie.get(authTokenName)) {
+          console.log("Cookie still not set after get-token call");
+        } else {
+          console.log("Cookie successfully set by get-token call");
+        }
+      } catch (error) {
+        console.error("Failed to get token:", error);
+      }
+    }
     
     return { user: response.data.user };
   } catch (error: any) {
@@ -45,8 +71,8 @@ export async function logout(): Promise<void> {
   try {
     const authApi = createAuthApiClient();
     await authApi.authControllerLogout();
-    
-    redirect('/');
+    cookie.remove(authTokenName);
+    console.log("Logged out");
   } catch (error) {
     console.error('Logout failed:', error);
     throw error;
@@ -54,5 +80,5 @@ export async function logout(): Promise<void> {
 }
 
 export function isAuthenticated(): boolean {
-  return document.cookie.includes(`${process.env.NEXT_PUBLIC_COOKIE_NAME || 'auth_token'}=`);
+  return cookie.get(authTokenName) !== undefined;
 }
