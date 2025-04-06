@@ -72,4 +72,21 @@ export class AuthController {
     
     return { success: true };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('verify-token')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Verify JWT token validity' })
+  @ApiResponse({ status: 200, description: 'Token is valid' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired token' })
+  verifyToken(@Request() req: any) {
+    return { 
+      valid: true,
+      user: {
+        id: req.user.id,
+        email: req.user.email,
+        role: req.user.role
+      }
+    };
+  }
 } 
