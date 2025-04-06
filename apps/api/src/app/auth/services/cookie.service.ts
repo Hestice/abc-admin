@@ -25,17 +25,6 @@ export class CookieService {
     };
   }
 
-  getCookieWithUserRole(role: string) {
-    return {
-      name: 'user_role',
-      value: role,
-      options: {
-        ...this.getCookieOptions(),
-        httpOnly: false
-      }
-    };
-  }
-
   getCookieForLogout() {
     return {
       name: 'auth_token',

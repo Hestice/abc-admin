@@ -43,11 +43,6 @@ export class AuthController {
     const authCookie = this.cookieService.getCookieWithJwtToken(access_token);
     response.cookie(authCookie.name, authCookie.value, authCookie.options);
     
-    if (user && user.role) {
-      const roleCookie = this.cookieService.getCookieWithUserRole(user.role);
-      response.cookie(roleCookie.name, roleCookie.value, roleCookie.options);
-    }
-    
     return { user };
   }
   
@@ -64,11 +59,6 @@ export class AuthController {
   async logout(@Res({ passthrough: true }) response: Response) {
     const cookie = this.cookieService.getCookieForLogout();
     response.cookie(cookie.name, cookie.value, cookie.options);
-    
-    response.cookie('user_role', '', { 
-      ...cookie.options,
-      httpOnly: false 
-    });
     
     return { success: true };
   }
