@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = isProtectedRoute(pathname);
   const isHomePage = pathname === AppRoutes.HOME;
   
-  const cookieName = process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || 'auth_token';
+  const cookieName = process.env.NEXT_PUBLIC_COOKIE_NAME || 'auth_token';
   const authToken = request.cookies.get(cookieName)?.value;
   
   if (isAuthRoute && !authToken) {
