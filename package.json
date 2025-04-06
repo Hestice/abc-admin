@@ -7,20 +7,26 @@
   },
   "private": true,
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/platform-express": "^11.0.12",
+    "@types/js-cookie": "^3.0.6",
     "axios": "^1.6.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "js-cookie": "^3.0.5",
     "next": "^15.2.4",
     "pg": "^8.14.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "^7.55.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "typeorm": "^0.3.21",
-    "typeorm-naming-strategies": "^4.1.0"
+    "typeorm-naming-strategies": "^4.1.0",
+    "zod": "^3.24.2",
+    "zod-form-data": "^2.0.7"
   },
   "devDependencies": {
     "@nestjs/class-transformer": "^0.4.0",
