@@ -1,51 +1,16 @@
-version: '3.8'
-
+# docker-compose -f docker-compose.local.postgres.yml up -d
 services:
-  # NestJS API service (Production with Amazon RDS)
-  api:
-    build:
-      context: .
-      dockerfile: ./apps/api/Dockerfile
-      target: production
-    container_name: abc-api-prod
-    ports:
-      - '${API_PORT:-8080}:8080'
+  db:
+    image: postgres
     environment:
-      - NODE_ENV=production
-      - PORT=8080
-      # Amazon RDS connection
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_DATABASE=${DB_DATABASE:-abc_admin}
-      # JWT settings
-      - JWT_SECRET=${JWT_SECRET}
-    restart: unless-stopped
-    command: node dist/main
-
-  # Nginx for SSL termination and reverse proxy (optional but recommended)
-  nginx:
-    image: nginx:alpine
-    container_name: abc-nginx
+      POSTGRES_DB:
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
     ports:
-      - '80:80'
-      - '443:443'
+      - '5432:5432'
     volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./nginx/certbot/conf:/etc/letsencrypt
-      - ./nginx/certbot/www:/var/www/certbot
-    depends_on:
-      - api
-    restart: unless-stopped
-    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+      - postgres_data:/var/lib/postgresql/data
+    command: postgres -c 'max_connections=300'
 
-  # Certbot for SSL certificates (optional but recommended)
-  certbot:
-    image: certbot/certbot
-    container_name: abc-certbot
-    volumes:
-      - ./nginx/certbot/conf:/etc/letsencrypt
-      - ./nginx/certbot/www:/var/www/certbot
-    restart: unless-stopped
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+volumes:
+  postgres_data:
