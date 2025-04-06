@@ -37,9 +37,11 @@ async function bootstrap() {
   const port = process.env.PORT || 8080;
 
   // Configure CORS
+  const allowedOrigins = process.env.FRONTEND_URL 
+  console.log('Allowed Origins:', allowedOrigins);
   app.enableCors({
-    origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: [allowedOrigins || 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
     credentials: true,
   });
 
