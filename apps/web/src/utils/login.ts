@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { AuthApi, Configuration, AuthControllerLogin200Response } from '@abc-admin/api-lib';
+import { AuthApi, Configuration } from '@abc-admin/api-lib';
 
 interface LoginResponse {
   user?: {
