@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { AppRoutes, isProtectedRoute } from './enums';
+import { AppRoutes } from './constants/routes';
 import { AuthApi, Configuration } from '@abc-admin/api-lib';
+import { isProtectedRoute } from './utils/get-routes';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthRoute = isProtectedRoute(pathname);
-  const isHomePage = pathname === AppRoutes.HOME || pathname === AppRoutes.LOGIN;
+  const isHomePage = pathname === AppRoutes.HOME;
   const authToken = request.cookies.get('auth_token')?.value;
   
   if (isAuthRoute && !authToken) {
@@ -45,9 +46,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    `${AppRoutes.DASHBOARD}/:path*`,
-    AppRoutes.HOME,
-    AppRoutes.LOGIN
-  ],
-}; 
+    matcher: [
+      '/:path*',
+    ]
+  }
