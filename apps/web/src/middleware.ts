@@ -8,7 +8,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthRoute = isProtectedRoute(pathname);
   const isHomePage = pathname === AppRoutes.HOME;
-  const authToken = request.cookies.get('auth_token')?.value;
+  
+  const cookieName = process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || 'auth_token';
+  const authToken = request.cookies.get(cookieName)?.value;
   
   if (isAuthRoute && !authToken) {
     return NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
@@ -23,7 +25,7 @@ export async function middleware(request: NextRequest) {
         baseOptions: {
           withCredentials: true,
           headers: {
-            Cookie: `auth_token=${authToken}`
+            Cookie: `${cookieName}=${authToken}`
           }
         }
       });
@@ -33,7 +35,7 @@ export async function middleware(request: NextRequest) {
       await authApi.authControllerVerifyToken();
     } catch (error) {
       const response = NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
-      response.cookies.delete('auth_token');
+      response.cookies.delete(cookieName);
       return response;
     }
   }
@@ -46,7 +48,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: [
-      '/:path*',
-    ]
-  }
+  matcher: [
+    '/:path*',
+  ]
+}
