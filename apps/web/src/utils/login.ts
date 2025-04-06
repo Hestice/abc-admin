@@ -1,6 +1,6 @@
 import { AuthApi, Configuration } from '@abc-admin/api-lib';
 import { redirect } from 'next/navigation';
-
+import { AxiosError } from 'axios';
 interface LoginDto {
   email: string;
   password: string;
@@ -34,6 +34,9 @@ export async function login(email: string, password: string): Promise<LoginRespo
     return { user: response.data.user };
   } catch (error) {
     console.error('Login failed:', error);
+    if (error instanceof AxiosError && error.response?.status === 401) {
+      return Promise.reject(new Error('Invalid credentials'));
+    }
     throw error;
   }
 }

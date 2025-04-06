@@ -52,9 +52,7 @@ export default function LoginCard() {
       // router.push('/dashboard');
     } catch (err) {
       setServerError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to login. Please check your credentials.'
+        err instanceof Error ? err.message : 'An error occurred during login'
       );
     } finally {
       setIsLoading(false);
