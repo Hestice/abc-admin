@@ -17,9 +17,13 @@ export class CookieService {
     };
   }
 
+  getCookieName() {
+    return this.configService.get('AUTH_COOKIE_NAME') || 'auth_token';
+  }
+
   getCookieWithJwtToken(token: string) {
     return {
-      name: 'auth_token',
+      name: this.getCookieName(),
       value: token,
       options: this.getCookieOptions(),
     };
@@ -27,7 +31,7 @@ export class CookieService {
 
   getCookieForLogout() {
     return {
-      name: 'auth_token',
+      name: this.getCookieName(),
       value: '',
       options: {
         ...this.getCookieOptions(),
