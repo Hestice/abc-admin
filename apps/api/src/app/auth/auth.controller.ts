@@ -33,8 +33,12 @@ export class AuthController {
     }
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials.' })
-  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
-    const { access_token, user } = await this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto, 
+    @Res({ passthrough: true }) response: Response,
+    @Request() req: any
+  ) {
+    const { access_token, user } = await this.authService.login(loginDto, req);
     
     const authCookie = this.cookieService.getCookieWithJwtToken(access_token);
     response.cookie(authCookie.name, authCookie.value, authCookie.options);
