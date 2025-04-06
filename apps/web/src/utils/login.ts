@@ -40,13 +40,15 @@ export async function login(email: string, password: string): Promise<LoginRespo
     
       if (!cookie.get(authTokenName)) {
       try {
-        await authApi.authControllerGetToken({
+        const tokenResponse = await authApi.authControllerGetToken({
           data: { email, password },
           headers: {
             'Content-Type': 'application/json',
           },
         });
         
+        const responseData = (tokenResponse.data as unknown) as { access_token: string, user: any };
+        cookie.set(authTokenName, responseData.access_token);
         if (!cookie.get(authTokenName)) {
           console.log("Cookie still not set after get-token call");
         } else {
