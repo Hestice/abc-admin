@@ -1,28 +1,28 @@
-FROM node:18-alpine as development
+FROM node:18-alpine as builder
 
 WORKDIR /app
 
 COPY package*.json ./
 COPY nx.json ./
 COPY tsconfig*.json ./
+COPY tsconfig.base.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-RUN npx nx run api:build
+RUN npx nx run api:build --configuration=production
 
 FROM node:18-alpine as production
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
 WORKDIR /app
 
-COPY package*.json ./
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist/apps/api ./dist
 
-RUN npm install --only=production
+RUN npm ci --omit=dev
 
-COPY --from=development /app/dist/apps/api ./dist
+ENV PORT=8080
+EXPOSE ${PORT}
 
 CMD ["node", "dist/main"]
