@@ -8,18 +8,17 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { EventEmitter } from 'events';
+import cookieParser from 'cookie-parser';
 
-// Increase EventEmitter max listeners
 EventEmitter.defaultMaxListeners = 15;
 
 async function bootstrap() {
-  // Create app with explicit memory options
   const app = await NestFactory.create(AppModule, {
-    bodyParser: true,
-    cors: true,
+    bodyParser: true
   });
 
-  // Configure Swagger
+  app.use(cookieParser());
+
   const config = new DocumentBuilder()
     .setTitle('ABC Admin API')
     .setDescription('API for Animal Bite Clinic Admin App')
@@ -33,17 +32,18 @@ async function bootstrap() {
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
   
-  // Get port from environment or use default
   const port = process.env.PORT || 8080;
 
-  // Configure CORS
   app.enableCors({
-    origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Set-Cookie'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
-  // Graceful shutdown
   const signals = ['SIGTERM', 'SIGINT'];
   signals.forEach(signal => {
     process.on(signal, async () => {

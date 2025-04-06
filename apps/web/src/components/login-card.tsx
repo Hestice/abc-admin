@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-// import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,7 +27,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginCard() {
-  // const router = useRouter();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
   const {
@@ -49,12 +49,10 @@ export default function LoginCard() {
     try {
       const response = await login(data.email, data.password);
       console.log('Logged in successfully', response);
-      // router.push('/dashboard');
+      router.push('/dashboard');
     } catch (err) {
       setServerError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to login. Please check your credentials.'
+        err instanceof Error ? err.message : 'An error occurred during login'
       );
     } finally {
       setIsLoading(false);
