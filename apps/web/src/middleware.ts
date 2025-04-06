@@ -24,8 +24,10 @@ export async function middleware(request: NextRequest) {
         basePath: backendUrl,
         baseOptions: {
           withCredentials: true,
+          credentials: 'include',
           headers: {
-            Cookie: `${cookieName}=${authToken}`
+            Cookie: `${cookieName}=${authToken}`,
+            Authorization: `Bearer ${authToken}`
           }
         }
       });
@@ -34,6 +36,7 @@ export async function middleware(request: NextRequest) {
       
       await authApi.authControllerVerifyToken();
     } catch (error) {
+      console.error('Token verification failed:', error);
       const response = NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
       response.cookies.delete(cookieName);
       return response;

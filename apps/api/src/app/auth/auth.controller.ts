@@ -79,4 +79,11 @@ export class AuthController {
       }
     };
   }
+
+  @Post('get-token')
+  @ApiOperation({ summary: 'Get token for manual cookie setting' })
+  async getToken(@Body() loginDto: LoginDto) {
+    const { access_token, user } = await this.authService.login(loginDto);
+    return { access_token, user };
+  }
 } 
