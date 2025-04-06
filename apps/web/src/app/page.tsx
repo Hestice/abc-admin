@@ -8,16 +8,15 @@ export default function Index() {
 
   const testApiConnection = async () => {
     setIsLoading(true);
+    const testApiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+    console.log('Testing API connection to:', testApiUrl);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(testApiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
