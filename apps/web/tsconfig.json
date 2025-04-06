@@ -42,9 +42,5 @@
     "src/**/*.test.ts",
     ".next"
   ],
-  "references": [
-    {
-      "path": "../../libs/api-lib"
-    }
-  ]
+  "references": []
 }

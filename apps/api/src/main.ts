@@ -14,8 +14,7 @@ EventEmitter.defaultMaxListeners = 15;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bodyParser: true,
-    cors: true,
+    bodyParser: true
   });
 
   app.use(cookieParser());
@@ -36,9 +35,13 @@ async function bootstrap() {
   const port = process.env.PORT || 8080;
 
   app.enableCors({
-    origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Set-Cookie'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   const signals = ['SIGTERM', 'SIGINT'];

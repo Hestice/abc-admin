@@ -26,11 +26,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   const checkAuthStatus = () => {
-    // Check authentication status based on cookies
     const loggedIn = isAuthenticated();
     setIsLoggedIn(loggedIn);
 
-    // Get user role from cookie
     if (loggedIn) {
       const cookies = document.cookie.split(';');
       const roleCookie = cookies.find((c) => c.trim().startsWith('user_role='));

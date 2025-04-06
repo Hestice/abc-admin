@@ -1,10 +1,4 @@
-import { AuthApi, Configuration } from '@abc-admin/api-lib';
 import { redirect } from 'next/navigation';
-import { AxiosError } from 'axios';
-interface LoginDto {
-  email: string;
-  password: string;
-}
 
 interface LoginResponse {
   user?: {
@@ -14,41 +8,40 @@ interface LoginResponse {
   };
 }
 
-
 export async function login(email: string, password: string): Promise<LoginResponse> {
   try {
-    const configuration = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL
-    });
-    
-    const authApi = new AuthApi(configuration);
-    const loginDto: LoginDto = { email, password };
-    
-    const response = await authApi.authControllerLogin({
-      data: loginDto,
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+    const response = await fetch(`${backendUrl}/api/auth/login`, {
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include',
     });
 
-    return { user: response.data.user };
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Invalid credentials');
+      }
+      throw new Error(`Login failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return { user: data.user };
   } catch (error) {
     console.error('Login failed:', error);
-    if (error instanceof AxiosError && error.response?.status === 401) {
-      return Promise.reject(new Error('Invalid credentials'));
-    }
     throw error;
   }
 }
 
 export async function logout(): Promise<void> {
   try {
-    const configuration = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+    await fetch(`${backendUrl}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
     });
-    
-    const authApi = new AuthApi(configuration);
-    await authApi.authControllerLogout();
     
     redirect('/');
   } catch (error) {
@@ -58,5 +51,5 @@ export async function logout(): Promise<void> {
 }
 
 export function isAuthenticated(): boolean {
-  return document.cookie.includes('user_role=');
+  return document.cookie.includes('auth_token=');
 }
