@@ -33,7 +33,6 @@ export async function middleware(request: NextRequest) {
     } catch (error) {
       const response = NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
       response.cookies.delete('auth_token');
-      response.cookies.delete('user_role');
       return response;
     }
   }
