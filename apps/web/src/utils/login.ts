@@ -1,5 +1,10 @@
-import { AuthApi, Configuration, LoginDto } from '@abc-admin/api-lib';
+import { AuthApi, Configuration } from '@abc-admin/api-lib';
 import { redirect } from 'next/navigation';
+
+interface LoginDto {
+  email: string;
+  password: string;
+}
 
 interface LoginResponse {
   user?: {
@@ -13,14 +18,18 @@ interface LoginResponse {
 export async function login(email: string, password: string): Promise<LoginResponse> {
   try {
     const configuration = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      credentials: 'include'
+      basePath: process.env.NEXT_PUBLIC_BACKEND_URL
     });
     
     const authApi = new AuthApi(configuration);
     const loginDto: LoginDto = { email, password };
     
-    const response = await authApi.authControllerLogin(loginDto);
+    const response = await authApi.authControllerLogin({
+      data: loginDto,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
     return { user: response.data.user };
   } catch (error) {
@@ -32,8 +41,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 export async function logout(): Promise<void> {
   try {
     const configuration = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      credentials: 'include'
+      basePath: process.env.NEXT_PUBLIC_BACKEND_URL
     });
     
     const authApi = new AuthApi(configuration);
