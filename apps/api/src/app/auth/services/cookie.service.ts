@@ -8,8 +8,17 @@ export class CookieService {
 
   getCookieOptions() {
     const isProd = this.configService.get('NODE_ENV') === 'production';
-    const domain = isProd ? this.configService.get('FRONTEND_URL') : 'http://localhost:3000';
-
+    let domain = isProd ? this.configService.get('FRONTEND_URL') : undefined;
+    if (domain && domain.includes('://')) {
+      try {
+        const url = new URL(domain);
+        domain = url.hostname;
+      } catch (e) {
+        this.logger.error(`Invalid domain URL: ${domain}`);
+        domain = undefined;
+      }
+    }
+    
     const cookieOptions = {
       httpOnly: true,
       secure: isProd,
@@ -17,8 +26,10 @@ export class CookieService {
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
       ...(domain && { domain }),
-    }
+    };
+    
     this.logger.log(`Cookie options: ${JSON.stringify(cookieOptions)}`);
+    
     return cookieOptions;
   }
 
