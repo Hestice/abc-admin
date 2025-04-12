@@ -7,13 +7,27 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
-import { getCurrentUser, verifyAuthentication } from '@/utils/auth';
+import { useSession } from 'next-auth/react';
+import { SessionProvider } from 'next-auth/react';
 
 interface User {
   id: string | null;
   email: string | null;
   role: string | null;
 }
+
+// Extension of NextAuth Session to include custom properties
+interface ExtendedSession {
+  user: {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: string;
+  };
+  accessToken?: string;
+}
+
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User;
@@ -34,50 +48,38 @@ const AuthContext = createContext<AuthContextType>({
   checkAuthStatus: async () => {},
 });
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+/**
+ * Internal AuthContext provider that depends on SessionProvider
+ */
+function AuthContextProvider({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<User>(emptyUser);
   const [isLoading, setIsLoading] = useState(true);
 
-  const clearUserData = () => setUser(emptyUser);
-
   const checkAuthStatus = async () => {
-    setIsLoading(true);
-
-    try {
-      const isAuthenticated = await verifyAuthentication();
-      setIsLoggedIn(isAuthenticated);
-
-      if (isAuthenticated) {
-        const profile = await getCurrentUser();
-
-        if (profile) {
-          setUser({
-            id: profile.id,
-            email: profile.email,
-            role: profile.role,
-          });
-        } else {
-          clearUserData();
-        }
-      } else {
-        clearUserData();
-      }
-    } catch (error) {
-      console.error('Authentication check failed:', error);
-      setIsLoggedIn(false);
-      clearUserData();
-    } finally {
-      setIsLoading(false);
-    }
+    // This is now a no-op as NextAuth handles session refresh
+    // But we keep it for API compatibility
+    return Promise.resolve();
   };
 
+  // Update user when session changes
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
+    setIsLoading(status === 'loading');
+
+    if (status === 'authenticated' && session) {
+      const extendedSession = session as unknown as ExtendedSession;
+      setUser({
+        id: extendedSession.user.id || null,
+        email: extendedSession.user.email || null,
+        role: extendedSession.user.role || null,
+      });
+    } else {
+      setUser(emptyUser);
+    }
+  }, [session, status]);
 
   const contextValue = {
-    isLoggedIn,
+    isLoggedIn: status === 'authenticated',
     user,
     isLoading,
     checkAuthStatus,
@@ -85,6 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
+}
+
+/**
+ * Main AuthProvider that includes both NextAuth's SessionProvider and our AuthContext
+ */
+export function AuthProvider({ children }: { children: ReactNode }) {
+  return (
+    <SessionProvider>
+      <AuthContextProvider>{children}</AuthContextProvider>
+    </SessionProvider>
   );
 }
 

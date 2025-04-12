@@ -1,6 +1,6 @@
 import './global.css';
 import { Metadata } from 'next';
-import AuthProvider from '@/components/auth-provider';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Admin',
