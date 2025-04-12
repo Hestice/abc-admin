@@ -1,8 +1,7 @@
 export const AppRoutes = {
-    HOME: '/',
-    DASHBOARD: '/dashboard',
-    PATIENTS: '/patients',
-    USERS: '/users',
-    SETTINGS: '/settings',
-    REGISTER: '/register',
-}
+  HOME: '/',
+  DASHBOARD: '/dashboard',
+  PATIENTS: '/patients',
+  REGISTER: '/register',
+  ADMINS: '/admins',
+};
