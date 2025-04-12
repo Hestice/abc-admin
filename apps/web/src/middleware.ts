@@ -1,57 +1,46 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { AppRoutes } from './constants/routes';
-import { AuthApi, Configuration } from '@abc-admin/api-lib';
+import { getToken } from 'next-auth/jwt';
 import { isProtectedRoute } from './utils/get-routes';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthRoute = isProtectedRoute(pathname);
   const isHomePage = pathname === AppRoutes.HOME;
-  
-  const cookieName = process.env.NEXT_PUBLIC_COOKIE_NAME || 'auth_token';
-  const authToken = request.cookies.get(cookieName)?.value;
-  
-  if (isAuthRoute && !authToken) {
+
+  // Get session token from NextAuth
+  const session = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  console.log('Middleware check:', {
+    pathname,
+    isAuthRoute,
+    hasSession: !!session,
+  });
+
+  // Redirect to login page if accessing protected route without session
+  if (isAuthRoute && !session) {
+    console.log('Redirecting to home: no session found');
     return NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
   }
 
-  if (isAuthRoute && authToken) {
-    try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-      
-      const configuration = new Configuration({
-        basePath: backendUrl,
-        baseOptions: {
-          withCredentials: true,
-          credentials: 'include',
-          headers: {
-            Cookie: `${cookieName}=${authToken}`,
-            Authorization: `Bearer ${authToken}`
-          }
-        }
-      });
-      
-      const authApi = new AuthApi(configuration);
-      
-      await authApi.authControllerVerifyToken();
-    } catch (error) {
-      console.error('Token verification failed:', error);
-      const response = NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
-      response.cookies.delete(cookieName);
-      return response;
-    }
-  }
-
-  if (isHomePage && authToken) {
+  // Redirect to dashboard if already logged in and accessing home page
+  if (isHomePage && session) {
+    console.log('Redirecting to dashboard: session found');
     return NextResponse.redirect(new URL(AppRoutes.DASHBOARD, request.url));
   }
 
   return NextResponse.next();
 }
 
+// Update the matcher to include specific paths we want to protect
 export const config = {
   matcher: [
-    '/:path*',
-  ]
-}
+    '/',
+    '/dashboard/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+};

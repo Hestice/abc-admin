@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,8 +29,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginCard() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+
   const {
     register,
     handleSubmit,
@@ -42,6 +45,13 @@ export default function LoginCard() {
     },
   });
 
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.push('/dashboard');
+    }
+  }, [session, status, router]);
+
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     setServerError('');
@@ -49,7 +59,9 @@ export default function LoginCard() {
     try {
       const response = await login(data.email, data.password);
       console.log('Logged in successfully', response);
-      router.push('/dashboard');
+
+      // Force a session update
+      window.location.href = '/dashboard';
     } catch (err) {
       setServerError(
         err instanceof Error ? err.message : 'An error occurred during login'
@@ -58,6 +70,17 @@ export default function LoginCard() {
       setIsLoading(false);
     }
   };
+
+  // If checking authentication status, show loading
+  if (status === 'loading') {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="pt-6">
+          <div className="text-center">Checking authentication...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
