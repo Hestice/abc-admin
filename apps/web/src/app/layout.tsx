@@ -1,8 +1,10 @@
 import './global.css';
+import { Metadata } from 'next';
+import { AuthProvider } from '@/contexts/AuthContext';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Admin',
-  description: 'Animal Bite Clinic Admin',
+  description: 'Web app for ABC-Carmona',
 };
 
 export default function RootLayout({
@@ -12,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="h-screen flex">{children}</body>
+      <body className="h-screen flex">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

@@ -18,23 +18,24 @@ export class CookieService {
         domain = undefined;
       }
     }
-    
+
     const cookieOptions = {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'strict' as const,
+      sameSite: 'lax' as const,
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
       ...(domain && { domain }),
     };
-    
+
     this.logger.log(`Cookie options: ${JSON.stringify(cookieOptions)}`);
-    
+
     return cookieOptions;
   }
 
   getCookieName() {
-    return this.configService.get('AUTH_COOKIE_NAME') || 'auth_token';
+    // Use NextAuth's default cookie name
+    return 'next-auth.session-token';
   }
 
   getCookieWithJwtToken(token: string) {
@@ -51,8 +52,8 @@ export class CookieService {
       value: '',
       options: {
         ...this.getCookieOptions(),
-        maxAge: 0
-      }
+        maxAge: 0,
+      },
     };
   }
 }
