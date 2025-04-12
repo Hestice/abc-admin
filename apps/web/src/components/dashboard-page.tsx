@@ -9,7 +9,7 @@ import { PatientManagement } from '@/components/patient-management';
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
-
+  console.log(activeTab); //TODO: functionality
   return (
     <DashboardShell>
       <DashboardHeader
