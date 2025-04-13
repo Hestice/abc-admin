@@ -82,11 +82,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
         <aside
           id="sidebar"
           className={cn(
-            'fixed inset-y-0 left-0 z-30 w-64 border-r bg-muted/40 transition-transform duration-300 ease-in-out md:hidden',
+            'fixed inset-y-0 left-0 z-30 w-64 border-r bg-white transition-transform duration-300 ease-in-out md:hidden',
             mobileOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
-          <div className="flex h-full max-h-screen flex-col gap-2 pt-14">
+          <div className="flex h-full max-h-screen flex-col gap-2 pt-14 sticky top-0">
             <DashboardNav
               collapsed={false}
               onNavItemClick={() => setMobileOpen(false)}
@@ -101,7 +101,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             collapsed ? 'w-16' : 'w-64'
           )}
         >
-          <div className="flex h-full max-h-screen flex-col gap-2">
+          <div className="flex h-full max-h-screen flex-col gap-2 sticky top-0">
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
               <span
                 className={cn(
@@ -117,7 +117,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute -right-3 top-20 h-6 w-6 rounded-full border bg-background shadow-sm"
+            className="fixed top-20 z-30 h-6 w-6 rounded-full border bg-background shadow-sm transition-all duration-300"
+            style={{
+              left: collapsed ? '3.25rem' : '15.25rem',
+            }}
             onClick={toggleSidebar}
           >
             {collapsed ? (
