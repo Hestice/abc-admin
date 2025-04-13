@@ -7,9 +7,13 @@ import { DashboardShell } from '@/components/dashboard-shell';
 import { DataOverview } from '@/components/data-overview';
 import { PatientManagement } from '@/components/patient-management';
 
+enum TabType {
+  Overview = 'overview',
+  Patients = 'patients',
+}
+
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState('overview');
-  console.log(activeTab); //TODO: functionality
+  const [_activeTab, setActiveTab] = useState(TabType.Overview);
   return (
     <DashboardShell>
       <DashboardHeader
@@ -17,22 +21,22 @@ export default function DashboardPage() {
         text="Manage patient records, view statistics, and administer system users."
       />
       <Tabs
-        defaultValue="overview"
+        defaultValue={TabType.Overview}
         className="space-y-4 w-full"
-        onValueChange={setActiveTab}
+        onValueChange={(value) => setActiveTab(value as TabType)}
       >
         <TabsList className="h-10">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="patients">Patients</TabsTrigger>
+          <TabsTrigger value={TabType.Overview}>Overview</TabsTrigger>
+          <TabsTrigger value={TabType.Patients}>Patients</TabsTrigger>
         </TabsList>
         <TabsContent
-          value="overview"
+          value={TabType.Overview}
           className="space-y-4 w-full overflow-x-hidden"
         >
           <DataOverview />
         </TabsContent>
         <TabsContent
-          value="patients"
+          value={TabType.Patients}
           className="space-y-4 w-full overflow-x-hidden"
         >
           <PatientManagement />
