@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PatientsModule } from './patients/patients.module';
+import { SchedulesModule } from './schedules/schedules.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { PatientsModule } from './patients/patients.module';
       useFactory: (configService: ConfigService) => {
         const isDevelopment = configService.get('NODE_ENV') === 'development';
         const isLocalhost = configService.get('DB_HOST') === 'localhost';
-        
+
         return {
           type: 'postgres',
           host: configService.get('DB_HOST'),
@@ -29,19 +30,24 @@ import { PatientsModule } from './patients/patients.module';
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           autoLoadEntities: true,
           synchronize: isDevelopment,
+          logging: isDevelopment ? ['query', 'error'] : ['error'],
           // Only apply SSL for non-local, non-development environments
           ssl: !isLocalhost && !isDevelopment,
-          extra: !isLocalhost && !isDevelopment ? {
-            ssl: {
-              rejectUnauthorized: false,
-            },
-          } : undefined,
+          extra:
+            !isLocalhost && !isDevelopment
+              ? {
+                  ssl: {
+                    rejectUnauthorized: false,
+                  },
+                }
+              : undefined,
         };
       },
     }),
     UsersModule,
     AuthModule,
     PatientsModule,
+    SchedulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
