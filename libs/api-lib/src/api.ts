@@ -109,6 +109,78 @@ export interface CreatePatientDto {
      * @memberof CreatePatientDto
      */
     'email': string;
+    /**
+     * 
+     * @type {object}
+     * @memberof CreatePatientDto
+     */
+    'category': object;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'bodyPartsAffected': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'placeOfExposure': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'dateOfExposure': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreatePatientDto
+     */
+    'isExposureAtHome': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'sourceOfExposure': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreatePatientDto
+     */
+    'isWoundCleaned': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreatePatientDto
+     */
+    'antiTetanusGiven': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'dateOfAntiTetanus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'briefHistory': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'allergy': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreatePatientDto
+     */
+    'medications': string;
 }
 
 export const CreatePatientDtoSexEnum = {
