@@ -149,7 +149,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
             collapsed ? 'md:ml-16' : 'md:ml-0'
           )}
         >
-          <div className="w-full max-w-full overflow-x-hidden">{children}</div>
+          <div className="w-full max-w-full overflow-x-hidden space-y-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>

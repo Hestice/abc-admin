@@ -141,7 +141,7 @@ export function DataOverview() {
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 max-w-full overflow-hidden">
       <Card className="w-full overflow-hidden">
         <CardHeader className="flex flex-col items-center justify-between space-y-2 pb-2 px-3">
-          <CardTitle className="text-sm font-medium text-center">
+          <CardTitle className="text-sm font-medium text-left w-full px-3">
             Patient Overview
           </CardTitle>
           <Tabs
