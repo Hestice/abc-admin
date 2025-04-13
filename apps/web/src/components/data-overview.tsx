@@ -32,6 +32,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import { Range } from '@/app/enums/time-category';
+
 // Mock data for demonstration
 const patientData = {
   today: 12,
@@ -87,7 +89,7 @@ const chartConfig = {
 };
 
 export function DataOverview() {
-  const [timeframe, setTimeframe] = useState('day');
+  const [timeframe, setTimeframe] = useState(Range.Day);
 
   // Calculate percentage change
   const calculateChange = (current: number, previous: number) => {
@@ -98,25 +100,25 @@ export function DataOverview() {
   // Get data based on selected timeframe
   const getCurrentData = () => {
     switch (timeframe) {
-      case 'day':
+      case Range.Day:
         return {
           current: patientData.today,
           previous: patientData.yesterday,
           label: 'Today vs Yesterday',
         };
-      case 'month':
+      case Range.Month:
         return {
           current: patientData.currentMonth,
           previous: patientData.lastMonth,
           label: 'This Month vs Last Month',
         };
-      case 'quarter':
+      case Range.Quarter:
         return {
           current: patientData.currentQuarter,
           previous: patientData.lastQuarter,
           label: 'This Quarter vs Last Quarter',
         };
-      case 'year':
+      case Range.Year:
         return {
           current: patientData.currentYear,
           previous: patientData.lastYear,
@@ -142,18 +144,22 @@ export function DataOverview() {
           <CardTitle className="text-sm font-medium">
             Patient Overview
           </CardTitle>
-          <Tabs defaultValue="day" onValueChange={setTimeframe} className="h-8">
+          <Tabs
+            defaultValue={Range.Day}
+            onValueChange={(value) => setTimeframe(value as Range)}
+            className="h-8"
+          >
             <TabsList className="h-8 grid grid-cols-2 sm:grid-cols-4 w-full sm:w-auto">
-              <TabsTrigger value="day" className="text-xs px-2">
+              <TabsTrigger value={Range.Day} className="text-xs px-2">
                 Day
               </TabsTrigger>
-              <TabsTrigger value="month" className="text-xs px-2">
+              <TabsTrigger value={Range.Month} className="text-xs px-2">
                 Month
               </TabsTrigger>
-              <TabsTrigger value="quarter" className="text-xs px-2">
+              <TabsTrigger value={Range.Quarter} className="text-xs px-2">
                 Quarter
               </TabsTrigger>
-              <TabsTrigger value="year" className="text-xs px-2">
+              <TabsTrigger value={Range.Year} className="text-xs px-2">
                 Year
               </TabsTrigger>
             </TabsList>
