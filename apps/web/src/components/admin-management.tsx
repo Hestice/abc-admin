@@ -34,9 +34,10 @@ import { Edit, MoreHorizontal, Search, ChevronRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
 import { getUsers } from '@/utils/get-users';
-import { Admin } from '@/types/admin';
+import { Admin, NewAdmin } from '@/types/admin';
 import ViewAdmin from './dialog/view-admin';
 import AddAdmin from './dialog/add-admin';
+import { UserRole } from '@abc-admin/enums';
 
 export function AdminManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,12 +63,16 @@ export function AdminManagement() {
     fetchUsers();
   }, []);
 
-  const [newAdmin, setNewAdmin] = useState({
+  const newAdmin = {
     username: '',
     email: '',
-    role: 'Admin',
+    role: UserRole.ADMIN,
     password: '',
-  });
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    isActive: true,
+  };
 
   const filteredAdmins = admins.filter(
     (admin) =>
@@ -76,28 +81,9 @@ export function AdminManagement() {
       admin.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddAdmin = () => {
-    console.log('Adding new admin:', newAdmin);
-    setIsAddDialogOpen(false);
-    setNewAdmin({
-      username: '',
-      email: '',
-      role: 'Admin',
-      password: '',
-    });
-  };
-
   const handleViewAdmin = (admin: any) => {
     setSelectedAdmin(admin);
     setIsViewDialogOpen(true);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setNewAdmin((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
   };
 
   return (
@@ -116,8 +102,6 @@ export function AdminManagement() {
         <AddAdmin
           isAddDialogOpen={isAddDialogOpen}
           setIsAddDialogOpen={setIsAddDialogOpen}
-          handleAddAdmin={handleAddAdmin}
-          handleInputChange={handleInputChange}
           newAdmin={newAdmin}
         />
       </div>

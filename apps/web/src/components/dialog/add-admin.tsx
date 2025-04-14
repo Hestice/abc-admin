@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogContent,
@@ -19,27 +22,74 @@ import {
   SelectValue,
 } from '../ui/select';
 import { DialogFooter } from '../ui/dialog';
+import { addUser } from '@/utils/add-admin';
+import { NewAdmin } from '@/types/admin';
+
+// Define Zod schema for form validation
+const adminFormSchema = z
+  .object({
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    username: z.string().min(3, 'Username must be at least 3 characters'),
+    email: z.string().email('Please enter a valid email address'),
+    role: z.string().optional().default('Admin'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    isActive: z.boolean().optional().default(true),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 interface AddAdminProps {
   isAddDialogOpen: boolean;
   setIsAddDialogOpen: (isOpen: boolean) => void;
-  handleAddAdmin: () => void;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  newAdmin: {
-    username: string;
-    email: string;
-    role: string;
-    password: string;
-  };
+  newAdmin: NewAdmin;
 }
 
 export default function AddAdmin({
   isAddDialogOpen,
   setIsAddDialogOpen,
-  handleAddAdmin,
-  handleInputChange,
   newAdmin,
 }: AddAdminProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(adminFormSchema),
+    defaultValues: {
+      firstName: newAdmin.firstName || '',
+      lastName: newAdmin.lastName || '',
+      username: newAdmin.username || '',
+      email: newAdmin.email || '',
+      role: newAdmin.role || 'Admin',
+      password: '',
+      confirmPassword: '',
+      isActive: newAdmin.isActive !== undefined ? newAdmin.isActive : true,
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof adminFormSchema>) => {
+    setIsLoading(true);
+    try {
+      await addUser({
+        newAdmin: data as NewAdmin,
+        setIsLoading,
+      });
+      setIsAddDialogOpen(false);
+      reset();
+    } catch (error) {
+      console.error('Failed to add admin:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
       <DialogTrigger asChild>
@@ -55,81 +105,120 @@ export default function AddAdmin({
             Create a new administrator account for the system.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-            <Label htmlFor="username" className="sm:text-right">
-              Username
-            </Label>
-            <Input
-              id="username"
-              value={newAdmin.username}
-              onChange={handleInputChange}
-              className="sm:col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-            <Label htmlFor="email" className="sm:text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={newAdmin.email}
-              onChange={handleInputChange}
-              className="sm:col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-            <Label htmlFor="role" className="sm:text-right">
-              Role
-            </Label>
-            <div className="sm:col-span-3">
-              <Select value={newAdmin.role} disabled>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="username" className="sm:text-right">
+                Username
+              </Label>
+              <div className="sm:col-span-3">
+                <Input
+                  id="username"
+                  {...register('username')}
+                  className="w-full"
+                  aria-invalid={errors.username ? 'true' : 'false'}
+                />
+                {errors.username && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.username.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="email" className="sm:text-right">
+                Email
+              </Label>
+              <div className="sm:col-span-3">
+                <Input
+                  id="email"
+                  type="email"
+                  {...register('email')}
+                  className="w-full"
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="role" className="sm:text-right">
+                Role
+              </Label>
+              <div className="sm:col-span-3">
+                <Select defaultValue="Admin" disabled {...register('role')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="password" className="sm:text-right">
+                Password
+              </Label>
+              <div className="sm:col-span-3">
+                <Input
+                  id="password"
+                  type="password"
+                  {...register('password')}
+                  className="w-full"
+                  aria-invalid={errors.password ? 'true' : 'false'}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="confirmPassword" className="sm:text-right">
+                Confirm Password
+              </Label>
+              <div className="sm:col-span-3">
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  {...register('confirmPassword')}
+                  className="w-full"
+                  aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-            <Label htmlFor="password" className="sm:text-right">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              value={newAdmin.password}
-              onChange={handleInputChange}
-              className="sm:col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-            <Label htmlFor="confirmPassword" className="sm:text-right">
-              Confirm Password
-            </Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              onChange={handleInputChange}
-              className="sm:col-span-3"
-            />
-          </div>
-        </div>
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsAddDialogOpen(false)}
-            className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleAddAdmin} className="w-full sm:w-auto">
-            Add Admin
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsAddDialogOpen(false);
+                reset();
+              }}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="w-full sm:w-auto"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Adding...' : 'Add Admin'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -1,20 +1,21 @@
 import { UsersApi, Configuration } from '@abc-admin/api-lib';
-import { Admin } from '@/types/admin';
+import { Admin, NewAdmin } from '@/types/admin';
 import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 
-// Define the extended session type
 interface ExtendedSession extends Session {
   accessToken?: string;
 }
 
-interface GetUsersConnectionProps {
+interface AddUserConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
+  newAdmin: NewAdmin;
 }
 
-export const getUsers = async ({
+export const addUser = async ({
   setIsLoading,
-}: GetUsersConnectionProps): Promise<Admin[]> => {
+  newAdmin,
+}: AddUserConnectionProps): Promise<Admin[]> => {
   setIsLoading(true);
 
   try {
@@ -31,12 +32,12 @@ export const getUsers = async ({
     });
 
     const usersApi = new UsersApi(config);
-    const response = await usersApi.usersControllerFindAll();
+    const response = await usersApi.usersControllerCreate(newAdmin);
     return (response as unknown as { data: Admin[] }).data;
   } catch (error) {
     console.error('API connection failed:', error);
     alert(
-      `failed to get users: ${
+      `failed to add user: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`
     );
