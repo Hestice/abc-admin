@@ -28,8 +28,8 @@ import { NewAdmin } from '@/types/admin';
 // Define Zod schema for form validation
 const adminFormSchema = z
   .object({
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
+    firstName: z.string().optional().default(''),
+    lastName: z.string().optional().default(''),
     username: z.string().min(3, 'Username must be at least 3 characters'),
     email: z.string().email('Please enter a valid email address'),
     role: z.string().optional().default('Admin'),
@@ -46,12 +46,14 @@ interface AddAdminProps {
   isAddDialogOpen: boolean;
   setIsAddDialogOpen: (isOpen: boolean) => void;
   newAdmin: NewAdmin;
+  onAdminAdded?: () => void;
 }
 
 export default function AddAdmin({
   isAddDialogOpen,
   setIsAddDialogOpen,
   newAdmin,
+  onAdminAdded,
 }: AddAdminProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -83,6 +85,9 @@ export default function AddAdmin({
       });
       setIsAddDialogOpen(false);
       reset();
+      if (onAdminAdded) {
+        onAdminAdded();
+      }
     } catch (error) {
       console.error('Failed to add admin:', error);
     } finally {

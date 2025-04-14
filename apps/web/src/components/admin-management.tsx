@@ -29,12 +29,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Edit, MoreHorizontal, Search, ChevronRight } from 'lucide-react';
+import {
+  Edit,
+  MoreHorizontal,
+  Search,
+  ChevronRight,
+  Loader2,
+} from 'lucide-react';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
 
 import { getUsers } from '@/utils/get-users';
-import { Admin, NewAdmin } from '@/types/admin';
+import { Admin } from '@/types/admin';
 import ViewAdmin from './dialog/view-admin';
 import AddAdmin from './dialog/add-admin';
 import { UserRole } from '@abc-admin/enums';
@@ -46,20 +52,24 @@ export function AdminManagement() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const [_isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [admins, setAdmins] = useState<Admin[]>([]);
+
+  // Function to fetch users
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const users = await getUsers({ setIsLoading });
+      setAdmins(users);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Fetch users when component mounts
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const users = await getUsers({ setIsLoading });
-        setAdmins(users);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
-      }
-    };
-
     fetchUsers();
   }, []);
 
@@ -103,6 +113,7 @@ export function AdminManagement() {
           isAddDialogOpen={isAddDialogOpen}
           setIsAddDialogOpen={setIsAddDialogOpen}
           newAdmin={newAdmin}
+          onAdminAdded={fetchUsers}
         />
       </div>
 
@@ -162,7 +173,13 @@ export function AdminManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAdmins.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    </TableCell>
+                  </TableRow>
+                ) : filteredAdmins.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center">
                       No administrators found
@@ -177,7 +194,7 @@ export function AdminManagement() {
                           {admin.email}
                         </div>
                       </TableCell>
-                      <TableCell>{admin.role}</TableCell>
+                      <TableCell className="capitalize">{admin.role}</TableCell>
                       <TableCell>
                         <Badge
                           variant={admin.isActive ? 'default' : 'secondary'}
@@ -188,9 +205,8 @@ export function AdminManagement() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" disabled>
                               <MoreHorizontal className="h-4 w-4 mr-1" />
-                              Actions
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
