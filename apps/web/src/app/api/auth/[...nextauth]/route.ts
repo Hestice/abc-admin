@@ -50,11 +50,8 @@ const handler = NextAuth({
           const authApi = new AuthApi(config);
 
           const response = await authApi.authControllerLogin({
-            data: {
-              email: credentials.email,
-              password: credentials.password,
-            },
-            headers: { 'Content-Type': 'application/json' },
+            email: credentials.email,
+            password: credentials.password,
           });
 
           if (!response.data.user) {
@@ -63,11 +60,8 @@ const handler = NextAuth({
 
           // Get token
           const tokenResponse = await authApi.authControllerGetToken({
-            data: {
-              email: credentials.email,
-              password: credentials.password,
-            },
-            headers: { 'Content-Type': 'application/json' },
+            email: credentials.email,
+            password: credentials.password,
           });
 
           const user = response.data.user;
@@ -78,9 +72,8 @@ const handler = NextAuth({
           return {
             id: String(user.id || ''),
             email: user.email || '',
-            // User may not have name or image properties, provide defaults
-            name: '', // Default empty string
-            image: '', // Default empty string
+            name: '',
+            image: '',
             role: user.role || '',
             accessToken: token,
           } as ExtendedUser;
