@@ -32,7 +32,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { Range } from '@/app/enums/time-category';
+import { Range } from '@/enums/time-category';
 
 // Mock data for demonstration
 const patientData = {
