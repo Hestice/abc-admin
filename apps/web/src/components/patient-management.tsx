@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Search, UserPlus } from 'lucide-react';
+import { Calendar, Loader2, Search, UserPlus } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import PatientTableMobile from './patient-management/table-mobile';
 import PatientsTable from './patient-management/table-web';
@@ -33,15 +33,15 @@ export function PatientManagement() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
-  // Filter patients based on search term
+  // TODO: Filter patients based on search term
 
   const [isLoading, setIsLoading] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
-      const patients = await getPatients({ setIsLoading });
-      setPatients(patients);
+      const response = await getPatients({ setIsLoading });
+      setPatients(response.patients);
     } catch (error) {
       console.error('Failed to fetch patients:', error);
     } finally {
@@ -95,21 +95,27 @@ export function PatientManagement() {
             Manage and view all patient records in the system.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {isMobile ? (
-            // Mobile card view
-            <PatientTableMobile
-              filteredPatients={patients}
-              handleViewPatient={handleViewPatient}
-            />
-          ) : (
-            // Desktop table view
-            <PatientsTable
-              filteredPatients={patients}
-              handleViewPatient={handleViewPatient}
-            />
-          )}
-        </CardContent>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        ) : (
+          <CardContent>
+            {isMobile ? (
+              // Mobile card view
+              <PatientTableMobile
+                filteredPatients={patients}
+                handleViewPatient={handleViewPatient}
+              />
+            ) : (
+              // Desktop table view
+              <PatientsTable
+                filteredPatients={patients}
+                handleViewPatient={handleViewPatient}
+              />
+            )}
+          </CardContent>
+        )}
         <CardFooter className="flex flex-col sm:flex-row justify-between">
           <div className="text-sm text-muted-foreground mb-2 sm:mb-0">
             Showing {patients.length} of {patients.length} patients

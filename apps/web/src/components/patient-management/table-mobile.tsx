@@ -3,6 +3,7 @@ import { Card, CardContent } from '../ui/card';
 import { ChevronRight } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Patient } from '@/types/patient';
+import { ScheduleStatus } from '@/enums/schedule-status';
 
 interface PatientTableMobileProps {
   filteredPatients: Patient[];
@@ -29,21 +30,31 @@ export default function PatientTableMobile({
                   onClick={() => handleViewPatient(patient)}
                 >
                   <div className="space-y-1">
-                    <div className="font-medium">{patient.name}</div>
+                    <div className="font-medium">
+                      {patient.firstName} {patient.middleName}{' '}
+                      {patient.lastName}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       #{patient.id}
                     </div>
                     <div className="mt-1 flex items-center gap-2">
                       <Badge
                         variant={
-                          patient.status === 'Complete' ? 'default' : 'outline'
+                          patient.scheduleStatus === ScheduleStatus.complete
+                            ? 'default'
+                            : 'outline'
                         }
                       >
-                        {patient.status}
+                        {patient.scheduleStatus}
                       </Badge>
-                      {patient.status === 'In Progress' && (
+                      {patient.scheduleStatus ===
+                        ScheduleStatus.in_progress && (
                         <div className="text-xs text-muted-foreground">
-                          Next: {patient.nextVaccination}
+                          Next: {patient.nextVaccinationDay}
+                          {patient.nextVaccinationDate &&
+                            new Date(
+                              patient.nextVaccinationDate
+                            ).toLocaleDateString()}
                         </div>
                       )}
                     </div>

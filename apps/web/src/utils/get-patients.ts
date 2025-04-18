@@ -14,7 +14,7 @@ interface GetPatientsConnectionProps {
 
 export const getPatients = async ({
   setIsLoading,
-}: GetPatientsConnectionProps): Promise<Patient[]> => {
+}: GetPatientsConnectionProps): Promise<{ patients: Patient[] }> => {
   setIsLoading(true);
 
   try {
@@ -32,7 +32,12 @@ export const getPatients = async ({
 
     const patientsApi = new PatientsApi(config);
     const response = await patientsApi.patientsControllerFindAll();
-    return (response as unknown as { data: Patient[] }).data;
+    const typedResponse = response.data as unknown as {
+      patients: Patient[];
+      total: number;
+    };
+
+    return typedResponse;
   } catch (error) {
     console.error('API connection failed:', error);
     alert(
@@ -40,7 +45,7 @@ export const getPatients = async ({
         error instanceof Error ? error.message : 'Unknown error'
       }`
     );
-    return [];
+    return { patients: [] };
   } finally {
     setIsLoading(false);
   }
