@@ -30,7 +30,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Search, UserPlus, Eye, ChevronRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
-
+import PatientTableMobile from './patient-management/table-mobile';
+import PatientsTable from './patient-management/table-web';
 // Mock data for demonstration
 const patients = [
   {
@@ -157,102 +158,16 @@ export function PatientManagement() {
         <CardContent>
           {isMobile ? (
             // Mobile card view
-            <div className="space-y-3">
-              {filteredPatients.length === 0 ? (
-                <div className="rounded-md border p-4 text-center">
-                  No patients found
-                </div>
-              ) : (
-                filteredPatients.map((patient) => (
-                  <Card key={patient.id} className="overflow-hidden">
-                    <CardContent className="p-0">
-                      <button
-                        className="flex w-full items-center justify-between p-4 text-left"
-                        onClick={() => handleViewPatient(patient)}
-                      >
-                        <div className="space-y-1">
-                          <div className="font-medium">{patient.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            #{patient.id}
-                          </div>
-                          <div className="mt-1 flex items-center gap-2">
-                            <Badge
-                              variant={
-                                patient.status === 'Complete'
-                                  ? 'default'
-                                  : 'outline'
-                              }
-                            >
-                              {patient.status}
-                            </Badge>
-                            {patient.status === 'In Progress' && (
-                              <div className="text-xs text-muted-foreground">
-                                Next: {patient.nextVaccination}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                      </button>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+            <PatientTableMobile
+              filteredPatients={filteredPatients}
+              handleViewPatient={handleViewPatient}
+            />
           ) : (
             // Desktop table view
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Next Vaccination</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPatients.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center">
-                      No patients found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredPatients.map((patient) => (
-                    <TableRow key={patient.id}>
-                      <TableCell>
-                        <div className="font-medium">{patient.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          #{patient.id}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            patient.status === 'Complete'
-                              ? 'default'
-                              : 'outline'
-                          }
-                        >
-                          {patient.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{patient.nextVaccination}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewPatient(patient)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Details
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <PatientsTable
+              filteredPatients={filteredPatients}
+              handleViewPatient={handleViewPatient}
+            />
           )}
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between">
