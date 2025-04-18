@@ -10,6 +10,8 @@ import { Patient } from './entities/patient.entity';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UsersService } from '../users/users.service';
 import { SchedulesService } from '../schedules/schedules.service';
+import { SimplifiedPatient } from './types/simplifiedPatients.type';
+import { Schedule } from '../schedules/entities/schedule.entity';
 
 @Injectable()
 export class PatientsService {
@@ -47,10 +49,63 @@ export class PatientsService {
     return this.findOne(savedPatient.id);
   }
 
-  async findAll(): Promise<Patient[]> {
-    return this.patientsRepository.find({
+  private getNextVaccinationDate(schedule: Schedule): {
+    date: Date | undefined;
+    day: string;
+  } {
+    if (!schedule) {
+      return { date: undefined, day: 'No schedule' };
+    }
+
+    if (!schedule.day0Completed) {
+      return { date: schedule.day0Date, day: 'Day 0' };
+    }
+
+    if (!schedule.day3Completed) {
+      return { date: schedule.day3Date, day: 'Day 3' };
+    }
+
+    if (!schedule.day7Completed) {
+      return { date: schedule.day7Date, day: 'Day 7' };
+    }
+
+    if (!schedule.day28Completed) {
+      return { date: schedule.day28Date, day: 'Day 28' };
+    }
+
+    return { date: undefined, day: 'Completed' };
+  }
+
+  async findAll(
+    page = 1,
+    limit = 10
+  ): Promise<{
+    patients: SimplifiedPatient[];
+    total: number;
+  }> {
+    const [patients, total] = await this.patientsRepository.findAndCount({
       relations: ['managedBy', 'schedule'],
+      skip: (page - 1) * limit,
+      take: limit,
     });
+
+    const simplifiedPatients = patients.map((patient) => {
+      const nextVaccination = this.getNextVaccinationDate(
+        patient.schedule || ({} as Schedule)
+      );
+
+      return {
+        id: patient.id,
+        firstName: patient.firstName,
+        middleName: patient.middleName,
+        lastName: patient.lastName,
+        scheduleStatus: patient.schedule?.status,
+        nextVaccinationDate: nextVaccination.date,
+        nextVaccinationDay: nextVaccination.day,
+      };
+    });
+
+    return { patients: simplifiedPatients, total };
   }
 
   async findOne(id: string): Promise<Patient> {
