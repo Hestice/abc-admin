@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,14 +12,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,76 +20,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Search, UserPlus, Eye, ChevronRight } from 'lucide-react';
+import { Calendar, Search, UserPlus } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import PatientTableMobile from './patient-management/table-mobile';
 import PatientsTable from './patient-management/table-web';
-// Mock data for demonstration
-const patients = [
-  {
-    id: 'P001',
-    name: 'John Doe',
-    age: 34,
-    contact: '555-1234',
-    dateRegistered: '2023-04-15',
-    status: 'Complete',
-    nextVaccination: 'N/A',
-  },
-  {
-    id: 'P002',
-    name: 'Jane Smith',
-    age: 28,
-    contact: '555-5678',
-    dateRegistered: '2023-05-20',
-    status: 'In Progress',
-    nextVaccination: '2023-06-20',
-  },
-  {
-    id: 'P003',
-    name: 'Robert Johnson',
-    age: 45,
-    contact: '555-9012',
-    dateRegistered: '2023-05-22',
-    status: 'In Progress',
-    nextVaccination: '2023-06-22',
-  },
-  {
-    id: 'P004',
-    name: 'Emily Davis',
-    age: 22,
-    contact: '555-3456',
-    dateRegistered: '2023-06-01',
-    status: 'In Progress',
-    nextVaccination: '2023-07-01',
-  },
-  {
-    id: 'P005',
-    name: 'Michael Wilson',
-    age: 39,
-    contact: '555-7890',
-    dateRegistered: '2023-06-05',
-    status: 'Complete',
-    nextVaccination: 'N/A',
-  },
-  {
-    id: 'P006',
-    name: 'Sarah Brown',
-    age: 31,
-    contact: '555-2345',
-    dateRegistered: '2023-06-10',
-    status: 'In Progress',
-    nextVaccination: '2023-07-10',
-  },
-  {
-    id: 'P007',
-    name: 'David Miller',
-    age: 27,
-    contact: '555-6789',
-    dateRegistered: '2023-06-15',
-    status: 'In Progress',
-    nextVaccination: '2023-07-15',
-  },
-];
+import { getPatients } from '@/utils/get-patients';
+import { Patient } from '@/types/patient';
 
 export function PatientManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,13 +33,25 @@ export function PatientManagement() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
-
   // Filter patients based on search term
-  const filteredPatients = patients.filter(
-    (patient) =>
-      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const fetchPatients = async () => {
+    try {
+      setIsLoading(true);
+      const patients = await getPatients({ setIsLoading });
+      setPatients(patients);
+    } catch (error) {
+      console.error('Failed to fetch patients:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
 
   const handleAddNewPatient = () => {
     // In a real application, this would navigate to a new patient form
@@ -159,20 +99,20 @@ export function PatientManagement() {
           {isMobile ? (
             // Mobile card view
             <PatientTableMobile
-              filteredPatients={filteredPatients}
+              filteredPatients={patients}
               handleViewPatient={handleViewPatient}
             />
           ) : (
             // Desktop table view
             <PatientsTable
-              filteredPatients={filteredPatients}
+              filteredPatients={patients}
               handleViewPatient={handleViewPatient}
             />
           )}
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between">
           <div className="text-sm text-muted-foreground mb-2 sm:mb-0">
-            Showing {filteredPatients.length} of {patients.length} patients
+            Showing {patients.length} of {patients.length} patients
           </div>
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <Button
