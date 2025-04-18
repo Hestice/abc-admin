@@ -1,9 +1,24 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { PatientsService } from './patients.service';
 import { Patient } from './entities/patient.entity';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SimplifiedPatient } from './types/simplifiedPatients.type';
 
 @ApiTags('patients')
 @Controller('patients')
@@ -14,9 +29,15 @@ export class PatientsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new patient' })
-  @ApiResponse({ status: 201, description: 'Patient has been created successfully.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Patient has been created successfully.',
+  })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
-  async create(@Body() createPatientDto: CreatePatientDto, @Request() req: any): Promise<Patient> {
+  async create(
+    @Body() createPatientDto: CreatePatientDto,
+    @Request() req: any
+  ): Promise<Patient> {
     return this.patientsService.create(createPatientDto, req.user.id);
   }
 
@@ -25,8 +46,10 @@ export class PatientsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all patients' })
   @ApiResponse({ status: 200, description: 'Return all patients.' })
-  async findAll(): Promise<Patient[]> {
-    return this.patientsService.findAll();
+  async findAll(
+    @Query('page') page = 1
+  ): Promise<{ patients: SimplifiedPatient[]; total: number }> {
+    return this.patientsService.findAll(page, 10);
   }
 
   @Get(':id')
@@ -40,4 +63,4 @@ export class PatientsController {
   }
 
   // Add other endpoints as needed (update, delete, etc.)
-} 
+}
