@@ -1,6 +1,9 @@
 export interface Patient {
   id: string;
-  name: string;
-  status: string;
-  nextVaccination: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  scheduleStatus: string;
+  nextVaccinationDate: Date;
+  nextVaccinationDay: string;
 }

@@ -11,6 +11,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Eye } from 'lucide-react';
 import { Patient } from '@/types/patient';
+import { ScheduleStatus } from '@/enums/schedule-status';
 
 interface PatientsTableProps {
   filteredPatients: Patient[];
@@ -42,7 +43,9 @@ export default function PatientsTable({
           filteredPatients.map((patient) => (
             <TableRow key={patient.id}>
               <TableCell>
-                <div className="font-medium">{patient.name}</div>
+                <div className="font-medium">
+                  {patient.firstName} {patient.middleName} {patient.lastName}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   #{patient.id}
                 </div>
@@ -50,13 +53,23 @@ export default function PatientsTable({
               <TableCell>
                 <Badge
                   variant={
-                    patient.status === 'Complete' ? 'default' : 'outline'
+                    patient.scheduleStatus === ScheduleStatus.complete
+                      ? 'default'
+                      : 'outline'
                   }
                 >
-                  {patient.status}
+                  {
+                    ScheduleStatus[
+                      patient.scheduleStatus as keyof typeof ScheduleStatus
+                    ]
+                  }
                 </Badge>
               </TableCell>
-              <TableCell>{patient.nextVaccination}</TableCell>
+              <TableCell>
+                {patient.nextVaccinationDay}
+                {patient.nextVaccinationDate &&
+                  new Date(patient.nextVaccinationDate).toLocaleDateString()}
+              </TableCell>
               <TableCell className="text-right">
                 <Button
                   variant="ghost"
