@@ -18,7 +18,7 @@ import PatientsTable from './patient-management/table-web';
 import { getPatients } from '@/utils/get-patients';
 import { Patient } from '@/types/patient';
 import ViewPatientDialog from './dialog/view-patient';
-
+import { useRouter } from 'next/navigation';
 export function PatientManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -31,6 +31,9 @@ export function PatientManagement() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [totalPatients, setTotalPatients] = useState(0);
   const [page, setPage] = useState(1);
+
+  const router = useRouter();
+
   const fetchPatients = async (page: number) => {
     try {
       setIsLoading(true);
@@ -51,7 +54,7 @@ export function PatientManagement() {
   const handleAddNewPatient = () => {
     // In a real application, this would navigate to a new patient form
     console.log('Navigate to add new patient page');
-    // router.push("/patients/new")
+    router.push('/patients/register');
   };
 
   const handleViewPatient = (patient: any) => {
