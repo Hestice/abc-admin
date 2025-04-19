@@ -56,22 +56,15 @@ export function MedicalInformationStep({ form }: MedicalInformationStepProps) {
         )}
       />
 
-      <div
-        className={cn(
-          'grid transition-all duration-300 ease-in-out',
-          !form.watch('antiTetanusGiven')
-            ? 'grid-rows-[0fr] opacity-0 invisible h-0 my-0'
-            : 'grid-rows-[1fr] opacity-100 visible h-auto my-4'
-        )}
-      >
-        <div className="overflow-hidden">
+      {form.watch('antiTetanusGiven') && (
+        <div className="space-y-4">
           <FormField
             control={form.control}
             name="dateOfAntiTetanus"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <div className="flex flex-row items-center justify-start gap-2">
-                  <FormLabel>Date of Anti-Tetanus</FormLabel>
+                  <FormLabel>Date of Anti-Tetanus shot given</FormLabel>
                   <FormMessage className="text-xs text-muted-foreground italic" />
                 </div>
                 <Popover>
@@ -106,14 +99,17 @@ export function MedicalInformationStep({ form }: MedicalInformationStepProps) {
             )}
           />
         </div>
-      </div>
+      )}
 
       <FormField
         control={form.control}
         name="briefHistory"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Brief History</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Brief History</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <Textarea
                 placeholder="Describe how the incident occurred"
@@ -121,92 +117,83 @@ export function MedicalInformationStep({ form }: MedicalInformationStepProps) {
                 {...field}
               />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
 
-      {/* Allergies field with "None" checkbox */}
+      {/* Allergies field with single checkbox */}
       <div className="space-y-4">
-        <FormField
-          control={form.control}
-          name="noAllergies"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>No Allergies</FormLabel>
-                <FormDescription>
-                  Check if patient has no known allergies
-                </FormDescription>
-              </div>
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="allergy"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Allergies</FormLabel>
+              <div className="flex flex-row items-center justify-start gap-2">
+                <FormLabel>Allergies</FormLabel>
+                <FormMessage className="text-xs text-muted-foreground italic" />
+              </div>
               <FormControl>
                 <Input
                   placeholder="List allergies"
                   {...field}
-                  disabled={form.watch('noAllergies')}
-                  className={cn(form.watch('noAllergies') && 'opacity-50')}
+                  disabled={field.value === 'none'}
+                  className={cn(field.value === 'none' && 'opacity-50')}
                 />
               </FormControl>
-              <FormMessage />
+              <div className="flex flex-row items-center space-x-3 mb-2">
+                <Checkbox
+                  checked={field.value === 'none'}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked ? 'none' : '');
+                  }}
+                  id="no-allergies"
+                />
+                <label
+                  htmlFor="no-allergies"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Check if no known allergies
+                </label>
+              </div>
             </FormItem>
           )}
         />
       </div>
 
-      {/* Medications field with "None" checkbox */}
+      {/* Medications field with single checkbox */}
       <div className="space-y-4">
-        <FormField
-          control={form.control}
-          name="noMedications"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>No Medications</FormLabel>
-                <FormDescription>
-                  Check if patient is not taking any medications
-                </FormDescription>
-              </div>
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="medications"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Current Medications</FormLabel>
+              <div className="flex flex-row items-center justify-start gap-2">
+                <FormLabel>Current Medications</FormLabel>
+                <FormMessage className="text-xs text-muted-foreground italic" />
+              </div>
               <FormControl>
                 <Input
                   placeholder="List medications"
                   {...field}
-                  disabled={form.watch('noMedications')}
-                  className={cn(form.watch('noMedications') && 'opacity-50')}
+                  disabled={field.value === 'none'}
+                  className={cn(field.value === 'none' && 'opacity-50')}
                 />
               </FormControl>
-              <FormMessage />
+              <div className="flex flex-row items-center space-x-3 mb-2">
+                <Checkbox
+                  checked={field.value === 'none'}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked ? 'none' : '');
+                  }}
+                  id="no-medications"
+                />
+                <label
+                  htmlFor="no-medications"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Check if no medications
+                </label>
+              </div>
             </FormItem>
           )}
         />

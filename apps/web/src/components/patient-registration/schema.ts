@@ -36,10 +36,7 @@ export const formSchema = z.object({
 
   // Make allergies and medications optional
   allergy: z.string().optional().default('none'),
-  noAllergies: z.boolean().default(false),
-
   medications: z.string().optional().default('none'),
-  noMedications: z.boolean().default(false),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
