@@ -143,50 +143,47 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
           </FormItem>
         )}
       />
-      <FormField
-        control={form.control}
-        name="placeOfExposure"
-        render={({ field }) => (
-          <FormItem className="w-full space-y-2">
-            <div className="flex flex-row items-center justify-start gap-2">
-              <FormLabel>Place of Exposure</FormLabel>
-              <FormMessage className="text-xs text-muted-foreground italic" />
-            </div>
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="exposureAtHome"
-                  checked={field.value === 'Home'}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      field.onChange('Home');
-                    } else {
-                      field.onChange('');
-                    }
-                  }}
-                />
-                <div className="space-y-1 leading-none">
-                  <label
-                    htmlFor="exposureAtHome"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Exposure Occurred at Home
-                  </label>
-                  <p className="text-xs text-muted-foreground">
-                    Check if the exposure happened at the patient's residence
-                  </p>
-                </div>
-              </div>
+      <div className="w-full space-y-2">
+        <div className="flex flex-row items-center justify-start gap-2">
+          <FormLabel>Place of Exposure</FormLabel>
+        </div>
 
-              {field.value !== 'Home' && (
+        <FormField
+          control={form.control}
+          name="isExposureAtHome"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-1">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Exposure Occurred at Home</FormLabel>
+                <FormDescription>
+                  Check if the exposure happened at the patient's residence
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        {!form.watch('isExposureAtHome') && (
+          <FormField
+            control={form.control}
+            name="placeOfExposure"
+            render={({ field }) => (
+              <FormItem>
                 <FormControl>
                   <Input placeholder="Park, school, etc." {...field} />
                 </FormControl>
-              )}
-            </div>
-          </FormItem>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
-      />
+      </div>
       <FormField
         control={form.control}
         name="sourceOfExposure"

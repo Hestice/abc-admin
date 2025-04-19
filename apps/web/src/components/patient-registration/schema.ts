@@ -26,6 +26,7 @@ export const formSchema = z.object({
     required_error: 'Date of exposure is required',
   }),
   sourceOfExposure: z.string().min(1, 'Source of exposure is required'),
+  isExposureAtHome: z.boolean().default(false),
   isWoundCleaned: z.boolean(),
 
   // Medical Information
