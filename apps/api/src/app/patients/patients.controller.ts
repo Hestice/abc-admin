@@ -13,6 +13,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { PatientsService } from './patients.service';
 import { Patient } from './entities/patient.entity';
@@ -46,6 +47,12 @@ export class PatientsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all patients' })
   @ApiResponse({ status: 200, description: 'Return all patients.' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination (default: 1)',
+    schema: { type: 'integer', default: 1 },
+  })
   async findAll(
     @Query('page') page = 1
   ): Promise<{ patients: SimplifiedPatient[]; total: number }> {
