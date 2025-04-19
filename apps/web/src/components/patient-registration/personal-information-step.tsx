@@ -65,11 +65,13 @@ export function PersonalInformationStep({
         name="lastName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Last Name</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Last Name</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <Input placeholder="Doe" {...field} />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
@@ -93,9 +95,12 @@ export function PersonalInformationStep({
         name="sex"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Sex</FormLabel>
+            <FormLabel>
+              Sex
+              <FormMessage />
+            </FormLabel>
             <FormControl>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {sexOptions.map((option) => {
                   const IconComponent =
                     iconMap[option.icon as keyof typeof iconMap];
@@ -119,7 +124,6 @@ export function PersonalInformationStep({
                 })}
               </div>
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
