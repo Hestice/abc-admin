@@ -37,11 +37,13 @@ export function PatientManagement() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [totalPatients, setTotalPatients] = useState(0);
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
       const response = await getPatients({ setIsLoading });
       setPatients(response.patients);
+      setTotalPatients(response.total);
     } catch (error) {
       console.error('Failed to fetch patients:', error);
     } finally {
@@ -118,7 +120,7 @@ export function PatientManagement() {
         )}
         <CardFooter className="flex flex-col sm:flex-row justify-between">
           <div className="text-sm text-muted-foreground mb-2 sm:mb-0">
-            Showing {patients.length} of {patients.length} patients
+            Showing {patients.length} of {totalPatients} patients
           </div>
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <Button

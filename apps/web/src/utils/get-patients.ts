@@ -14,7 +14,10 @@ interface GetPatientsConnectionProps {
 
 export const getPatients = async ({
   setIsLoading,
-}: GetPatientsConnectionProps): Promise<{ patients: Patient[] }> => {
+}: GetPatientsConnectionProps): Promise<{
+  patients: Patient[];
+  total: number;
+}> => {
   setIsLoading(true);
 
   try {
@@ -45,7 +48,7 @@ export const getPatients = async ({
         error instanceof Error ? error.message : 'Unknown error'
       }`
     );
-    return { patients: [] };
+    return { patients: [], total: 0 };
   } finally {
     setIsLoading(false);
   }
