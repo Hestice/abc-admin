@@ -117,9 +117,11 @@ export default function CustomDatePicker({
 
   return (
     <FormItem className="flex flex-col">
-      {label && <FormLabel>{label}</FormLabel>}
+      <div className="flex flex-row items-center justify-start gap-2">
+        {label && <FormLabel>{label}</FormLabel>}
+        <FormMessage className="text-xs text-muted-foreground italic" />
+      </div>
       <FormControl>{datePickerContent}</FormControl>
-      <FormMessage />
     </FormItem>
   );
 }

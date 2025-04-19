@@ -38,11 +38,13 @@ export function PersonalInformationStep({
           name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First Name</FormLabel>
+              <div className="flex flex-row items-center justify-start gap-2">
+                <FormLabel>First Name</FormLabel>
+                <FormMessage className="text-xs text-muted-foreground italic" />
+              </div>
               <FormControl>
-                <Input placeholder="John" {...field} />
+                <Input placeholder="ex: Juana Marie" {...field} />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
@@ -51,11 +53,13 @@ export function PersonalInformationStep({
           name="middleName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Middle Name (Optional)</FormLabel>
+              <div className="flex flex-row items-center justify-start gap-2">
+                <FormLabel>Middle Name (Optional)</FormLabel>
+                <FormMessage className="text-xs text-muted-foreground italic" />
+              </div>
               <FormControl>
-                <Input placeholder="D" {...field} />
+                <Input placeholder="ex: Cruz" {...field} />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
@@ -70,7 +74,7 @@ export function PersonalInformationStep({
               <FormMessage className="text-xs text-muted-foreground italic" />
             </div>
             <FormControl>
-              <Input placeholder="Doe" {...field} />
+              <Input placeholder="ex: Del Rosario" {...field} />
             </FormControl>
           </FormItem>
         )}
@@ -95,10 +99,10 @@ export function PersonalInformationStep({
         name="sex"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>
-              Sex
-              <FormMessage />
-            </FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Sex</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {sexOptions.map((option) => {
@@ -132,7 +136,10 @@ export function PersonalInformationStep({
         name="address"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Address</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Address</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <Textarea
                 placeholder="123 Main St, City, Country"
@@ -140,7 +147,6 @@ export function PersonalInformationStep({
                 {...field}
               />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
@@ -149,7 +155,10 @@ export function PersonalInformationStep({
         name="email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Email (Optional)</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Email (Optional)</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <Input
                 type="email"
@@ -157,7 +166,6 @@ export function PersonalInformationStep({
                 {...field}
               />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />

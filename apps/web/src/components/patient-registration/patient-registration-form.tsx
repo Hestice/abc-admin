@@ -34,12 +34,14 @@ export function PatientRegistrationForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{steps[currentStep].title}</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {steps[currentStep].title}
+          </CardTitle>
           <CardDescription>{steps[currentStep].description}</CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-8">
               {/* Render the appropriate step based on currentStep */}
               {currentStep === 0 && <PersonalInformationStep form={form} />}
               {currentStep === 1 && <ExposureDetailsStep form={form} />}
