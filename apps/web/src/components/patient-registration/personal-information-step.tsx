@@ -1,7 +1,6 @@
 'use client';
 
-import { format } from 'date-fns';
-import { CalendarIcon, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { BsGenderMale, BsGenderFemale } from 'react-icons/bs';
 import { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -14,15 +13,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { FormValues, sexOptions } from './schema';
-import React from 'react';
 import CustomDatePicker from '@/components/custom-fields/custom-date-picker';
 
 interface PersonalInformationStepProps {
