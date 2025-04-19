@@ -145,13 +145,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
         {/* Main Content */}
         <main
           className={cn(
-            'flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 transition-all duration-300 overflow-hidden w-full',
+            'flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 transition-all duration-300 w-full',
             collapsed ? 'md:ml-16' : 'md:ml-0'
           )}
         >
-          <div className="w-full max-w-full overflow-x-hidden space-y-6">
-            {children}
-          </div>
+          <div className="w-full max-w-full space-y-6 relative">{children}</div>
         </main>
       </div>
     </div>
