@@ -10,10 +10,12 @@ interface ExtendedSession extends Session {
 
 interface GetPatientsConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
+  page: number;
 }
 
 export const getPatients = async ({
   setIsLoading,
+  page,
 }: GetPatientsConnectionProps): Promise<{
   patients: Patient[];
   total: number;
@@ -34,7 +36,11 @@ export const getPatients = async ({
     });
 
     const patientsApi = new PatientsApi(config);
-    const response = await patientsApi.patientsControllerFindAll();
+    const response = await patientsApi.patientsControllerFindAll({
+      params: {
+        page,
+      },
+    });
     const typedResponse = response.data as unknown as {
       patients: Patient[];
       total: number;
