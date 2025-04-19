@@ -25,7 +25,6 @@ export const formSchema = z.object({
   dateOfExposure: z.date({
     required_error: 'Date of exposure is required',
   }),
-  isExposureAtHome: z.boolean(),
   sourceOfExposure: z.string().min(1, 'Source of exposure is required'),
   isWoundCleaned: z.boolean(),
 

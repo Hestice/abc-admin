@@ -145,61 +145,60 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
       />
       <FormField
         control={form.control}
-        name="isExposureAtHome"
+        name="placeOfExposure"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-            <div className="space-y-1 leading-none">
-              <FormLabel>Exposure Occurred at Home</FormLabel>
-              <FormDescription>
-                Check if the exposure happened at the patient's residence
-              </FormDescription>
+          <FormItem className="w-full space-y-2">
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Place of Exposure</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="exposureAtHome"
+                  checked={field.value === 'Home'}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      field.onChange('Home');
+                    } else {
+                      field.onChange('');
+                    }
+                  }}
+                />
+                <div className="space-y-1 leading-none">
+                  <label
+                    htmlFor="exposureAtHome"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Exposure Occurred at Home
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Check if the exposure happened at the patient's residence
+                  </p>
+                </div>
+              </div>
+
+              {field.value !== 'Home' && (
+                <FormControl>
+                  <Input placeholder="Park, school, etc." {...field} />
+                </FormControl>
+              )}
             </div>
           </FormItem>
         )}
       />
-
-      {/* Place of Exposure field with smooth transition */}
-      <div
-        className={cn(
-          'grid transition-all duration-300 ease-in-out',
-          form.watch('isExposureAtHome')
-            ? 'grid-rows-[0fr] opacity-0 invisible h-0 my-0'
-            : 'grid-rows-[1fr] opacity-100 visible h-auto my-4'
-        )}
-      >
-        <div className="overflow-hidden">
-          <FormField
-            control={form.control}
-            name="placeOfExposure"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Place of Exposure</FormLabel>
-                <FormControl>
-                  <Input placeholder="Park, school, etc." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
-
       <FormField
         control={form.control}
         name="sourceOfExposure"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Source of Exposure</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Source of Exposure</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <Input placeholder="Dog, cat, etc." {...field} />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
@@ -208,7 +207,10 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
         name="isWoundCleaned"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Was the Wound Cleaned?</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Was the Wound Cleaned?</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <div className="flex gap-4">
                 <Button
@@ -217,7 +219,7 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
                   className="w-full"
                   onClick={() => field.onChange(true)}
                 >
-                  Yes
+                  Yes, the wound was cleaned properly.
                 </Button>
                 <Button
                   type="button"
@@ -225,14 +227,13 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
                   className="w-full"
                   onClick={() => field.onChange(false)}
                 >
-                  No
+                  No, the wound was not cleaned at all.
                 </Button>
               </div>
             </FormControl>
             <FormDescription>
               Indicate if the wound was cleaned before arrival
             </FormDescription>
-            <FormMessage />
           </FormItem>
         )}
       />
