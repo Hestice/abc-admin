@@ -1,14 +1,14 @@
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { steps } from './schema';
-
+import { Card } from '@/components/ui/card';
 interface FormStepIndicatorProps {
   currentStep: number;
 }
 
 export function FormStepIndicator({ currentStep }: FormStepIndicatorProps) {
   return (
-    <div className="mb-8">
+    <Card className="sticky top-0 p-4 z-20 w-full">
       <div className="flex justify-between mb-2">
         {steps.map((step, index) => (
           <div
@@ -44,6 +44,6 @@ export function FormStepIndicator({ currentStep }: FormStepIndicatorProps) {
           style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
         />
       </div>
-    </div>
+    </Card>
   );
 }

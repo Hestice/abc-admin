@@ -29,7 +29,7 @@ export function PatientRegistrationForm() {
   } = usePatientForm();
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <>
       <FormStepIndicator currentStep={currentStep} />
 
       <Card>
@@ -83,6 +83,6 @@ export function PatientRegistrationForm() {
           </form>
         </Form>
       </Card>
-    </div>
+    </>
   );
 }
