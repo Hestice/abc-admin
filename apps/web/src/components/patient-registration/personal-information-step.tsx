@@ -113,7 +113,7 @@ export function PersonalInformationStep({
                       key={option.value}
                       type="button"
                       variant={
-                        field.value === option.value ? 'default' : 'outline'
+                        field.value === option.value ? 'secondary' : 'outline'
                       }
                       className={cn(
                         'flex flex-col items-center justify-center h-auto py-3',

@@ -221,7 +221,7 @@ function Calendar({
     (month: number) => {
       const newDate = new Date(
         month === 11 ? currentYear + 1 : currentYear,
-        month === 11 ? 0 : month + 1
+        month
       );
       setMonth(newDate);
     },
