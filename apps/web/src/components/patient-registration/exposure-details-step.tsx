@@ -21,6 +21,7 @@ import {
 import { format } from 'date-fns';
 import { Card } from '../ui/card';
 import { CalendarNav } from '../ui/calendar-nav';
+import { CalendarIcon } from 'lucide-react';
 
 interface ExposureDetailsStepProps {
   form: UseFormReturn<FormValues>;
@@ -106,18 +107,18 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
         control={form.control}
         name="dateOfExposure"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col">
             <div className="flex flex-row items-center justify-start gap-2">
               <FormLabel>Date of Exposure</FormLabel>
               <FormMessage className="text-xs text-muted-foreground italic" />
             </div>
-            <FormControl>
-              <Popover>
-                <PopoverTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
+                <FormControl>
                   <Button
-                    variant="outline"
+                    variant={'outline'}
                     className={cn(
-                      'w-full pl-3 text-left font-normal justify-between',
+                      'w-full pl-3 text-left font-normal',
                       !field.value && 'text-muted-foreground'
                     )}
                   >
@@ -126,20 +127,21 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
                     ) : (
                       <span>Pick a date</span>
                     )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Card className="w-full">
-                    <CalendarNav
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </Card>
-                </PopoverContent>
-              </Popover>
-            </FormControl>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Card>
+                  <CalendarNav
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                  />
+                </Card>
+              </PopoverContent>
+            </Popover>
           </FormItem>
         )}
       />

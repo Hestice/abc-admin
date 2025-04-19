@@ -21,6 +21,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { FormValues } from './schema';
+import { CalendarNav } from '../ui/calendar-nav';
 
 interface MedicalInformationStepProps {
   form: UseFormReturn<FormValues>;
@@ -55,7 +56,6 @@ export function MedicalInformationStep({ form }: MedicalInformationStepProps) {
         )}
       />
 
-      {/* Date of Anti-Tetanus field with smooth transition */}
       <div
         className={cn(
           'grid transition-all duration-300 ease-in-out',
@@ -70,7 +70,10 @@ export function MedicalInformationStep({ form }: MedicalInformationStepProps) {
             name="dateOfAntiTetanus"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Date of Anti-Tetanus</FormLabel>
+                <div className="flex flex-row items-center justify-start gap-2">
+                  <FormLabel>Date of Anti-Tetanus</FormLabel>
+                  <FormMessage className="text-xs text-muted-foreground italic" />
+                </div>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -91,19 +94,14 @@ export function MedicalInformationStep({ form }: MedicalInformationStepProps) {
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
+                    <CalendarNav
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) => date > new Date()}
                       initialFocus
-                      captionLayout="dropdown-buttons"
-                      fromYear={1900}
-                      toYear={new Date().getFullYear()}
                     />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
               </FormItem>
             )}
           />
