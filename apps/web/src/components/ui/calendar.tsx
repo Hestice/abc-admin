@@ -174,10 +174,6 @@ const DropdownComponent = React.memo(
 );
 DropdownComponent.displayName = 'DropdownComponent';
 
-// Memoized icons
-const IconLeft = React.memo(() => <ChevronLeft className="h-4 w-4" />);
-const IconRight = React.memo(() => <ChevronRight className="h-4 w-4" />);
-
 // Extended Calendar component with searchable year dropdown
 function Calendar({
   className,
