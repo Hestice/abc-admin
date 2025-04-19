@@ -30,6 +30,7 @@ export function PatientManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [totalPatients, setTotalPatients] = useState(0);
+  const [page, setPage] = useState(1);
   const fetchPatients = async (page: number) => {
     try {
       setIsLoading(true);
@@ -105,28 +106,42 @@ export function PatientManagement() {
             )}
           </CardContent>
         )}
-        <CardFooter className="flex flex-col sm:flex-row justify-between">
-          <div className="text-sm text-muted-foreground mb-2 sm:mb-0">
-            Showing {patients.length} of {totalPatients} patients
+        <CardFooter className="flex flex-col justify-between gap-4">
+          <div className="flex flex-row gap-2 justify-between w-full">
+            <span className="text-sm text-muted-foreground mb-2 sm:mb-0">
+              Showing {patients.length} out of {totalPatients} patients
+            </span>
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                className="flex-1 sm:flex-none"
+                onClick={() => {
+                  setPage(page - 1);
+                  fetchPatients(page - 1);
+                }}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === totalPatients / 10}
+                className="flex-1 sm:flex-none"
+                onClick={() => {
+                  setPage(page + 1);
+                  fetchPatients(page + 1);
+                }}
+              >
+                Next
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              className="flex-1 sm:flex-none"
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              className="flex-1 sm:flex-none"
-            >
-              Next
-            </Button>
-          </div>
+
+          <span className="text-xs text-muted-foreground">
+            Page {page} of {Math.ceil(totalPatients / 10)}
+          </span>
         </CardFooter>
       </Card>
 
