@@ -6,6 +6,49 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Resolver } from 'react-hook-form';
 import { Category, Sex } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from './schema';
+import { addPatient } from '@/utils/add-patient';
+import { NewPatient } from '@/types/patient';
+
+// Helper to convert form data to NewPatient format
+const formatPatientData = (data: FormValues): NewPatient => {
+  // Map Sex enum to number
+  let sexValue: number;
+  if (data.sex === Sex.MALE) sexValue = 1;
+  else if (data.sex === Sex.FEMALE) sexValue = 2;
+  else sexValue = 3;
+
+  // Create base patient object
+  const patient: any = {
+    firstName: data.firstName,
+    middleName: data.middleName || '',
+    lastName: data.lastName,
+    dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
+    dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
+    sex: sexValue,
+    address: data.address,
+    email: data.email || '',
+    category: Number(data.category),
+    bodyPartsAffected: data.bodyPartsAffected,
+    placeOfExposure: data.placeOfExposure,
+    isExposureAtHome: data.isExposureAtHome,
+    sourceOfExposure: data.sourceOfExposure,
+    isWoundCleaned: data.isWoundCleaned,
+    antiTetanusGiven: data.antiTetanusGiven,
+    briefHistory: data.briefHistory,
+    allergy: data.allergy,
+    medications: data.medications,
+  };
+
+  // Only include dateOfAntiTetanus if anti-tetanus was given and a date was selected
+  if (data.antiTetanusGiven && data.dateOfAntiTetanus) {
+    patient.dateOfAntiTetanus = data.dateOfAntiTetanus
+      .toISOString()
+      .split('T')[0];
+  }
+
+  console.log('Formatted patient data:', patient);
+  return patient;
+};
 
 export function usePatientForm() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -34,17 +77,13 @@ export function usePatientForm() {
       dateOfAntiTetanus: undefined,
       briefHistory: '',
       allergy: '',
-      noAllergies: false,
       medications: '',
-      noMedications: false,
     },
     mode: 'onChange',
   });
 
   // Watch for changes to isExposureAtHome and update placeOfExposure accordingly
   const isExposureAtHome = form.watch('isExposureAtHome');
-  const noAllergies = form.watch('noAllergies');
-  const noMedications = form.watch('noMedications');
 
   useEffect(() => {
     if (isExposureAtHome) {
@@ -53,24 +92,6 @@ export function usePatientForm() {
       form.setValue('placeOfExposure', '');
     }
   }, [isExposureAtHome, form]);
-
-  // Handle allergies checkbox
-  useEffect(() => {
-    if (noAllergies) {
-      form.setValue('allergy', 'none');
-    } else if (form.getValues('allergy') === 'none') {
-      form.setValue('allergy', '');
-    }
-  }, [noAllergies, form]);
-
-  // Handle medications checkbox
-  useEffect(() => {
-    if (noMedications) {
-      form.setValue('medications', 'none');
-    } else if (form.getValues('medications') === 'none') {
-      form.setValue('medications', '');
-    }
-  }, [noMedications, form]);
 
   // Check if the current step is valid
   const isCurrentStepValid = async () => {
@@ -97,10 +118,16 @@ export function usePatientForm() {
   // Handle form submission
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    try {
-      console.log('Submitting patient data:');
+    console.log('Raw form data:', data);
 
-      // Navigate back to patients list
+    const formattedData = formatPatientData(data);
+    console.log('Formatted data for submission:', formattedData);
+
+    try {
+      await addPatient({
+        setIsLoading: setIsSubmitting,
+        newPatient: formattedData,
+      });
       router.push('/patients');
     } catch (error) {
       console.error('Error submitting patient data:', error);

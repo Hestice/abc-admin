@@ -1,5 +1,3 @@
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,16 +9,19 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { FormValues } from './schema';
 import { CategoryLabels } from '@/enums/category';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@radix-ui/react-popover';
+import { format } from 'date-fns';
+import { Card } from '../ui/card';
+import { CalendarNav } from '../ui/calendar-nav';
+import { CalendarIcon } from 'lucide-react';
 
 interface ExposureDetailsStepProps {
   form: UseFormReturn<FormValues>;
@@ -34,7 +35,10 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
         name="category"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Bite Category</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Bite Category</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <div className="space-y-3">
                 {Object.entries(CategoryLabels).map(([value, label]) => (
@@ -44,25 +48,32 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
                     variant={
                       field.value === Number(value) ? 'default' : 'outline'
                     }
-                    className="w-full justify-start text-left h-auto py-3 px-4"
+                    className="w-full justify-start text-left h-auto py-3 px-4 group"
                     onClick={() => field.onChange(Number(value))}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 group-hover:text-background">
                       <div
                         className={cn(
-                          'w-5 h-5 rounded-full border flex items-center justify-center',
+                          'w-5 h-5 rounded-full border flex items-center justify-center group-hover:border-background ',
                           field.value === Number(value)
-                            ? 'border-primary-foreground bg-primary-foreground'
+                            ? 'border-primary-foreground bg-primary-foreground text-background'
                             : 'border-muted-foreground'
                         )}
                       >
                         {field.value === Number(value) && (
-                          <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-primary " />
                         )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-medium">Category {value}</span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="font-medium group-hover:text-background">
+                          Category {value}
+                        </span>
+                        <span
+                          className={cn(
+                            'text-xs text-muted-foreground group-hover:text-background',
+                            field.value === Number(value) && 'text-background'
+                          )}
+                        >
                           {label.split(' - ')[1]}
                         </span>
                       </div>
@@ -74,7 +85,6 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
             <FormDescription>
               Select the appropriate category based on the exposure severity
             </FormDescription>
-            <FormMessage />
           </FormItem>
         )}
       />
@@ -83,11 +93,13 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
         name="bodyPartsAffected"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Body Parts Affected</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Body Parts Affected</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <Input placeholder="Hand, arm, leg, etc." {...field} />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
@@ -96,7 +108,10 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
         name="dateOfExposure"
         render={({ field }) => (
           <FormItem className="flex flex-col">
-            <FormLabel>Date of Exposure</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Date of Exposure</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
@@ -117,59 +132,51 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) => date > new Date()}
-                  initialFocus
-                  captionLayout="dropdown-buttons"
-                  fromYear={1900}
-                  toYear={new Date().getFullYear()}
-                />
+                <Card>
+                  <CalendarNav
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                  />
+                </Card>
               </PopoverContent>
             </Popover>
-            <FormMessage />
           </FormItem>
         )}
       />
-      <FormField
-        control={form.control}
-        name="isExposureAtHome"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-            <div className="space-y-1 leading-none">
-              <FormLabel>Exposure Occurred at Home</FormLabel>
-              <FormDescription>
-                Check if the exposure happened at the patient's residence
-              </FormDescription>
-            </div>
-          </FormItem>
-        )}
-      />
+      <div className="w-full space-y-2">
+        <div className="flex flex-row items-center justify-start gap-2">
+          <FormLabel>Place of Exposure</FormLabel>
+        </div>
 
-      {/* Place of Exposure field with smooth transition */}
-      <div
-        className={cn(
-          'grid transition-all duration-300 ease-in-out',
-          form.watch('isExposureAtHome')
-            ? 'grid-rows-[0fr] opacity-0 invisible h-0 my-0'
-            : 'grid-rows-[1fr] opacity-100 visible h-auto my-4'
-        )}
-      >
-        <div className="overflow-hidden">
+        <FormField
+          control={form.control}
+          name="isExposureAtHome"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-1">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Exposure Occurred at Home</FormLabel>
+                <FormDescription>
+                  Check if the exposure happened at the patient's residence
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        {!form.watch('isExposureAtHome') && (
           <FormField
             control={form.control}
             name="placeOfExposure"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Place of Exposure</FormLabel>
                 <FormControl>
                   <Input placeholder="Park, school, etc." {...field} />
                 </FormControl>
@@ -177,19 +184,20 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
               </FormItem>
             )}
           />
-        </div>
+        )}
       </div>
-
       <FormField
         control={form.control}
         name="sourceOfExposure"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Source of Exposure</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Source of Exposure</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <Input placeholder="Dog, cat, etc." {...field} />
             </FormControl>
-            <FormMessage />
           </FormItem>
         )}
       />
@@ -198,7 +206,10 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
         name="isWoundCleaned"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Was the Wound Cleaned?</FormLabel>
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel>Was the Wound Cleaned?</FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
             <FormControl>
               <div className="flex gap-4">
                 <Button
@@ -207,7 +218,7 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
                   className="w-full"
                   onClick={() => field.onChange(true)}
                 >
-                  Yes
+                  Yes, the wound was cleaned properly.
                 </Button>
                 <Button
                   type="button"
@@ -215,14 +226,13 @@ export function ExposureDetailsStep({ form }: ExposureDetailsStepProps) {
                   className="w-full"
                   onClick={() => field.onChange(false)}
                 >
-                  No
+                  No, the wound was not cleaned at all.
                 </Button>
               </div>
             </FormControl>
             <FormDescription>
               Indicate if the wound was cleaned before arrival
             </FormDescription>
-            <FormMessage />
           </FormItem>
         )}
       />

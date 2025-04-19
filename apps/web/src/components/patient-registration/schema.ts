@@ -25,8 +25,8 @@ export const formSchema = z.object({
   dateOfExposure: z.date({
     required_error: 'Date of exposure is required',
   }),
-  isExposureAtHome: z.boolean(),
   sourceOfExposure: z.string().min(1, 'Source of exposure is required'),
+  isExposureAtHome: z.boolean().default(false),
   isWoundCleaned: z.boolean(),
 
   // Medical Information
@@ -36,10 +36,7 @@ export const formSchema = z.object({
 
   // Make allergies and medications optional
   allergy: z.string().optional().default('none'),
-  noAllergies: z.boolean().default(false),
-
   medications: z.string().optional().default('none'),
-  noMedications: z.boolean().default(false),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
