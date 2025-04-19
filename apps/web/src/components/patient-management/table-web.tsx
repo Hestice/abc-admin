@@ -7,11 +7,8 @@ import {
   TableBody,
   TableCell,
 } from '../ui/table';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Eye } from 'lucide-react';
 import { Patient } from '@/types/patient';
-import { ScheduleStatus } from '@/enums/schedule-status';
+import PatientInfoRow from './patient-info-row';
 
 interface PatientsTableProps {
   filteredPatients: Patient[];
@@ -40,48 +37,15 @@ export default function PatientsTable({
             </TableCell>
           </TableRow>
         ) : (
-          filteredPatients.map((patient) => (
-            <TableRow key={patient.id}>
-              <TableCell>
-                <div className="font-medium">
-                  {patient.firstName} {patient.middleName} {patient.lastName}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  #{patient.id}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={
-                    patient.scheduleStatus === ScheduleStatus.complete
-                      ? 'default'
-                      : 'outline'
-                  }
-                >
-                  {
-                    ScheduleStatus[
-                      patient.scheduleStatus as keyof typeof ScheduleStatus
-                    ]
-                  }
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {patient.nextVaccinationDay}
-                {patient.nextVaccinationDate &&
-                  new Date(patient.nextVaccinationDate).toLocaleDateString()}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleViewPatient(patient)}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Details
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))
+          filteredPatients.map((patient) => {
+            return (
+              <PatientInfoRow
+                key={patient.id}
+                patient={patient}
+                handleViewPatient={handleViewPatient}
+              />
+            );
+          })
         )}
       </TableBody>
     </Table>
