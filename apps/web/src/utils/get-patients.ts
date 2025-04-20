@@ -36,11 +36,7 @@ export const getPatients = async ({
     });
 
     const patientsApi = new PatientsApi(config);
-    const response = await patientsApi.patientsControllerFindAll({
-      params: {
-        page,
-      },
-    });
+    const response = await patientsApi.patientsControllerFindAll(page);
     const typedResponse = response.data as unknown as {
       patients: Patient[];
       total: number;

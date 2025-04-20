@@ -1,11 +1,25 @@
-'use client';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { DashboardShell } from '@/components/dashboard-shell';
+import PatientEditForm from '@/components/patient-edit-form';
 
-import { useParams } from 'next/navigation';
-import React from 'react';
+interface PatientEditPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
 
-export default function PatientInfo() {
-  const params = useParams();
-  const id = params.id;
+export default async function PatientEditPage({
+  params,
+}: PatientEditPageProps) {
+  const { id } = await params;
 
-  return <div>PatientInfo: {id}</div>;
+  return (
+    <DashboardShell>
+      <DashboardHeader
+        heading="Edit Patient Record"
+        text="Update patient information and animal bite details"
+      />
+      <PatientEditForm patientId={id} />
+    </DashboardShell>
+  );
 }

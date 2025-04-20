@@ -132,6 +132,7 @@ export class PatientsService {
     const patient = await this.findOne(id);
 
     Object.assign(patient, updatePatientDto);
+    patient.updatedAt = new Date();
 
     return this.patientsRepository.save(patient);
   }

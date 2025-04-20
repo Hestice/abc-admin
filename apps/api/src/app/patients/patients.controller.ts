@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Query,
+  Patch,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,6 +15,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiQuery,
+  ApiBody,
 } from '@nestjs/swagger';
 import { PatientsService } from './patients.service';
 import { Patient } from './entities/patient.entity';
@@ -67,6 +69,27 @@ export class PatientsController {
   @ApiResponse({ status: 404, description: 'Patient not found.' })
   async findOne(@Param('id') id: string): Promise<Patient> {
     return this.patientsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a patient' })
+  @ApiResponse({
+    status: 200,
+    description: 'Patient has been updated successfully.',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiResponse({ status: 404, description: 'Patient not found.' })
+  @ApiBody({
+    type: CreatePatientDto,
+    description: 'Patient data to update. All fields are optional.',
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() updatePatientDto: Partial<CreatePatientDto>
+  ): Promise<Patient> {
+    return this.patientsService.update(id, updatePatientDto);
   }
 
   // Add other endpoints as needed (update, delete, etc.)
