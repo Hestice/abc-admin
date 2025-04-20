@@ -102,6 +102,8 @@ export class PatientsService {
         scheduleStatus: patient.schedule?.status,
         nextVaccinationDate: nextVaccination.date,
         nextVaccinationDay: nextVaccination.day,
+        dateOfBirth: patient.dateOfBirth,
+        dateRegistered: patient.createdAt,
       };
     });
 

@@ -14,6 +14,7 @@ import { Patient } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import CalculateAge from '@/utils/calculate-age';
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
   setIsViewDialogOpen: (isOpen: boolean) => void;
@@ -92,7 +93,7 @@ export default function ViewPatientDialog({
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Age</p>
-                <p>age</p>
+                <p>{CalculateAge(selectedPatient.dateOfBirth)}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">

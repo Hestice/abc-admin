@@ -6,6 +6,8 @@ export interface Patient {
   scheduleStatus: string;
   nextVaccinationDate: Date;
   nextVaccinationDay: string;
+  dateOfBirth: Date;
+  dateRegistered: Date;
 }
 
 export interface NewPatient {
