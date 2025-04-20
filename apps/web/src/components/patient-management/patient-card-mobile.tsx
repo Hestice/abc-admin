@@ -15,9 +15,9 @@ export default function PatientCardMobile({
   patient,
   handleViewPatient,
 }: PatientCardMobileProps) {
-  const patientName = `${patient?.lastName}, ${
-    patient?.firstName
-  } ${patient?.middleName.charAt(0)}.`;
+  const patientName = `${patient?.lastName}, ${patient?.firstName} ${
+    patient?.middleName ? patient?.middleName.charAt(0) + '.' : ''
+  }`;
   const scheduleStatus =
     ScheduleStatus[patient.scheduleStatus as keyof typeof ScheduleStatus];
   const formattedDate = new Date(

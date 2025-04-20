@@ -45,8 +45,6 @@ const formatPatientData = (data: FormValues): NewPatient => {
       .toISOString()
       .split('T')[0];
   }
-
-  console.log('Formatted patient data:', patient);
   return patient;
 };
 
