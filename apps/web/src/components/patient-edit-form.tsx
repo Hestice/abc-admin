@@ -112,7 +112,10 @@ export default function PatientEditForm({ patientId }: PatientEditFormProps) {
                 {currentStep < steps.length - 1 ? (
                   <Button
                     type="button"
-                    onClick={handleNext}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNext();
+                    }}
                     className="w-full sm:w-auto"
                   >
                     Next

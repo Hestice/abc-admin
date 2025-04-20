@@ -107,7 +107,7 @@ export function usePatientEditForm(patientId: string) {
   // Initialize the form with default values
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
-    mode: 'onChange',
+    mode: 'onTouched',
   });
 
   // Fetch patient data on mount
@@ -213,28 +213,55 @@ export function usePatientEditForm(patientId: string) {
   };
 
   // Check if the current step is valid
-  const isCurrentStepValid = async () => {
+  const isCurrentStepValid = async (buttonType: 'next' | 'submit' = 'next') => {
     const fields = steps[currentStep].fields;
-    const result = await form.trigger(fields as any);
-    return result;
+
+    // If moving to step 3 (Medical Information), special handling is needed
+    if (currentStep === 1 && buttonType === 'next') {
+      // Don't validate briefHistory when moving to step 3
+      const filteredFields = fields.filter((field) => {
+        return (
+          field !== 'briefHistory' &&
+          field !== 'allergy' &&
+          field !== 'medications' &&
+          field !== 'noAllergies' &&
+          field !== 'noMedications'
+        );
+      });
+      return await form.trigger(filteredFields as any);
+    }
+
+    // For regular validation
+    return await form.trigger(fields as any);
   };
 
   // Handle next step
   const handleNext = async () => {
-    const isValid = await isCurrentStepValid();
-    if (isValid) {
-      const nextStep = Math.min(currentStep + 1, steps.length - 1);
+    // Prevent default HTML form submission behavior
+    try {
+      const isValid = await isCurrentStepValid('next');
 
-      // If we're moving to the medical information step
-      if (nextStep === 2) {
-        // Temporarily clear the briefHistory error so it doesn't show immediately
-        setTimeout(() => {
-          form.clearErrors('briefHistory');
-        }, 0);
+      if (isValid) {
+        const nextStep = Math.min(currentStep + 1, steps.length - 1);
+
+        // If we're moving to the medical information step
+        if (nextStep === 2) {
+          // Preemptively clear any potential errors for fields in step 3
+          form.clearErrors([
+            'briefHistory',
+            'allergy',
+            'medications',
+            'antiTetanusGiven',
+            'dateOfAntiTetanus',
+          ]);
+        }
+
+        // Update the step without triggering validation on the next step's fields
+        setCurrentStep(nextStep);
+        window.scrollTo(0, 0);
       }
-
-      setCurrentStep(nextStep);
-      window.scrollTo(0, 0);
+    } catch (error) {
+      console.error('Error during step navigation:', error);
     }
   };
 
@@ -246,9 +273,15 @@ export function usePatientEditForm(patientId: string) {
 
   // Handle form submission
   const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
-
     try {
+      // First validate the current step specifically (with submit type)
+      const isValid = await isCurrentStepValid('submit');
+      if (!isValid) {
+        return; // Stop if validation fails
+      }
+
+      setIsSubmitting(true);
+
       // We'll send the entire object - the API will handle partial updates
       const formattedData = formatPatientUpdateData(data);
       await updatePatient({
