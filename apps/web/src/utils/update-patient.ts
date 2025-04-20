@@ -25,11 +25,6 @@ const adaptToUpdatePatientDto = (patient: Partial<NewPatient>): any => {
   // Only transform fields that are defined
   const adaptedPatient: any = { ...patient };
 
-  // Handle sex enum if present
-  if (patient.sex !== undefined) {
-    adaptedPatient.sex = Sex.OTHER;
-  }
-
   // Handle category if present
   if (patient.category !== undefined) {
     adaptedPatient.category = patient.category as Category;

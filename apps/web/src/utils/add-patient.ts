@@ -2,7 +2,7 @@ import { PatientsApi, Configuration } from '@abc-admin/api-lib';
 import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { NewPatient } from '@/types/patient';
-import { Category } from '@abc-admin/enums';
+import { Category, Sex } from '@abc-admin/enums';
 
 interface ExtendedSession extends Session {
   accessToken?: string;
@@ -30,7 +30,7 @@ const adaptToCreatePatientDto = (patient: NewPatient): any => {
     ...patient,
     middleName: patient.middleName || '',
     email: patient.email || '',
-    sex: patient.sex,
+    sex: patient.sex as Sex,
     // Category is already numeric, matching the enum
     category: patient.category as Category,
   };

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Resolver } from 'react-hook-form';
-import { Category, Sex } from '@abc-admin/enums';
+import { Category, Sex, Status } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from './schema';
 import { addPatient } from '@/utils/add-patient';
 import { NewPatient } from '@/types/patient';
@@ -18,7 +18,7 @@ const formatPatientData = (data: FormValues): NewPatient => {
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
     dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
-    sex: data.sex,
+    sex: data.sex as Sex,
     address: data.address,
     email: data.email || '',
     category: Number(data.category),
@@ -26,6 +26,7 @@ const formatPatientData = (data: FormValues): NewPatient => {
     placeOfExposure: data.placeOfExposure,
     isExposureAtHome: data.isExposureAtHome,
     sourceOfExposure: data.sourceOfExposure,
+    animalStatus: data.animalStatus,
     isWoundCleaned: data.isWoundCleaned,
     antiTetanusGiven: data.antiTetanusGiven,
     briefHistory: data.briefHistory,
@@ -64,6 +65,7 @@ export function usePatientForm() {
       dateOfExposure: undefined as unknown as Date,
       sourceOfExposure: '',
       isExposureAtHome: false,
+      animalStatus: Status.UNKNOWN,
       isWoundCleaned: false,
       antiTetanusGiven: false,
       dateOfAntiTetanus: undefined,

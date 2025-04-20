@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Resolver } from 'react-hook-form';
-import { Category, Sex } from '@abc-admin/enums';
+import { Category, Sex, Status } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from '../patient-registration/schema';
 import { getPatient, updatePatient } from '@/utils/update-patient';
 import { EditablePatient, NewPatient } from '@/types/patient';
@@ -12,17 +12,6 @@ import { deepEquals } from '@/utils/object-utils';
 
 // Helper to convert Patient data to form values
 const patientToFormValues = (patient: EditablePatient): FormValues => {
-  // Convert sex to enum value
-  let sexValue: Sex;
-  // Check if sex is a number or already a Sex enum
-  if (typeof patient.sex === 'number') {
-    if (patient.sex === 1) sexValue = Sex.MALE;
-    else if (patient.sex === 2) sexValue = Sex.FEMALE;
-    else sexValue = Sex.OTHER;
-  } else {
-    sexValue = patient.sex;
-  }
-
   // Create form values object
   return {
     firstName: patient.firstName,
@@ -30,7 +19,7 @@ const patientToFormValues = (patient: EditablePatient): FormValues => {
     lastName: patient.lastName,
     dateOfBirth: new Date(patient.dateOfBirth),
     dateOfExposure: new Date(patient.dateOfExposure),
-    sex: sexValue,
+    sex: patient.sex as Sex,
     address: patient.address || '',
     email: patient.email || '',
     category: patient.category as Category,
@@ -38,6 +27,7 @@ const patientToFormValues = (patient: EditablePatient): FormValues => {
     placeOfExposure: patient.placeOfExposure,
     isExposureAtHome: patient.isExposureAtHome,
     sourceOfExposure: patient.sourceOfExposure,
+    animalStatus: patient.animalStatus || Status.UNKNOWN,
     isWoundCleaned: patient.isWoundCleaned,
     antiTetanusGiven: patient.antiTetanusGiven,
     dateOfAntiTetanus: patient.dateOfAntiTetanus
@@ -58,7 +48,7 @@ const formatPatientUpdateData = (data: FormValues): Partial<NewPatient> => {
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
     dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
-    sex: data.sex,
+    sex: data.sex as Sex,
     address: data.address,
     email: data.email || '',
     category: Number(data.category),
@@ -66,6 +56,7 @@ const formatPatientUpdateData = (data: FormValues): Partial<NewPatient> => {
     placeOfExposure: data.placeOfExposure,
     isExposureAtHome: data.isExposureAtHome,
     sourceOfExposure: data.sourceOfExposure,
+    animalStatus: data.animalStatus,
     isWoundCleaned: data.isWoundCleaned,
     antiTetanusGiven: data.antiTetanusGiven,
     briefHistory: data.briefHistory,

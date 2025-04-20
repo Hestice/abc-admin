@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { FormValues } from './schema';
+import { FormValues, statusOptions } from './schema';
 import { CategoryLabels } from '@/enums/category';
 import {
   Popover,
@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { Card } from '../ui/card';
 import { CalendarNav } from '../ui/calendar-nav';
 import { CalendarIcon } from 'lucide-react';
+import { ButtonGroup } from '../ui/button-group';
 
 interface ExposureDetailsStepProps {
   form: UseFormReturn<FormValues>;
@@ -318,7 +319,7 @@ export function ExposureDetailsStep({
             </div>
             <FormControl>
               <Input
-                placeholder="Dog, cat, etc."
+                placeholder="Dog, Cat, Hamster, etc."
                 {...field}
                 className={cn(
                   modifiedFields.sourceOfExposure && 'border-secondary'
@@ -328,6 +329,49 @@ export function ExposureDetailsStep({
           </FormItem>
         )}
       />
+
+      <FormField
+        control={form.control}
+        name="animalStatus"
+        render={({ field }) => (
+          <FormItem
+            className={cn(
+              modifiedFields.animalStatus &&
+                'border-secondary pl-2 rounded transition-all'
+            )}
+          >
+            <div className="flex flex-row items-center justify-start gap-2">
+              <FormLabel
+                className={cn(
+                  modifiedFields.animalStatus && 'text-secondary font-medium'
+                )}
+              >
+                Status of Animal
+                {modifiedFields.animalStatus && (
+                  <span className="ml-1 text-xs">(Modified)</span>
+                )}
+              </FormLabel>
+              <FormMessage className="text-xs text-muted-foreground italic" />
+            </div>
+            <FormControl>
+              <ButtonGroup
+                options={statusOptions}
+                value={field.value}
+                onChange={field.onChange}
+                name={field.name}
+                className={cn(
+                  modifiedFields.animalStatus && 'border-secondary'
+                )}
+                isModified={modifiedFields.animalStatus}
+              />
+            </FormControl>
+            <FormDescription>
+              Specify the current status of the animal that caused the exposure
+            </FormDescription>
+          </FormItem>
+        )}
+      />
+
       <FormField
         control={form.control}
         name="isWoundCleaned"
