@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Schedule } from '../../schedules/entities/schedule.entity';
-import { Category, Sex } from '@abc-admin/enums';
+import { Category, Sex, Status } from '@abc-admin/enums';
 
 @Entity('patients')
 export class Patient {
@@ -58,6 +58,13 @@ export class Patient {
 
   @Column()
   sourceOfExposure!: string;
+
+  @Column({
+    type: 'enum',
+    enum: Status,
+    default: Status.UNKNOWN,
+  })
+  animalStatus!: Status;
 
   @Column()
   isWoundCleaned!: boolean;
