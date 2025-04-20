@@ -102,7 +102,17 @@ export function usePatientForm() {
   const handleNext = async () => {
     const isValid = await isCurrentStepValid();
     if (isValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+      const nextStep = Math.min(currentStep + 1, steps.length - 1);
+
+      // If we're moving to the medical information step
+      if (nextStep === 2) {
+        // Temporarily clear the briefHistory error so it doesn't show immediately
+        setTimeout(() => {
+          form.clearErrors('briefHistory');
+        }, 0);
+      }
+
+      setCurrentStep(nextStep);
       window.scrollTo(0, 0);
     }
   };
