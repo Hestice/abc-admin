@@ -5,11 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { DataOverview } from '@/components/data-overview';
-import { PatientManagement } from '@/components/patient-management';
 
 enum TabType {
   Overview = 'overview',
-  Patients = 'patients',
+  Export = 'export',
 }
 
 export default function DashboardPage() {
@@ -27,7 +26,7 @@ export default function DashboardPage() {
       >
         <TabsList className="h-10">
           <TabsTrigger value={TabType.Overview}>Overview</TabsTrigger>
-          <TabsTrigger value={TabType.Patients}>Patients</TabsTrigger>
+          <TabsTrigger value={TabType.Export}>Export</TabsTrigger>
         </TabsList>
         <TabsContent
           value={TabType.Overview}
@@ -36,10 +35,10 @@ export default function DashboardPage() {
           <DataOverview />
         </TabsContent>
         <TabsContent
-          value={TabType.Patients}
+          value={TabType.Export}
           className="space-y-4 w-full overflow-x-hidden"
         >
-          <PatientManagement />
+          Export Tab here
         </TabsContent>
       </Tabs>
     </DashboardShell>
