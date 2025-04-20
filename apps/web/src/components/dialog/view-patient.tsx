@@ -127,17 +127,28 @@ export default function ViewPatientDialog({
               />
             </div>
 
-            <div className="rounded-lg border p-4">
-              <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="w-full h-auto"
+              onClick={() => {
+                setIsViewDialogOpen(false);
+                router.push(
+                  AppRoutes.PATIENT_SCHEDULE.replace(':id', selectedPatient.id)
+                );
+              }}
+            >
+              <div className="flex items-center gap-4">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Next Vaccination</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Next Vaccination:
+                  </p>
                   <p className="text-sm">
                     {formatDate(selectedPatient.nextVaccinationDate)}
                   </p>
                 </div>
               </div>
-            </div>
+            </Button>
           </div>
         )}
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
