@@ -9,10 +9,11 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Calendar, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronRight, Copy } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
   setIsViewDialogOpen: (isOpen: boolean) => void;
@@ -24,10 +25,18 @@ export default function ViewPatientDialog({
   selectedPatient,
 }: ViewPatientDialogProps) {
   const router = useRouter();
+  const { toast } = useToast();
+
   const handleEditPatient = (patientId: string) => {
     setIsViewDialogOpen(false);
-    console.log('go to patients/', patientId);
     router.push(`/patients/${patientId}`);
+  };
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      description: 'Patient ID copied to clipboard',
+      duration: 2000,
+    });
   };
 
   return (
@@ -53,7 +62,11 @@ export default function ViewPatientDialog({
                     : 'outline'
                 }
               >
-                {selectedPatient.scheduleStatus}
+                {
+                  ScheduleStatus[
+                    selectedPatient.scheduleStatus as keyof typeof ScheduleStatus
+                  ]
+                }
               </Badge>
             </div>
 
@@ -62,7 +75,20 @@ export default function ViewPatientDialog({
                 <p className="text-sm font-medium text-muted-foreground">
                   Patient ID
                 </p>
-                <p>{selectedPatient.id}</p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => copyToClipboard(selectedPatient.id)}
+                    title="Copy patient ID"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                  <p className="truncate w-20 text-muted-foreground">
+                    #{selectedPatient.id}
+                  </p>
+                </div>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Age</p>
