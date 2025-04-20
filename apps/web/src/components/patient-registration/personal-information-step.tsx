@@ -42,7 +42,7 @@ export function PersonalInformationStep({
             <FormItem
               className={cn(
                 modifiedFields.firstName &&
-                  'border-l-2 border-secondary pl-2 rounded transition-all'
+                  ' border-secondary pl-2 rounded transition-all'
               )}
             >
               <div className="flex flex-row items-center justify-start gap-2">
@@ -75,7 +75,7 @@ export function PersonalInformationStep({
             <FormItem
               className={cn(
                 modifiedFields.middleName &&
-                  'border-l-2 border-secondary pl-2 rounded transition-all'
+                  ' border-secondary pl-2 rounded transition-all'
               )}
             >
               <div className="flex flex-row items-center justify-start gap-2">
@@ -111,7 +111,7 @@ export function PersonalInformationStep({
           <FormItem
             className={cn(
               modifiedFields.lastName &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                ' border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -160,7 +160,7 @@ export function PersonalInformationStep({
           <FormItem
             className={cn(
               modifiedFields.sex &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                ' border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -214,7 +214,7 @@ export function PersonalInformationStep({
           <FormItem
             className={cn(
               modifiedFields.address &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                ' border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -250,7 +250,7 @@ export function PersonalInformationStep({
           <FormItem
             className={cn(
               modifiedFields.email &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                ' border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
