@@ -1,4 +1,4 @@
 export enum ScheduleStatus {
-  complete = 'Complete',
+  completed = 'Complete',
   in_progress = 'In Progress',
 }

@@ -24,12 +24,36 @@ export default function PatientInfoRow({
     patient?.middleName ? patient?.middleName.charAt(0) + '.' : ''
   }`;
 
-  const nextVaccinationDate = new Date(
-    patient?.nextVaccinationDate
-  ).toLocaleDateString();
+  const nextVaccinationDate = () => {
+    if (patient?.nextVaccinationDate) {
+      return new Date(patient?.nextVaccinationDate);
+    }
+    return null;
+  };
+  const date = nextVaccinationDate();
 
-  const formattedDate = format(nextVaccinationDate, 'PPP');
-  const dayOfWeek = format(new Date(patient?.nextVaccinationDate), 'EEEE');
+  const formattedDate = () => {
+    if (date) {
+      return format(date, 'PPP');
+    }
+    return null;
+  };
+
+  const dayOfWeek = () => {
+    if (date) {
+      return format(date, 'EEEE');
+    }
+    return null;
+  };
+
+  const scheduleStatus = () => {
+    return ScheduleStatus[
+      patient.scheduleStatus as keyof typeof ScheduleStatus
+    ];
+  };
+  const isCompleted = () => {
+    return scheduleStatus() === ScheduleStatus.completed;
+  };
 
   return (
     <TableRow key={patient.id}>
@@ -38,32 +62,24 @@ export default function PatientInfoRow({
         <div className="text-xs text-muted-foreground">#{patient.id}</div>
       </TableCell>
       <TableCell>
-        <Badge
-          variant={
-            patient.scheduleStatus === ScheduleStatus.complete
-              ? 'default'
-              : 'outline'
-          }
-        >
-          {
-            ScheduleStatus[
-              patient.scheduleStatus as keyof typeof ScheduleStatus
-            ]
-          }
+        <Badge variant={isCompleted() ? 'default' : 'outline'}>
+          {scheduleStatus()}
         </Badge>
       </TableCell>
       <TableCell className="cursor-pointer">
         <TooltipProvider delayDuration={10}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="inline-flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  {patient.nextVaccinationDay}:
-                </span>
-                <span>{formattedDate}</span>
-              </div>
+              {!isCompleted() && (
+                <div className="inline-flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {patient.nextVaccinationDay}:
+                  </span>
+                  <span>{formattedDate()}</span>
+                </div>
+              )}
             </TooltipTrigger>
-            <TooltipContent>{dayOfWeek}</TooltipContent>
+            <TooltipContent>{dayOfWeek()}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </TableCell>

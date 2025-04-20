@@ -79,7 +79,7 @@ export default function ViewPatientDialog({
               </div>
               <Badge
                 variant={
-                  selectedPatient.scheduleStatus === ScheduleStatus.complete
+                  selectedPatient.scheduleStatus === ScheduleStatus.completed
                     ? 'default'
                     : 'outline'
                 }
@@ -132,7 +132,9 @@ export default function ViewPatientDialog({
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium">Next Vaccination</p>
-                  <p className="text-sm">next vaccination dates</p>
+                  <p className="text-sm">
+                    {formatDate(selectedPatient.nextVaccinationDate)}
+                  </p>
                 </div>
               </div>
             </div>
