@@ -40,7 +40,9 @@ export function MedicalInformationStep({ form }: MedicalInformationStepProps) {
                 checked={field.value}
                 onCheckedChange={(checked) => {
                   field.onChange(checked);
-                  if (!checked) {
+                  if (checked) {
+                    form.setValue('dateOfAntiTetanus', new Date());
+                  } else {
                     form.setValue('dateOfAntiTetanus', undefined);
                   }
                 }}
