@@ -18,7 +18,7 @@ const formatPatientData = (data: FormValues): NewPatient => {
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
     dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
-    sex: data.sex,
+    sex: data.sex as Sex,
     address: data.address,
     email: data.email || '',
     category: Number(data.category),

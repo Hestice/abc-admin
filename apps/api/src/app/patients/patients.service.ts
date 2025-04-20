@@ -13,8 +13,10 @@ import { SchedulesService } from '../schedules/schedules.service';
 import { SimplifiedPatient } from './types/simplifiedPatients.type';
 import { Schedule } from '../schedules/entities/schedule.entity';
 import { Sex } from '@abc-admin/enums';
+import { Logger } from '@nestjs/common';
 @Injectable()
 export class PatientsService {
+  private readonly logger = new Logger(PatientsService.name);
   constructor(
     @InjectRepository(Patient)
     private patientsRepository: Repository<Patient>,
@@ -130,7 +132,7 @@ export class PatientsService {
     updatePatientDto: Partial<CreatePatientDto>
   ): Promise<Patient> {
     const patient = await this.findOne(id);
-
+    this.logger.log(updatePatientDto);
     Object.assign(patient, updatePatientDto);
     patient.updatedAt = new Date();
 
