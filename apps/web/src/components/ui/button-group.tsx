@@ -28,6 +28,7 @@ interface ButtonGroupProps {
   onChange: (value: string) => void;
   name: string;
   className?: string;
+  isModified?: boolean;
 }
 
 export function ButtonGroup({
@@ -36,17 +37,24 @@ export function ButtonGroup({
   onChange,
   name,
   className,
+  isModified = false,
 }: ButtonGroupProps) {
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       {options.map((option) => {
         const IconComponent = option.icon ? iconMap[option.icon] : undefined;
 
+        // Determine button variant based on selection and modification state
+        let variant: 'default' | 'secondary' | 'outline' = 'outline';
+        if (value === option.value) {
+          variant = isModified ? 'secondary' : 'default';
+        }
+
         return (
           <Button
             key={option.value}
             type="button"
-            variant={value === option.value ? 'default' : 'outline'}
+            variant={variant}
             className="flex items-center gap-2"
             onClick={() => onChange(option.value)}
           >

@@ -362,6 +362,7 @@ export function ExposureDetailsStep({
                 className={cn(
                   modifiedFields.animalStatus && 'border-secondary'
                 )}
+                isModified={modifiedFields.animalStatus}
               />
             </FormControl>
             <FormDescription>

@@ -104,6 +104,6 @@ export const sexOptions = [
 export const statusOptions = [
   { value: Status.ALIVE, label: 'Alive', icon: 'CheckCircle' },
   { value: Status.DEAD, label: 'Dead', icon: 'XCircle' },
-  { value: Status.UNKNOWN, label: 'Unknown', icon: 'HelpCircle' },
   { value: Status.LOST, label: 'Lost', icon: 'Search' },
+  { value: Status.UNKNOWN, label: 'Unknown', icon: 'HelpCircle' },
 ];
