@@ -9,10 +9,10 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Calendar } from 'lucide-react';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
-
+import { useRouter } from 'next/navigation';
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
   setIsViewDialogOpen: (isOpen: boolean) => void;
@@ -23,9 +23,11 @@ export default function ViewPatientDialog({
   setIsViewDialogOpen,
   selectedPatient,
 }: ViewPatientDialogProps) {
+  const router = useRouter();
   const handleEditPatient = (patientId: string) => {
     setIsViewDialogOpen(false);
-    console.log('go to patient/', patientId);
+    console.log('go to patients/', patientId);
+    router.push(`/patients/${patientId}`);
   };
 
   return (
@@ -106,7 +108,7 @@ export default function ViewPatientDialog({
             }}
             className="w-full sm:w-auto"
           >
-            Edit
+            More Details <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         </DialogFooter>
       </DialogContent>

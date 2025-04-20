@@ -19,6 +19,9 @@ import { getPatients } from '@/utils/get-patients';
 import { Patient } from '@/types/patient';
 import ViewPatientDialog from './dialog/view-patient';
 import { useRouter } from 'next/navigation';
+
+const PATIENTS_PER_PAGE = 10;
+
 export function PatientManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -31,6 +34,10 @@ export function PatientManagement() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [totalPatients, setTotalPatients] = useState(0);
   const [page, setPage] = useState(1);
+
+  const totalPages = Math.ceil(totalPatients / PATIENTS_PER_PAGE);
+  const isFirstPage = page === 1;
+  const isLastPage = page >= totalPages;
 
   const router = useRouter();
 
@@ -52,14 +59,17 @@ export function PatientManagement() {
   }, []);
 
   const handleAddNewPatient = () => {
-    // In a real application, this would navigate to a new patient form
-    console.log('Navigate to add new patient page');
     router.push('/patients/register');
   };
 
   const handleViewPatient = (patient: any) => {
     setSelectedPatient(patient);
     setIsViewDialogOpen(true);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    fetchPatients(newPage);
   };
 
   return (
@@ -118,24 +128,18 @@ export function PatientManagement() {
               <Button
                 variant="outline"
                 size="sm"
-                disabled={page === 1}
+                disabled={isFirstPage}
                 className="flex-1 sm:flex-none"
-                onClick={() => {
-                  setPage(page - 1);
-                  fetchPatients(page - 1);
-                }}
+                onClick={() => handlePageChange(page - 1)}
               >
                 Previous
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                disabled={page === totalPatients / 10}
+                disabled={isLastPage}
                 className="flex-1 sm:flex-none"
-                onClick={() => {
-                  setPage(page + 1);
-                  fetchPatients(page + 1);
-                }}
+                onClick={() => handlePageChange(page + 1)}
               >
                 Next
               </Button>
@@ -143,7 +147,7 @@ export function PatientManagement() {
           </div>
 
           <span className="text-xs text-muted-foreground">
-            Page {page} of {Math.ceil(totalPatients / 10)}
+            Page {page} of {totalPages}
           </span>
         </CardFooter>
       </Card>
