@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Resolver } from 'react-hook-form';
-import { Category, Sex } from '@abc-admin/enums';
+import { Category, Sex, Status } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from '../patient-registration/schema';
 import { getPatient, updatePatient } from '@/utils/update-patient';
 import { EditablePatient, NewPatient } from '@/types/patient';
@@ -38,6 +38,7 @@ const patientToFormValues = (patient: EditablePatient): FormValues => {
     placeOfExposure: patient.placeOfExposure,
     isExposureAtHome: patient.isExposureAtHome,
     sourceOfExposure: patient.sourceOfExposure,
+    animalStatus: patient.animalStatus || Status.UNKNOWN,
     isWoundCleaned: patient.isWoundCleaned,
     antiTetanusGiven: patient.antiTetanusGiven,
     dateOfAntiTetanus: patient.dateOfAntiTetanus
@@ -66,6 +67,7 @@ const formatPatientUpdateData = (data: FormValues): Partial<NewPatient> => {
     placeOfExposure: data.placeOfExposure,
     isExposureAtHome: data.isExposureAtHome,
     sourceOfExposure: data.sourceOfExposure,
+    animalStatus: data.animalStatus,
     isWoundCleaned: data.isWoundCleaned,
     antiTetanusGiven: data.antiTetanusGiven,
     briefHistory: data.briefHistory,

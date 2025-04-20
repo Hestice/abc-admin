@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Category, Sex } from '@abc-admin/enums';
+import { Category, Sex, Status } from '@abc-admin/enums';
 
 // Define the form schema with Zod
 export const formSchema = z.object({
@@ -27,6 +27,11 @@ export const formSchema = z.object({
   }),
   sourceOfExposure: z.string().min(1, 'Source of exposure is required'),
   isExposureAtHome: z.boolean().default(false),
+  animalStatus: z
+    .nativeEnum(Status, {
+      required_error: 'Animal status is required',
+    })
+    .default(Status.UNKNOWN),
   isWoundCleaned: z.boolean(),
 
   // Medical Information
@@ -68,6 +73,7 @@ export const steps = [
       'dateOfExposure',
       'isExposureAtHome',
       'sourceOfExposure',
+      'animalStatus',
       'isWoundCleaned',
     ],
   },
@@ -92,4 +98,12 @@ export const sexOptions = [
   { value: Sex.MALE, label: 'Male', icon: 'Male' },
   { value: Sex.FEMALE, label: 'Female', icon: 'Female' },
   { value: Sex.OTHER, label: 'Other', icon: 'Users' },
+];
+
+// Add status options with icons
+export const statusOptions = [
+  { value: Status.ALIVE, label: 'Alive', icon: 'CheckCircle' },
+  { value: Status.DEAD, label: 'Dead', icon: 'XCircle' },
+  { value: Status.UNKNOWN, label: 'Unknown', icon: 'HelpCircle' },
+  { value: Status.LOST, label: 'Lost', icon: 'Search' },
 ];
