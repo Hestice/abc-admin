@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,6 +21,7 @@ import { Schedule } from './entities/schedule.entity';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateVaccinationDto } from './dto/update-vaccination.dto';
 
 // Response class for better Swagger documentation
 class ScheduleResponse {
@@ -146,6 +148,39 @@ export class SchedulesController {
     @Body() updateScheduleDto: UpdateScheduleDto
   ): Promise<Schedule> {
     return this.schedulesService.update(id, updateScheduleDto);
+  }
+
+  @Patch(':id/vaccination')
+  @ApiOperation({ summary: 'Mark a vaccination day as completed' })
+  @ApiResponse({
+    status: 200,
+    description: 'The vaccination has been successfully marked as completed.',
+    type: ScheduleResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Schedule and patient do not match.',
+  })
+  @ApiResponse({ status: 404, description: 'Schedule not found.' })
+  async updateVaccination(
+    @Param('id') id: string,
+    @Body() updateVaccinationDto: UpdateVaccinationDto
+  ): Promise<Schedule> {
+    // Get the schedule
+    const schedule = await this.schedulesService.findOne(id);
+
+    // Verify that the schedule belongs to the patient
+    if (schedule.patient.id !== updateVaccinationDto.patientId) {
+      throw new BadRequestException(
+        'Schedule does not belong to the specified patient'
+      );
+    }
+
+    // Update the vaccination day
+    return this.schedulesService.updateVaccination(
+      id,
+      updateVaccinationDto.day
+    );
   }
 
   @Delete(':id')

@@ -147,6 +147,12 @@ export interface CreatePatientDto {
     'sourceOfExposure': string;
     /**
      * 
+     * @type {object}
+     * @memberof CreatePatientDto
+     */
+    'animalStatus': object;
+    /**
+     * 
      * @type {boolean}
      * @memberof CreatePatientDto
      */
@@ -450,6 +456,35 @@ export const UpdateScheduleDtoStatusEnum = {
 } as const;
 
 export type UpdateScheduleDtoStatusEnum = typeof UpdateScheduleDtoStatusEnum[keyof typeof UpdateScheduleDtoStatusEnum];
+
+/**
+ * 
+ * @export
+ * @interface UpdateVaccinationDto
+ */
+export interface UpdateVaccinationDto {
+    /**
+     * The patient ID associated with this vaccination
+     * @type {string}
+     * @memberof UpdateVaccinationDto
+     */
+    'patientId': string;
+    /**
+     * The vaccination day to mark as completed
+     * @type {number}
+     * @memberof UpdateVaccinationDto
+     */
+    'day': UpdateVaccinationDtoDayEnum;
+}
+
+export const UpdateVaccinationDtoDayEnum = {
+    NUMBER_0: 0,
+    NUMBER_3: 3,
+    NUMBER_7: 7,
+    NUMBER_28: 28
+} as const;
+
+export type UpdateVaccinationDtoDayEnum = typeof UpdateVaccinationDtoDayEnum[keyof typeof UpdateVaccinationDtoDayEnum];
 
 
 /**
@@ -1505,6 +1540,50 @@ export const SchedulesApiAxiosParamCreator = function (configuration?: Configura
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Mark a vaccination day as completed
+         * @param {string} id 
+         * @param {UpdateVaccinationDto} updateVaccinationDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        schedulesControllerUpdateVaccination: async (id: string, updateVaccinationDto: UpdateVaccinationDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('schedulesControllerUpdateVaccination', 'id', id)
+            // verify required parameter 'updateVaccinationDto' is not null or undefined
+            assertParamExists('schedulesControllerUpdateVaccination', 'updateVaccinationDto', updateVaccinationDto)
+            const localVarPath = `/api/schedules/{id}/vaccination`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateVaccinationDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -1593,6 +1672,20 @@ export const SchedulesApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['SchedulesApi.schedulesControllerUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * 
+         * @summary Mark a vaccination day as completed
+         * @param {string} id 
+         * @param {UpdateVaccinationDto} updateVaccinationDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async schedulesControllerUpdateVaccination(id: string, updateVaccinationDto: UpdateVaccinationDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ScheduleResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesControllerUpdateVaccination(id, updateVaccinationDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SchedulesApi.schedulesControllerUpdateVaccination']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -1662,6 +1755,17 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
          */
         schedulesControllerUpdate(id: string, updateScheduleDto: UpdateScheduleDto, options?: RawAxiosRequestConfig): AxiosPromise<ScheduleResponse> {
             return localVarFp.schedulesControllerUpdate(id, updateScheduleDto, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Mark a vaccination day as completed
+         * @param {string} id 
+         * @param {UpdateVaccinationDto} updateVaccinationDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        schedulesControllerUpdateVaccination(id: string, updateVaccinationDto: UpdateVaccinationDto, options?: RawAxiosRequestConfig): AxiosPromise<ScheduleResponse> {
+            return localVarFp.schedulesControllerUpdateVaccination(id, updateVaccinationDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1743,6 +1847,19 @@ export class SchedulesApi extends BaseAPI {
      */
     public schedulesControllerUpdate(id: string, updateScheduleDto: UpdateScheduleDto, options?: RawAxiosRequestConfig) {
         return SchedulesApiFp(this.configuration).schedulesControllerUpdate(id, updateScheduleDto, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Mark a vaccination day as completed
+     * @param {string} id 
+     * @param {UpdateVaccinationDto} updateVaccinationDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SchedulesApi
+     */
+    public schedulesControllerUpdateVaccination(id: string, updateVaccinationDto: UpdateVaccinationDto, options?: RawAxiosRequestConfig) {
+        return SchedulesApiFp(this.configuration).schedulesControllerUpdateVaccination(id, updateVaccinationDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

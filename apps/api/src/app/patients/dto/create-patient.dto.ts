@@ -10,7 +10,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 
-import { Category, Sex } from '@abc-admin/enums';
+import { Category, Sex, Status } from '@abc-admin/enums';
 
 export class CreatePatientDto {
   @ApiProperty({ example: 'John' })
@@ -76,6 +76,11 @@ export class CreatePatientDto {
   @IsString()
   @IsNotEmpty()
   sourceOfExposure!: string;
+
+  @ApiProperty({ example: Status.ALIVE })
+  @IsEnum(Status)
+  @IsOptional()
+  animalStatus?: Status;
 
   @ApiProperty({ example: false })
   @IsBoolean()

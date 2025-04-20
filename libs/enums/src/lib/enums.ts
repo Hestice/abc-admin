@@ -13,3 +13,10 @@ export enum Category {
   TWO = 2,
   THREE = 3,
 }
+
+export enum Status {
+  ALIVE = 'alive',
+  DEAD = 'dead',
+  UNKNOWN = 'unknown',
+  LOST = 'lost',
+}
