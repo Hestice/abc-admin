@@ -338,6 +338,52 @@ export class SchedulesService {
     this.logger.log(`Fixed ${schedules.length} schedules`);
   }
 
+  async updateVaccination(id: string, day: VaccinationDay): Promise<Schedule> {
+    const schedule = await this.findOne(id);
+
+    switch (day) {
+      case VaccinationDay.DAY_0:
+        schedule.day0Completed = !schedule.day0Completed;
+        schedule.day0CompletedAt = schedule.day0Completed
+          ? new Date()
+          : (null as unknown as undefined);
+        break;
+      case VaccinationDay.DAY_3:
+        schedule.day3Completed = !schedule.day3Completed;
+        schedule.day3CompletedAt = schedule.day3Completed
+          ? new Date()
+          : (null as unknown as undefined);
+        break;
+      case VaccinationDay.DAY_7:
+        schedule.day7Completed = !schedule.day7Completed;
+        schedule.day7CompletedAt = schedule.day7Completed
+          ? new Date()
+          : (null as unknown as undefined);
+        break;
+      case VaccinationDay.DAY_28:
+        schedule.day28Completed = !schedule.day28Completed;
+        schedule.day28CompletedAt = schedule.day28Completed
+          ? new Date()
+          : (null as unknown as undefined);
+        break;
+    }
+
+    schedule.updatedAt = new Date();
+
+    if (
+      schedule.day0Completed &&
+      schedule.day3Completed &&
+      schedule.day7Completed &&
+      schedule.day28Completed
+    ) {
+      schedule.status = ScheduleStatus.COMPLETED;
+    } else {
+      schedule.status = ScheduleStatus.IN_PROGRESS;
+    }
+
+    return this.schedulesRepository.save(schedule);
+  }
+
   async remove(id: string): Promise<void> {
     this.logger.log(`Removing schedule with ID: ${id}`);
     const schedule = await this.findOne(id);
