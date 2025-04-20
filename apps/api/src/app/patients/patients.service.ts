@@ -104,6 +104,7 @@ export class PatientsService {
         nextVaccinationDay: nextVaccination.day,
         dateOfBirth: patient.dateOfBirth,
         dateRegistered: patient.createdAt,
+        email: patient.email,
       };
     });
 

@@ -8,6 +8,7 @@ export interface Patient {
   nextVaccinationDay: string;
   dateOfBirth: Date;
   dateRegistered: Date;
+  email: string;
 }
 
 export interface NewPatient {

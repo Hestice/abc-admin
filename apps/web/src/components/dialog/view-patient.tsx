@@ -9,35 +9,30 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Calendar, ChevronRight, Copy } from 'lucide-react';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
 import CalculateAge from '@/utils/calculate-age';
+import { formatDate } from '@/utils/date-utils';
+import { CopyableItem } from '../ui/copyable-item';
+
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
   setIsViewDialogOpen: (isOpen: boolean) => void;
   selectedPatient: Patient;
 }
+
 export default function ViewPatientDialog({
   isViewDialogOpen,
   setIsViewDialogOpen,
   selectedPatient,
 }: ViewPatientDialogProps) {
   const router = useRouter();
-  const { toast } = useToast();
 
   const handleEditPatient = (patientId: string) => {
     setIsViewDialogOpen(false);
     router.push(`/patients/${patientId}`);
-  };
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      description: 'Patient ID copied to clipboard',
-      duration: 2000,
-    });
   };
 
   return (
@@ -72,41 +67,32 @@ export default function ViewPatientDialog({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Patient ID
-                </p>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => copyToClipboard(selectedPatient.id)}
-                    title="Copy patient ID"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                  </Button>
-                  <p className="truncate w-20 text-muted-foreground">
-                    #{selectedPatient.id}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Age</p>
-                <p>{CalculateAge(selectedPatient.dateOfBirth)}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Contact
-                </p>
-                <p>contact</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Date Registered
-                </p>
-                <p>date registered</p>
-              </div>
+              <CopyableItem
+                label="Patient ID"
+                value={selectedPatient.id}
+                displayValue={
+                  <span className="truncate w-20">#{selectedPatient.id}</span>
+                }
+                copyMessage="Patient ID copied to clipboard"
+              />
+
+              <CopyableItem
+                label="Age"
+                value={String(CalculateAge(selectedPatient.dateOfBirth))}
+                copyMessage="Age copied to clipboard"
+              />
+
+              <CopyableItem
+                label="Contact"
+                value={selectedPatient.email}
+                copyMessage="Email copied to clipboard"
+              />
+
+              <CopyableItem
+                label="Date Registered"
+                value={formatDate(selectedPatient.dateRegistered)}
+                copyMessage="Date registered copied to clipboard"
+              />
             </div>
 
             <div className="rounded-lg border p-4">
