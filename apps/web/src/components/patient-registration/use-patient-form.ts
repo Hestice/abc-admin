@@ -11,12 +11,6 @@ import { NewPatient } from '@/types/patient';
 
 // Helper to convert form data to NewPatient format
 const formatPatientData = (data: FormValues): NewPatient => {
-  // Map Sex enum to number
-  let sexValue: number;
-  if (data.sex === Sex.MALE) sexValue = 1;
-  else if (data.sex === Sex.FEMALE) sexValue = 2;
-  else sexValue = 3;
-
   // Create base patient object
   const patient: any = {
     firstName: data.firstName,
@@ -24,7 +18,7 @@ const formatPatientData = (data: FormValues): NewPatient => {
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
     dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
-    sex: sexValue,
+    sex: data.sex,
     address: data.address,
     email: data.email || '',
     category: Number(data.category),
