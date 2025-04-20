@@ -122,10 +122,8 @@ export function usePatientForm() {
   // Handle form submission
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    console.log('Raw form data:', data);
 
     const formattedData = formatPatientData(data);
-    console.log('Formatted data for submission:', formattedData);
 
     try {
       await addPatient({

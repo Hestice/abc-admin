@@ -269,7 +269,6 @@ export function usePatientEditForm(patientId: string) {
 
       // We'll send the entire object - the API will handle partial updates
       const formattedData = formatPatientUpdateData(data);
-      console.log('formattedData: ', formattedData);
       await updatePatient({
         setIsLoading: setIsSubmitting,
         patientId,

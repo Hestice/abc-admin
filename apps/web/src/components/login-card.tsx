@@ -57,10 +57,7 @@ export default function LoginCard() {
     setServerError('');
 
     try {
-      const response = await login(data.email, data.password);
-      console.log('Logged in successfully', response);
-
-      // Force a session update
+      await login(data.email, data.password);
       window.location.href = '/dashboard';
     } catch (err) {
       setServerError(

@@ -41,7 +41,6 @@ const adaptToCreatePatientDto = (patient: NewPatient): any => {
     delete adaptedPatient.dateOfAntiTetanus;
   }
 
-  console.log('Adapted patient data:', adaptedPatient);
   return adaptedPatient;
 };
 
