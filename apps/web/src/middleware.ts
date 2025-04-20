@@ -15,21 +15,13 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  console.log('Middleware check:', {
-    pathname,
-    isAuthRoute,
-    hasSession: !!session,
-  });
-
   // Redirect to login page if accessing protected route without session
   if (isAuthRoute && !session) {
-    console.log('Redirecting to home: no session found');
     return NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
   }
 
   // Redirect to dashboard if already logged in and accessing home page
   if (isHomePage && session) {
-    console.log('Redirecting to dashboard: session found');
     return NextResponse.redirect(new URL(AppRoutes.DASHBOARD, request.url));
   }
 

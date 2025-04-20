@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { EditablePatient, NewPatient } from '@/types/patient';
 import { ApiError } from './add-patient';
-import { Category, Sex } from '@abc-admin/enums';
+import { Category } from '@abc-admin/enums';
 
 interface ExtendedSession extends Session {
   accessToken?: string;
