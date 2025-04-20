@@ -19,7 +19,7 @@ import { CopyableItem } from '../ui/copyable-item';
 import { Sex } from '@abc-admin/enums';
 import { BsGenderFemale } from 'react-icons/bs';
 import { BsGenderMale } from 'react-icons/bs';
-
+import { AppRoutes } from '@/constants/routes';
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
   setIsViewDialogOpen: (isOpen: boolean) => void;
@@ -35,7 +35,7 @@ export default function ViewPatientDialog({
 
   const handleEditPatient = (patientId: string) => {
     setIsViewDialogOpen(false);
-    router.push(`/patients/${patientId}`);
+    router.push(AppRoutes.EDIT_PATIENT.replace(':id', patientId));
   };
 
   const renderSexBadge = (sex: Sex) => {

@@ -48,6 +48,7 @@ export class PatientsService {
     }
 
     // Return the patient with the newly added schedule
+    this.logger.log('Patient created successfully: ', savedPatient);
     return this.findOne(savedPatient.id);
   }
 

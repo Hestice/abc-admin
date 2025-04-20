@@ -15,6 +15,7 @@ export interface Patient {
 }
 
 export interface NewPatient {
+  id: string;
   firstName: string;
   middleName?: string;
   lastName: string;

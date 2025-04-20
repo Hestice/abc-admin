@@ -8,7 +8,7 @@ import { Category, Sex, Status } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from './schema';
 import { addPatient } from '@/utils/add-patient';
 import { NewPatient } from '@/types/patient';
-
+import { AppRoutes } from '@/constants/routes';
 // Helper to convert form data to NewPatient format
 const formatPatientData = (data: FormValues): NewPatient => {
   // Create base patient object
@@ -126,11 +126,20 @@ export function usePatientForm() {
     const formattedData = formatPatientData(data);
 
     try {
-      await addPatient({
+      const response = await addPatient({
         setIsLoading: setIsSubmitting,
         newPatient: formattedData,
       });
-      router.push('/patients');
+
+      type ApiResponse = { data: { id: string } };
+      const createdPatientId = (response as ApiResponse).data.id;
+      if (createdPatientId) {
+        router.push(
+          AppRoutes.PATIENT_SCHEDULE.replace(':id', createdPatientId)
+        );
+      } else {
+        router.push(AppRoutes.PATIENTS);
+      }
     } catch (error) {
       console.error('Error submitting patient data:', error);
     } finally {

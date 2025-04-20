@@ -13,6 +13,15 @@ interface AddPatientConnectionProps {
   newPatient: NewPatient;
 }
 
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  config: any;
+  request: any;
+}
+
 export class ApiError extends Error {
   status?: number;
 
@@ -47,7 +56,7 @@ const adaptToCreatePatientDto = (patient: NewPatient): any => {
 export const addPatient = async ({
   setIsLoading,
   newPatient,
-}: AddPatientConnectionProps): Promise<NewPatient[]> => {
+}: AddPatientConnectionProps): Promise<ApiResponse<NewPatient>> => {
   setIsLoading(true);
 
   try {
@@ -67,7 +76,7 @@ export const addPatient = async ({
     const response = await patientsApi.patientsControllerCreate(
       adaptToCreatePatientDto(newPatient)
     );
-    return (response as unknown as { data: NewPatient[] }).data;
+    return response as unknown as ApiResponse<NewPatient>;
   } catch (error: any) {
     console.error('API connection failed:', error);
 

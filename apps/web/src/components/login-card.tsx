@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '@/utils/login';
-
+import { AppRoutes } from '@/constants/routes';
 // Define Zod schema for form validation
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -48,7 +48,7 @@ export default function LoginCard() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (status === 'authenticated' && session) {
-      router.push('/dashboard');
+      router.push(AppRoutes.DASHBOARD);
     }
   }, [session, status, router]);
 
@@ -58,7 +58,7 @@ export default function LoginCard() {
 
     try {
       await login(data.email, data.password);
-      window.location.href = '/dashboard';
+      router.push(AppRoutes.DASHBOARD);
     } catch (err) {
       setServerError(
         err instanceof Error ? err.message : 'An error occurred during login'

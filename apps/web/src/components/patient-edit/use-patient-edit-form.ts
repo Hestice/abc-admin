@@ -9,7 +9,7 @@ import { FormValues, formSchema, steps } from '../patient-registration/schema';
 import { getPatient, updatePatient } from '@/utils/update-patient';
 import { EditablePatient, NewPatient } from '@/types/patient';
 import { deepEquals } from '@/utils/object-utils';
-
+import { AppRoutes } from '@/constants/routes';
 // Helper to convert Patient data to form values
 const patientToFormValues = (patient: EditablePatient): FormValues => {
   // Create form values object
@@ -284,7 +284,7 @@ export function usePatientEditForm(patientId: string) {
       previousOriginalValuesRef.current = JSON.stringify(data);
       modifiedFieldsRef.current = {};
 
-      router.push('/patients');
+      router.push(AppRoutes.PATIENTS);
     } catch (error) {
       console.error('Error updating patient:', error);
     } finally {
