@@ -4,13 +4,18 @@ import { TableRow } from '../ui/table';
 import { Button } from '../ui/button';
 import { Eye } from 'lucide-react';
 import { Badge } from '../ui/badge';
-import { ScheduleStatus } from '@/enums/schedule-status';
 import { Patient } from '@/types/patient';
-import { format } from 'date-fns';
 import { TooltipContent } from '../ui/tooltip';
 import { TooltipTrigger } from '../ui/tooltip';
 import { Tooltip } from '../ui/tooltip';
 import { TooltipProvider } from '../ui/tooltip';
+import {
+  getFormattedVaccinationDate,
+  getVaccinationDayOfWeek,
+} from '@/utils/patient-utils';
+import { getScheduleStatus } from '@/utils/patient-utils';
+import { isVaccinationCompleted } from '@/utils/patient-utils';
+import { getPatientName } from '@/utils/patient-utils';
 interface PatientInfoRowProps {
   patient: Patient;
   handleViewPatient: (patient: Patient) => void;
@@ -20,16 +25,7 @@ export default function PatientInfoRow({
   patient,
   handleViewPatient,
 }: PatientInfoRowProps) {
-  const patientName = `${patient?.lastName}, ${patient?.firstName} ${
-    patient?.middleName ? patient?.middleName.charAt(0) + '.' : ''
-  }`;
-
-  const nextVaccinationDate = new Date(
-    patient?.nextVaccinationDate
-  ).toLocaleDateString();
-
-  const formattedDate = format(nextVaccinationDate, 'PPP');
-  const dayOfWeek = format(new Date(patient?.nextVaccinationDate), 'EEEE');
+  const patientName = getPatientName(patient);
 
   return (
     <TableRow key={patient.id}>
@@ -39,31 +35,25 @@ export default function PatientInfoRow({
       </TableCell>
       <TableCell>
         <Badge
-          variant={
-            patient.scheduleStatus === ScheduleStatus.complete
-              ? 'default'
-              : 'outline'
-          }
+          variant={isVaccinationCompleted(patient) ? 'default' : 'outline'}
         >
-          {
-            ScheduleStatus[
-              patient.scheduleStatus as keyof typeof ScheduleStatus
-            ]
-          }
+          {getScheduleStatus(patient)}
         </Badge>
       </TableCell>
       <TableCell className="cursor-pointer">
         <TooltipProvider delayDuration={10}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="inline-flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  {patient.nextVaccinationDay}:
-                </span>
-                <span>{formattedDate}</span>
-              </div>
+              {!isVaccinationCompleted(patient) && (
+                <div className="inline-flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {patient.nextVaccinationDay}:
+                  </span>
+                  <span>{getFormattedVaccinationDate(patient)}</span>
+                </div>
+              )}
             </TooltipTrigger>
-            <TooltipContent>{dayOfWeek}</TooltipContent>
+            <TooltipContent>{getVaccinationDayOfWeek(patient)}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </TableCell>

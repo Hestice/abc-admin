@@ -45,6 +45,7 @@ export const getPatients = async ({
       patients: Patient[];
       total: number;
     };
+    console.log(typedResponse);
 
     return typedResponse;
   } catch (error) {

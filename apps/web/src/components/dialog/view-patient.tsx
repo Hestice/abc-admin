@@ -9,34 +9,53 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Calendar, ChevronRight, Copy } from 'lucide-react';
+import { Calendar, ChevronRight, Users } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import CalculateAge from '@/utils/calculate-age';
+import { formatDate } from '@/utils/date-utils';
+import { CopyableItem } from '../ui/copyable-item';
+import { Sex } from '@abc-admin/enums';
+import { BsGenderFemale } from 'react-icons/bs';
+import { BsGenderMale } from 'react-icons/bs';
+
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
   setIsViewDialogOpen: (isOpen: boolean) => void;
   selectedPatient: Patient;
 }
+
 export default function ViewPatientDialog({
   isViewDialogOpen,
   setIsViewDialogOpen,
   selectedPatient,
 }: ViewPatientDialogProps) {
   const router = useRouter();
-  const { toast } = useToast();
 
   const handleEditPatient = (patientId: string) => {
     setIsViewDialogOpen(false);
     router.push(`/patients/${patientId}`);
   };
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      description: 'Patient ID copied to clipboard',
-      duration: 2000,
-    });
+
+  const renderSexBadge = (sex: Sex) => {
+    const sexConfig: Record<
+      string,
+      { Icon: React.ComponentType<any>; label: string }
+    > = {
+      [Sex.MALE]: { Icon: BsGenderMale, label: 'Male' },
+      [Sex.FEMALE]: { Icon: BsGenderFemale, label: 'Female' },
+      [Sex.OTHER]: { Icon: Users, label: 'Other' },
+    };
+
+    const { Icon, label } = sexConfig[sex] || null;
+
+    return (
+      <div className="flex items-center gap-1">
+        {Icon && <Icon className="w-5 h-5" />}
+        <p className="text-xs text-muted-foreground italic">{label}</p>
+      </div>
+    );
   };
 
   return (
@@ -50,14 +69,17 @@ export default function ViewPatientDialog({
         </DialogHeader>
         {selectedPatient && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">
-                {selectedPatient.firstName} {selectedPatient.middleName}{' '}
-                {selectedPatient.lastName}
-              </h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between sm:gap-1 gap-3">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <h3 className="text-lg font-medium">
+                  {selectedPatient.firstName} {selectedPatient.middleName}{' '}
+                  {selectedPatient.lastName}
+                </h3>
+                {renderSexBadge(selectedPatient.sex)}
+              </div>
               <Badge
                 variant={
-                  selectedPatient.scheduleStatus === ScheduleStatus.complete
+                  selectedPatient.scheduleStatus === ScheduleStatus.completed
                     ? 'default'
                     : 'outline'
                 }
@@ -71,41 +93,38 @@ export default function ViewPatientDialog({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Patient ID
+              <CopyableItem
+                label="Patient ID"
+                value={selectedPatient.id}
+                displayValue={
+                  <span className="truncate w-20">#{selectedPatient.id}</span>
+                }
+                copyMessage="Patient ID copied to clipboard"
+              />
+
+              <CopyableItem
+                label="Age"
+                value={String(CalculateAge(selectedPatient.dateOfBirth))}
+                copyMessage="Age copied to clipboard"
+              />
+
+              {selectedPatient.email ? (
+                <CopyableItem
+                  label="Contact"
+                  value={selectedPatient.email}
+                  copyMessage="Email copied to clipboard"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No contact information provided
                 </p>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => copyToClipboard(selectedPatient.id)}
-                    title="Copy patient ID"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                  </Button>
-                  <p className="truncate w-20 text-muted-foreground">
-                    #{selectedPatient.id}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Age</p>
-                <p>age</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Contact
-                </p>
-                <p>contact</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Date Registered
-                </p>
-                <p>date registered</p>
-              </div>
+              )}
+
+              <CopyableItem
+                label="Date Registered"
+                value={formatDate(selectedPatient.dateRegistered)}
+                copyMessage="Date registered copied to clipboard"
+              />
             </div>
 
             <div className="rounded-lg border p-4">
@@ -113,7 +132,9 @@ export default function ViewPatientDialog({
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium">Next Vaccination</p>
-                  <p className="text-sm">next vaccination dates</p>
+                  <p className="text-sm">
+                    {formatDate(selectedPatient.nextVaccinationDate)}
+                  </p>
                 </div>
               </div>
             </div>

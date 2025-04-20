@@ -1,3 +1,5 @@
+import { Sex } from '@abc-admin/enums';
+
 export interface Patient {
   id: string;
   firstName: string;
@@ -6,6 +8,10 @@ export interface Patient {
   scheduleStatus: string;
   nextVaccinationDate: Date;
   nextVaccinationDay: string;
+  dateOfBirth: Date;
+  dateRegistered: Date;
+  email: string | null;
+  sex: Sex;
 }
 
 export interface NewPatient {
