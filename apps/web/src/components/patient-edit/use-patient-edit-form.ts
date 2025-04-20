@@ -51,12 +51,6 @@ const patientToFormValues = (patient: EditablePatient): FormValues => {
 
 // Helper to convert form data to Patient update format
 const formatPatientUpdateData = (data: FormValues): Partial<NewPatient> => {
-  // Map Sex enum to number
-  let sexValue: number;
-  if (data.sex === Sex.MALE) sexValue = 1;
-  else if (data.sex === Sex.FEMALE) sexValue = 2;
-  else sexValue = 3;
-
   // Create base patient object
   const patient: Partial<NewPatient> = {
     firstName: data.firstName,
@@ -64,7 +58,7 @@ const formatPatientUpdateData = (data: FormValues): Partial<NewPatient> => {
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
     dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
-    sex: sexValue,
+    sex: data.sex,
     address: data.address,
     email: data.email || '',
     category: Number(data.category),
@@ -284,6 +278,7 @@ export function usePatientEditForm(patientId: string) {
 
       // We'll send the entire object - the API will handle partial updates
       const formattedData = formatPatientUpdateData(data);
+      console.log('formattedData: ', formattedData);
       await updatePatient({
         setIsLoading: setIsSubmitting,
         patientId,

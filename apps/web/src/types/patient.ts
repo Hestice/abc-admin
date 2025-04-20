@@ -19,7 +19,7 @@ export interface NewPatient {
   middleName?: string;
   lastName: string;
   dateOfBirth: string;
-  sex: number;
+  sex: Sex;
   address: string;
   email?: string;
   category: number;

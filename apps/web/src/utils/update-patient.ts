@@ -27,11 +27,7 @@ const adaptToUpdatePatientDto = (patient: Partial<NewPatient>): any => {
 
   // Handle sex enum if present
   if (patient.sex !== undefined) {
-    let sexValue: Sex;
-    if (patient.sex === 1) sexValue = Sex.MALE;
-    else if (patient.sex === 2) sexValue = Sex.FEMALE;
-    else sexValue = Sex.OTHER;
-    adaptedPatient.sex = sexValue;
+    adaptedPatient.sex = Sex.OTHER;
   }
 
   // Handle category if present
