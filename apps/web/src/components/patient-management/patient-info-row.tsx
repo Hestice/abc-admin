@@ -11,7 +11,6 @@ import { Tooltip } from '../ui/tooltip';
 import { TooltipProvider } from '../ui/tooltip';
 import {
   getFormattedVaccinationDate,
-  getNextVaccinationDate,
   getVaccinationDayOfWeek,
 } from '@/utils/patient-utils';
 import { getScheduleStatus } from '@/utils/patient-utils';
@@ -26,7 +25,6 @@ export default function PatientInfoRow({
   patient,
   handleViewPatient,
 }: PatientInfoRowProps) {
-  // ... existing code ...
   const patientName = getPatientName(patient);
 
   return (
