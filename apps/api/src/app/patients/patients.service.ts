@@ -12,7 +12,7 @@ import { UsersService } from '../users/users.service';
 import { SchedulesService } from '../schedules/schedules.service';
 import { SimplifiedPatient } from './types/simplifiedPatients.type';
 import { Schedule } from '../schedules/entities/schedule.entity';
-
+import { Sex } from '@abc-admin/enums';
 @Injectable()
 export class PatientsService {
   constructor(
@@ -105,6 +105,7 @@ export class PatientsService {
         dateOfBirth: patient.dateOfBirth,
         dateRegistered: patient.createdAt,
         email: patient.email,
+        sex: patient.sex as Sex,
       };
     });
 

@@ -9,13 +9,16 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Calendar, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronRight, Users } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
 import { useRouter } from 'next/navigation';
 import CalculateAge from '@/utils/calculate-age';
 import { formatDate } from '@/utils/date-utils';
 import { CopyableItem } from '../ui/copyable-item';
+import { Sex } from '@abc-admin/enums';
+import { BsGenderFemale } from 'react-icons/bs';
+import { BsGenderMale } from 'react-icons/bs';
 
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
@@ -35,6 +38,26 @@ export default function ViewPatientDialog({
     router.push(`/patients/${patientId}`);
   };
 
+  const renderSexBadge = (sex: Sex) => {
+    const sexConfig: Record<
+      string,
+      { Icon: React.ComponentType<any>; label: string }
+    > = {
+      [Sex.MALE]: { Icon: BsGenderMale, label: 'Male' },
+      [Sex.FEMALE]: { Icon: BsGenderFemale, label: 'Female' },
+      [Sex.OTHER]: { Icon: Users, label: 'Other' },
+    };
+
+    const { Icon, label } = sexConfig[sex] || null;
+
+    return (
+      <div className="flex items-center gap-1">
+        {Icon && <Icon className="w-5 h-5" />}
+        <p className="text-xs text-muted-foreground italic">{label}</p>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
       <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] max-h-[calc(100vh-2rem)] overflow-y-auto">
@@ -46,11 +69,14 @@ export default function ViewPatientDialog({
         </DialogHeader>
         {selectedPatient && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">
-                {selectedPatient.firstName} {selectedPatient.middleName}{' '}
-                {selectedPatient.lastName}
-              </h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between sm:gap-1 gap-3">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <h3 className="text-lg font-medium">
+                  {selectedPatient.firstName} {selectedPatient.middleName}{' '}
+                  {selectedPatient.lastName}
+                </h3>
+                {renderSexBadge(selectedPatient.sex)}
+              </div>
               <Badge
                 variant={
                   selectedPatient.scheduleStatus === ScheduleStatus.complete
@@ -82,11 +108,17 @@ export default function ViewPatientDialog({
                 copyMessage="Age copied to clipboard"
               />
 
-              <CopyableItem
-                label="Contact"
-                value={selectedPatient.email}
-                copyMessage="Email copied to clipboard"
-              />
+              {selectedPatient.email ? (
+                <CopyableItem
+                  label="Contact"
+                  value={selectedPatient.email}
+                  copyMessage="Email copied to clipboard"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No contact information provided
+                </p>
+              )}
 
               <CopyableItem
                 label="Date Registered"
