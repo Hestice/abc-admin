@@ -16,6 +16,7 @@ import {
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { PatientsService } from '../patients/patients.service';
+import { Status } from '@abc-admin/enums';
 
 @Injectable()
 export class SchedulesService {
@@ -340,6 +341,8 @@ export class SchedulesService {
 
   async updateVaccination(id: string, day: VaccinationDay): Promise<Schedule> {
     const schedule = await this.findOne(id);
+    const patient = await this.patientsService.findOne(schedule.patient.id);
+    const isAnimalAlive = patient.animalStatus === Status.ALIVE;
 
     switch (day) {
       case VaccinationDay.DAY_0:
@@ -370,15 +373,29 @@ export class SchedulesService {
 
     schedule.updatedAt = new Date();
 
-    if (
-      schedule.day0Completed &&
-      schedule.day3Completed &&
-      schedule.day7Completed &&
-      schedule.day28Completed
-    ) {
-      schedule.status = ScheduleStatus.COMPLETED;
+    // If animal is alive, only days 0-7 are required for completion
+    if (isAnimalAlive) {
+      if (
+        schedule.day0Completed &&
+        schedule.day3Completed &&
+        schedule.day7Completed
+      ) {
+        schedule.status = ScheduleStatus.COMPLETED;
+      } else {
+        schedule.status = ScheduleStatus.IN_PROGRESS;
+      }
     } else {
-      schedule.status = ScheduleStatus.IN_PROGRESS;
+      // For animals that aren't alive, all days including day 28 are required
+      if (
+        schedule.day0Completed &&
+        schedule.day3Completed &&
+        schedule.day7Completed &&
+        schedule.day28Completed
+      ) {
+        schedule.status = ScheduleStatus.COMPLETED;
+      } else {
+        schedule.status = ScheduleStatus.IN_PROGRESS;
+      }
     }
 
     return this.schedulesRepository.save(schedule);

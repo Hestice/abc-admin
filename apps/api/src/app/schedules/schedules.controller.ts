@@ -17,7 +17,7 @@ import {
   ApiProperty,
 } from '@nestjs/swagger';
 import { SchedulesService } from './schedules.service';
-import { Schedule, VaccinationDay } from './entities/schedule.entity';
+import { Schedule } from './entities/schedule.entity';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
