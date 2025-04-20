@@ -1,8 +1,4 @@
-import {
-  PatientsApi,
-  Configuration,
-  CreatePatientDto,
-} from '@abc-admin/api-lib';
+import { PatientsApi, Configuration } from '@abc-admin/api-lib';
 import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { NewPatient } from '@/types/patient';

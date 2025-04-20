@@ -20,9 +20,9 @@ export default function PatientInfoRow({
   patient,
   handleViewPatient,
 }: PatientInfoRowProps) {
-  const patientName = `${patient?.lastName}, ${
-    patient?.firstName
-  } ${patient?.middleName.charAt(0)}.`;
+  const patientName = `${patient?.lastName}, ${patient?.firstName} ${
+    patient?.middleName ? patient?.middleName.charAt(0) + '.' : ''
+  }`;
 
   const nextVaccinationDate = new Date(
     patient?.nextVaccinationDate
