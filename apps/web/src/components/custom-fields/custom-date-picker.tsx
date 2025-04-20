@@ -122,7 +122,7 @@ export default function CustomDatePicker({
     <FormItem
       className={cn(
         'flex flex-col',
-        isModified && 'border-l-2 border-secondary pl-2 rounded transition-all'
+        isModified && 'border-secondary pl-2 rounded transition-all'
       )}
     >
       <div className="flex flex-row items-center justify-start gap-2">

@@ -41,7 +41,7 @@ export function MedicalInformationStep({
           <FormItem
             className={cn(
               'flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4',
-              modifiedFields.antiTetanusGiven && 'border-secondary border-l-2'
+              modifiedFields.antiTetanusGiven && 'border-secondary'
             )}
           >
             <FormControl>
@@ -91,7 +91,7 @@ export function MedicalInformationStep({
                 className={cn(
                   'flex flex-col',
                   modifiedFields.dateOfAntiTetanus &&
-                    'border-l-2 border-secondary pl-2 rounded transition-all'
+                    'border-secondary pl-2 rounded transition-all'
                 )}
               >
                 <div className="flex flex-row items-center justify-start gap-2">
@@ -153,7 +153,7 @@ export function MedicalInformationStep({
           <FormItem
             className={cn(
               modifiedFields.briefHistory &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -192,7 +192,7 @@ export function MedicalInformationStep({
             <FormItem
               className={cn(
                 modifiedFields.allergy &&
-                  'border-l-2 border-secondary pl-2 rounded transition-all'
+                  'border-secondary pl-2 rounded transition-all'
               )}
             >
               <div className="flex flex-row items-center justify-start gap-2">
@@ -255,7 +255,7 @@ export function MedicalInformationStep({
             <FormItem
               className={cn(
                 modifiedFields.medications &&
-                  'border-l-2 border-secondary pl-2 rounded transition-all'
+                  'border-secondary pl-2 rounded transition-all'
               )}
             >
               <div className="flex flex-row items-center justify-start gap-2">

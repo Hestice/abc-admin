@@ -41,7 +41,7 @@ export function ExposureDetailsStep({
           <FormItem
             className={cn(
               modifiedFields.category &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -126,7 +126,7 @@ export function ExposureDetailsStep({
           <FormItem
             className={cn(
               modifiedFields.bodyPartsAffected &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -163,7 +163,7 @@ export function ExposureDetailsStep({
             className={cn(
               'flex flex-col',
               modifiedFields.dateOfExposure &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -236,7 +236,7 @@ export function ExposureDetailsStep({
               className={cn(
                 'flex flex-row items-start space-x-3 space-y-0 mt-1',
                 modifiedFields.isExposureAtHome &&
-                  'border-l-2 border-secondary pl-2 rounded transition-all'
+                  'border-secondary pl-2 rounded transition-all'
               )}
             >
               <FormControl>
@@ -274,7 +274,7 @@ export function ExposureDetailsStep({
               <FormItem
                 className={cn(
                   modifiedFields.placeOfExposure &&
-                    'border-l-2 border-secondary pl-2 rounded transition-all'
+                    'border-secondary pl-2 rounded transition-all'
                 )}
               >
                 <FormControl>
@@ -299,7 +299,7 @@ export function ExposureDetailsStep({
           <FormItem
             className={cn(
               modifiedFields.sourceOfExposure &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -335,7 +335,7 @@ export function ExposureDetailsStep({
           <FormItem
             className={cn(
               modifiedFields.isWoundCleaned &&
-                'border-l-2 border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
