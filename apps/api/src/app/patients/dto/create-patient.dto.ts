@@ -60,7 +60,7 @@ export class CreatePatientDto {
   @IsString()
   @IsNotEmpty()
   placeOfExposure!: string;
-  //can be string or 'unknown'
+  //can be string, if isExposureAtHome is true, it will be 'Home'
 
   @ApiProperty({ example: '2025-02-13' })
   @IsDateString()
@@ -101,10 +101,11 @@ export class CreatePatientDto {
   @IsString()
   @IsNotEmpty()
   allergy!: string;
-  //can be string, 'none'
+  //can be string that says 'none'
 
   @ApiProperty({ example: 'loperamide' })
   @IsString()
   @IsNotEmpty()
   medications!: string;
+  //can be string that says 'none'
 }
