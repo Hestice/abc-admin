@@ -19,10 +19,12 @@ import CustomDatePicker from '@/components/custom-fields/custom-date-picker';
 
 interface PersonalInformationStepProps {
   form: UseFormReturn<FormValues>;
+  modifiedFields?: Record<string, boolean>;
 }
 
 export function PersonalInformationStep({
   form,
+  modifiedFields = {},
 }: PersonalInformationStepProps) {
   const iconMap = {
     Male: BsGenderMale,
@@ -37,13 +39,31 @@ export function PersonalInformationStep({
           control={form.control}
           name="firstName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem
+              className={cn(
+                modifiedFields.firstName &&
+                  'border-l-2 border-secondary pl-2 rounded transition-all'
+              )}
+            >
               <div className="flex flex-row items-center justify-start gap-2">
-                <FormLabel>First Name</FormLabel>
+                <FormLabel
+                  className={cn(
+                    modifiedFields.firstName && 'text-secondary font-medium'
+                  )}
+                >
+                  First Name
+                  {modifiedFields.firstName && (
+                    <span className="ml-1 text-xs">(Modified)</span>
+                  )}
+                </FormLabel>
                 <FormMessage className="text-xs text-muted-foreground italic" />
               </div>
               <FormControl>
-                <Input placeholder="ex: Juana Marie" {...field} />
+                <Input
+                  placeholder="ex: Juana Marie"
+                  {...field}
+                  className={cn(modifiedFields.firstName && 'border-secondary')}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -52,13 +72,33 @@ export function PersonalInformationStep({
           control={form.control}
           name="middleName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem
+              className={cn(
+                modifiedFields.middleName &&
+                  'border-l-2 border-secondary pl-2 rounded transition-all'
+              )}
+            >
               <div className="flex flex-row items-center justify-start gap-2">
-                <FormLabel>Middle Name (Optional)</FormLabel>
+                <FormLabel
+                  className={cn(
+                    modifiedFields.middleName && 'text-secondary font-medium'
+                  )}
+                >
+                  Middle Name (Optional)
+                  {modifiedFields.middleName && (
+                    <span className="ml-1 text-xs">(Modified)</span>
+                  )}
+                </FormLabel>
                 <FormMessage className="text-xs text-muted-foreground italic" />
               </div>
               <FormControl>
-                <Input placeholder="ex: Cruz" {...field} />
+                <Input
+                  placeholder="ex: Cruz"
+                  {...field}
+                  className={cn(
+                    modifiedFields.middleName && 'border-secondary'
+                  )}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -68,13 +108,31 @@ export function PersonalInformationStep({
         control={form.control}
         name="lastName"
         render={({ field }) => (
-          <FormItem>
+          <FormItem
+            className={cn(
+              modifiedFields.lastName &&
+                'border-l-2 border-secondary pl-2 rounded transition-all'
+            )}
+          >
             <div className="flex flex-row items-center justify-start gap-2">
-              <FormLabel>Last Name</FormLabel>
+              <FormLabel
+                className={cn(
+                  modifiedFields.lastName && 'text-secondary font-medium'
+                )}
+              >
+                Last Name
+                {modifiedFields.lastName && (
+                  <span className="ml-1 text-xs">(Modified)</span>
+                )}
+              </FormLabel>
               <FormMessage className="text-xs text-muted-foreground italic" />
             </div>
             <FormControl>
-              <Input placeholder="ex: Del Rosario" {...field} />
+              <Input
+                placeholder="ex: Del Rosario"
+                {...field}
+                className={cn(modifiedFields.lastName && 'border-secondary')}
+              />
             </FormControl>
           </FormItem>
         )}
@@ -91,6 +149,7 @@ export function PersonalInformationStep({
             toYear={new Date().getFullYear()}
             minDate={new Date('1800-01-01')}
             maxDate={new Date()}
+            isModified={modifiedFields.dateOfBirth}
           />
         )}
       />
@@ -98,9 +157,23 @@ export function PersonalInformationStep({
         control={form.control}
         name="sex"
         render={({ field }) => (
-          <FormItem>
+          <FormItem
+            className={cn(
+              modifiedFields.sex &&
+                'border-l-2 border-secondary pl-2 rounded transition-all'
+            )}
+          >
             <div className="flex flex-row items-center justify-start gap-2">
-              <FormLabel>Sex</FormLabel>
+              <FormLabel
+                className={cn(
+                  modifiedFields.sex && 'text-secondary font-medium'
+                )}
+              >
+                Sex
+                {modifiedFields.sex && (
+                  <span className="ml-1 text-xs">(Modified)</span>
+                )}
+              </FormLabel>
               <FormMessage className="text-xs text-muted-foreground italic" />
             </div>
             <FormControl>
@@ -117,7 +190,10 @@ export function PersonalInformationStep({
                       }
                       className={cn(
                         'flex flex-col items-center justify-center h-auto py-3',
-                        field.value === option.value ? 'border-primary' : ''
+                        field.value === option.value ? 'border-primary' : '',
+                        modifiedFields.sex &&
+                          field.value === option.value &&
+                          'bg-secondary text-secondary-foreground'
                       )}
                       onClick={() => field.onChange(option.value)}
                     >
@@ -135,15 +211,32 @@ export function PersonalInformationStep({
         control={form.control}
         name="address"
         render={({ field }) => (
-          <FormItem>
+          <FormItem
+            className={cn(
+              modifiedFields.address &&
+                'border-l-2 border-secondary pl-2 rounded transition-all'
+            )}
+          >
             <div className="flex flex-row items-center justify-start gap-2">
-              <FormLabel>Address</FormLabel>
+              <FormLabel
+                className={cn(
+                  modifiedFields.address && 'text-secondary font-medium'
+                )}
+              >
+                Address
+                {modifiedFields.address && (
+                  <span className="ml-1 text-xs">(Modified)</span>
+                )}
+              </FormLabel>
               <FormMessage className="text-xs text-muted-foreground italic" />
             </div>
             <FormControl>
               <Textarea
                 placeholder="123 Main St, City, Country"
-                className="resize-none"
+                className={cn(
+                  'resize-none',
+                  modifiedFields.address && 'border-secondary'
+                )}
                 {...field}
               />
             </FormControl>
@@ -154,15 +247,30 @@ export function PersonalInformationStep({
         control={form.control}
         name="email"
         render={({ field }) => (
-          <FormItem>
+          <FormItem
+            className={cn(
+              modifiedFields.email &&
+                'border-l-2 border-secondary pl-2 rounded transition-all'
+            )}
+          >
             <div className="flex flex-row items-center justify-start gap-2">
-              <FormLabel>Email (Optional)</FormLabel>
+              <FormLabel
+                className={cn(
+                  modifiedFields.email && 'text-secondary font-medium'
+                )}
+              >
+                Email (Optional)
+                {modifiedFields.email && (
+                  <span className="ml-1 text-xs">(Modified)</span>
+                )}
+              </FormLabel>
               <FormMessage className="text-xs text-muted-foreground italic" />
             </div>
             <FormControl>
               <Input
                 type="email"
                 placeholder="patient@example.com"
+                className={cn(modifiedFields.email && 'border-secondary')}
                 {...field}
               />
             </FormControl>

@@ -32,6 +32,7 @@ interface CustomDatePickerProps {
   className?: string;
   showFormField?: boolean;
   field?: any; // For react-hook-form integration
+  isModified?: boolean; // Indicates if the field has been modified
 }
 
 export default function CustomDatePicker({
@@ -47,6 +48,7 @@ export default function CustomDatePicker({
   className,
   showFormField = true,
   field,
+  isModified,
 }: CustomDatePickerProps) {
   const [open, setOpen] = useState(false);
 
@@ -83,11 +85,12 @@ export default function CustomDatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant={isModified ? 'secondary' : 'outline'}
           disabled={disabled}
           className={cn(
             'w-full pl-3 text-left font-normal justify-between',
             !dateValue && 'text-muted-foreground',
+            isModified && 'border-secondary',
             className
           )}
         >
@@ -116,9 +119,19 @@ export default function CustomDatePicker({
   }
 
   return (
-    <FormItem className="flex flex-col">
+    <FormItem
+      className={cn(
+        'flex flex-col',
+        isModified && 'border-l-2 border-secondary pl-2 rounded transition-all'
+      )}
+    >
       <div className="flex flex-row items-center justify-start gap-2">
-        {label && <FormLabel>{label}</FormLabel>}
+        {label && (
+          <FormLabel className={cn(isModified && 'text-secondary font-medium')}>
+            {label}
+            {isModified && <span className="ml-1 text-xs">(Modified)</span>}
+          </FormLabel>
+        )}
         <FormMessage className="text-xs text-muted-foreground italic" />
       </div>
       <FormControl>{datePickerContent}</FormControl>

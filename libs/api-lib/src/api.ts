@@ -973,10 +973,11 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * 
          * @summary Get all patients
+         * @param {number} [page] Page number for pagination (default: 1)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patientsControllerFindAll: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        patientsControllerFindAll: async (page?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/patients`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -992,6 +993,10 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             // authentication bearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
 
 
     
@@ -1042,6 +1047,50 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Update a patient
+         * @param {string} id 
+         * @param {CreatePatientDto} createPatientDto Patient data to update. All fields are optional.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsControllerUpdate: async (id: string, createPatientDto: CreatePatientDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('patientsControllerUpdate', 'id', id)
+            // verify required parameter 'createPatientDto' is not null or undefined
+            assertParamExists('patientsControllerUpdate', 'createPatientDto', createPatientDto)
+            const localVarPath = `/api/patients/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createPatientDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -1068,11 +1117,12 @@ export const PatientsApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Get all patients
+         * @param {number} [page] Page number for pagination (default: 1)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async patientsControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.patientsControllerFindAll(options);
+        async patientsControllerFindAll(page?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientsControllerFindAll(page, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientsControllerFindAll']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1088,6 +1138,20 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.patientsControllerFindOne(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientsControllerFindOne']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update a patient
+         * @param {string} id 
+         * @param {CreatePatientDto} createPatientDto Patient data to update. All fields are optional.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientsControllerUpdate(id: string, createPatientDto: CreatePatientDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientsControllerUpdate(id, createPatientDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientsControllerUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -1113,11 +1177,12 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
         /**
          * 
          * @summary Get all patients
+         * @param {number} [page] Page number for pagination (default: 1)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patientsControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.patientsControllerFindAll(options).then((request) => request(axios, basePath));
+        patientsControllerFindAll(page?: number, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.patientsControllerFindAll(page, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1128,6 +1193,17 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
          */
         patientsControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.patientsControllerFindOne(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update a patient
+         * @param {string} id 
+         * @param {CreatePatientDto} createPatientDto Patient data to update. All fields are optional.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsControllerUpdate(id: string, createPatientDto: CreatePatientDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.patientsControllerUpdate(id, createPatientDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1154,12 +1230,13 @@ export class PatientsApi extends BaseAPI {
     /**
      * 
      * @summary Get all patients
+     * @param {number} [page] Page number for pagination (default: 1)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PatientsApi
      */
-    public patientsControllerFindAll(options?: RawAxiosRequestConfig) {
-        return PatientsApiFp(this.configuration).patientsControllerFindAll(options).then((request) => request(this.axios, this.basePath));
+    public patientsControllerFindAll(page?: number, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientsControllerFindAll(page, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1172,6 +1249,19 @@ export class PatientsApi extends BaseAPI {
      */
     public patientsControllerFindOne(id: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientsControllerFindOne(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update a patient
+     * @param {string} id 
+     * @param {CreatePatientDto} createPatientDto Patient data to update. All fields are optional.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientsControllerUpdate(id: string, createPatientDto: CreatePatientDto, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientsControllerUpdate(id, createPatientDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
