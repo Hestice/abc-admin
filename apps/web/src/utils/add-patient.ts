@@ -25,18 +25,12 @@ export class ApiError extends Error {
 
 // Adapter function to convert NewPatient to CreatePatientDto
 const adaptToCreatePatientDto = (patient: NewPatient): any => {
-  // Map numeric sex value to enum string value
-  let sexValue: Sex;
-  if (patient.sex === 1) sexValue = Sex.MALE;
-  else if (patient.sex === 2) sexValue = Sex.FEMALE;
-  else sexValue = Sex.OTHER;
-
   // Create the base object
   const adaptedPatient = {
     ...patient,
     middleName: patient.middleName || '',
     email: patient.email || '',
-    sex: sexValue,
+    sex: patient.sex,
     // Category is already numeric, matching the enum
     category: patient.category as Category,
   };
