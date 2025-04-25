@@ -151,7 +151,7 @@ export default function ViewPatientDialog({
             </Button>
           </div>
         )}
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between">
           <Button
             variant="outline"
             onClick={() => setIsViewDialogOpen(false)}
