@@ -11,8 +11,8 @@ import { toast } from '@/hooks/use-toast';
 import { VaccinationCard } from '@/components/schedules/vaccination-card';
 import { AntiTetanusCard } from '@/components/schedules/anti-tetanus-card';
 import { getSchedule } from '@/utils/get-schedule';
-import { updateVaccination } from '@/utils/update-vaccination';
-import { VaccinationDay } from '@/types/schedule';
+import { transformScheduleData } from '@/utils/transform-schedule';
+import { updateVaccinationStatus } from '@/utils/vaccination-updater';
 
 // Define the vaccination schedule structure
 interface Vaccination {
@@ -54,59 +54,7 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
     const fetchSchedule = async () => {
       try {
         const scheduleResponse = await getSchedule({ setIsLoading, patientId });
-        console.log('scheduleResponse: ', scheduleResponse);
-        // Map schedule data to PatientVaccination structure
-        const transformedData: PatientVaccination = {
-          id: scheduleResponse.id,
-          patientId: scheduleResponse.patientId,
-          patientName: 'Patient', // This should be fetched from API or passed as prop
-          exposureDate: new Date(scheduleResponse.day0Date),
-          vaccinations: [
-            {
-              day: 0,
-              label: 'First Dose',
-              date: new Date(scheduleResponse.day0Date),
-              completed: scheduleResponse.day0Completed,
-              completedDate: scheduleResponse.day0CompletedAt
-                ? new Date(scheduleResponse.day0CompletedAt)
-                : undefined,
-            },
-            {
-              day: 3,
-              label: 'Second Dose',
-              date: new Date(scheduleResponse.day3Date),
-              completed: scheduleResponse.day3Completed,
-              completedDate: scheduleResponse.day3CompletedAt
-                ? new Date(scheduleResponse.day3CompletedAt)
-                : undefined,
-            },
-            {
-              day: 7,
-              label: 'Third Dose',
-              date: new Date(scheduleResponse.day7Date),
-              completed: scheduleResponse.day7Completed,
-              completedDate: scheduleResponse.day7CompletedAt
-                ? new Date(scheduleResponse.day7CompletedAt)
-                : undefined,
-            },
-            {
-              day: 28,
-              label: 'Fourth Dose',
-              date: new Date(scheduleResponse.day28Date),
-              completed: scheduleResponse.day28Completed,
-              completedDate: scheduleResponse.day28CompletedAt
-                ? new Date(scheduleResponse.day28CompletedAt)
-                : undefined,
-              optional: true,
-            },
-          ],
-          antiTetanus: {
-            required: true,
-            administered: false, // This should come from API
-            date: undefined,
-          },
-        };
-
+        const transformedData = transformScheduleData(scheduleResponse);
         setScheduleData(transformedData);
       } catch (error) {
         console.error('Error fetching vaccination schedule:', error);
@@ -121,123 +69,21 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
     fetchSchedule();
   }, [patientId]);
 
-  // Handle vaccination status toggle
   const handleVaccinationToggle = async (day: number, completed: boolean) => {
     if (!scheduleData) return;
 
-    setIsSaving(true);
-    try {
-      if (completed) {
-        let vaccinationDay;
-
-        // Map the day number to VaccinationDay enum
-        switch (day) {
-          case 0:
-            vaccinationDay = VaccinationDay.DAY_0;
-            break;
-          case 3:
-            vaccinationDay = VaccinationDay.DAY_3;
-            break;
-          case 7:
-            vaccinationDay = VaccinationDay.DAY_7;
-            break;
-          case 28:
-            vaccinationDay = VaccinationDay.DAY_28;
-            break;
-          default:
-            throw new Error(`Invalid vaccination day: ${day}`);
-        }
-
-        // Update vaccination in the backend
-        await updateVaccination({
-          setIsLoading: setIsSaving,
-          patientId,
-          vaccinationDay,
-        });
-      }
-
-      // Update local state
-      const updatedVaccinations = scheduleData.vaccinations.map(
-        (vaccination) => {
-          if (vaccination.day === day) {
-            return {
-              ...vaccination,
-              completed,
-              completedDate: completed ? new Date() : undefined,
-            };
-          }
-          return vaccination;
-        }
-      );
-
-      setScheduleData({
-        ...scheduleData,
-        vaccinations: updatedVaccinations,
-      });
-
-      toast({
-        title: completed
-          ? 'Vaccination Completed'
-          : 'Vaccination Marked as Incomplete',
-        description: `Day ${day} vaccination has been updated successfully.`,
-      });
-    } catch (error) {
-      console.error('Error updating vaccination status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update vaccination status. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    await updateVaccinationStatus({
+      day,
+      completed,
+      scheduleData,
+      setIsSaving,
+      patientId,
+      setScheduleData,
+    });
   };
 
   // Handle anti-tetanus update
-  const handleAntiTetanusUpdate = async (
-    administered: boolean,
-    date?: Date
-  ) => {
-    if (!scheduleData) return;
-
-    setIsSaving(true);
-    try {
-      // In a real app, this would be an API call
-      // await fetch(`/api/patients/${patientId}/anti-tetanus`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ administered, date }),
-      // })
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Update local state
-      setScheduleData({
-        ...scheduleData,
-        antiTetanus: {
-          ...scheduleData.antiTetanus,
-          administered,
-          date,
-        },
-      });
-
-      toast({
-        title: 'Anti-Tetanus Updated',
-        description: 'Anti-tetanus information has been updated successfully.',
-      });
-    } catch (error) {
-      console.error('Error updating anti-tetanus status:', error);
-      toast({
-        title: 'Error',
-        description:
-          'Failed to update anti-tetanus information. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const handleAntiTetanusUpdate = async () => {};
 
   // Handle navigation back to patient details
   const handleBack = () => {
