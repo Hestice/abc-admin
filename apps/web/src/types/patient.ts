@@ -14,6 +14,21 @@ export interface Patient {
   sex: Sex;
 }
 
+export interface PatientSummary {
+  id: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  category: Category;
+  antiTetanusGiven: boolean;
+  dateOfAntiTetanus: Date;
+  dateRegistered: Date;
+  scheduleStatus: string;
+  nextVaccinationDate: Date;
+  nextVaccinationDay: string;
+}
+
 export interface NewPatient {
   id: string;
   firstName: string;

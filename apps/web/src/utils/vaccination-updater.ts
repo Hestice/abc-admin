@@ -1,10 +1,7 @@
 import { toast } from '@/hooks/use-toast';
 import { updateVaccination } from '@/utils/update-vaccination';
-import {
-  PatientVaccination,
-  mapDayToVaccinationDay,
-} from '@/utils/transform-schedule';
-
+import { mapDayToVaccinationDay } from '@/utils/transform-schedule';
+import { PatientVaccination } from '@/types/vaccinations';
 interface VaccinationUpdateParams {
   day: number;
   completed: boolean;

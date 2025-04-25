@@ -13,29 +13,9 @@ import { AntiTetanusCard } from '@/components/schedules/anti-tetanus-card';
 import { getSchedule } from '@/utils/get-schedule';
 import { transformScheduleData } from '@/utils/transform-schedule';
 import { updateVaccinationStatus } from '@/utils/vaccination-updater';
-
-// Define the vaccination schedule structure
-interface Vaccination {
-  day: number;
-  label: string;
-  date: Date;
-  completed: boolean;
-  completedDate?: Date;
-  optional?: boolean;
-}
-
-interface PatientVaccination {
-  id: string;
-  patientId: string;
-  patientName: string;
-  exposureDate: Date;
-  vaccinations: Vaccination[];
-  antiTetanus: {
-    required: boolean;
-    administered: boolean;
-    date?: Date;
-  };
-}
+import { getPatient } from '@/utils/get-patients';
+import { PatientSummary } from '@/types/patient';
+import { PatientVaccination } from '@/types/vaccinations';
 
 interface VaccinationScheduleProps {
   patientId: string;
@@ -47,14 +27,30 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
   const [scheduleData, setScheduleData] = useState<PatientVaccination | null>(
     null
   );
+  const [patient, setPatient] = useState<PatientSummary | null>(null);
   const router = useRouter();
 
   // Fetch vaccination schedule data
   useEffect(() => {
+    const fetchPatient = async () => {
+      const patientResponse = await getPatient({ setIsLoading, patientId });
+      console.log('patientResponse', patientResponse);
+      setPatient(patientResponse.patient);
+    };
+
+    fetchPatient();
+  }, [patientId]);
+
+  useEffect(() => {
     const fetchSchedule = async () => {
       try {
         const scheduleResponse = await getSchedule({ setIsLoading, patientId });
-        const transformedData = transformScheduleData(scheduleResponse);
+        const transformedData = transformScheduleData(
+          scheduleResponse,
+          patient?.firstName,
+          patient?.antiTetanusGiven,
+          patient?.dateOfAntiTetanus
+        );
         setScheduleData(transformedData);
       } catch (error) {
         console.error('Error fetching vaccination schedule:', error);

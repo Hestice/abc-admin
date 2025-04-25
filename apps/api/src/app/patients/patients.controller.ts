@@ -22,7 +22,7 @@ import { Patient } from './entities/patient.entity';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { SimplifiedPatient } from './types/simplifiedPatients.type';
-
+import { PatientSummaryDto } from './dto/patient-summary.dto';
 @ApiTags('patients')
 @Controller('patients')
 export class PatientsController {
@@ -69,6 +69,18 @@ export class PatientsController {
   @ApiResponse({ status: 404, description: 'Patient not found.' })
   async findOne(@Param('id') id: string): Promise<Patient> {
     return this.patientsService.findOne(id);
+  }
+
+  @Get(':id/summary')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get a patient by ID as a summary' })
+  @ApiResponse({ status: 200, description: 'Return the patient sumamry.' })
+  @ApiResponse({ status: 404, description: 'Patient not found.' })
+  async findOneAsSummary(
+    @Param('id') id: string
+  ): Promise<{ patient: PatientSummaryDto }> {
+    return this.patientsService.findOneAsSummary(id);
   }
 
   @Patch(':id')

@@ -1,35 +1,11 @@
 import { Schedule, VaccinationDay } from '@/types/schedule';
+import { PatientVaccination } from '@/types/vaccinations';
 
-// Define the vaccination schedule structure
-export interface Vaccination {
-  day: number;
-  label: string;
-  date: Date;
-  completed: boolean;
-  completedDate?: Date;
-  optional?: boolean;
-}
-
-export interface PatientVaccination {
-  id: string;
-  patientId: string;
-  patientName: string;
-  exposureDate: Date;
-  vaccinations: Vaccination[];
-  antiTetanus: {
-    required: boolean;
-    administered: boolean;
-    date?: Date;
-  };
-}
-
-/**
- * Transforms raw schedule data from the API into a more usable structure
- * for the frontend components
- */
 export function transformScheduleData(
   scheduleResponse: Schedule,
-  patientName: string = 'Patient'
+  patientName: string = 'Patient',
+  antiTetanusGiven: boolean = false,
+  dateOfAntiTetanus: Date = new Date()
 ): PatientVaccination {
   return {
     id: scheduleResponse.id,
@@ -76,9 +52,8 @@ export function transformScheduleData(
       },
     ],
     antiTetanus: {
-      required: true,
-      administered: false, // This should come from API
-      date: undefined,
+      administered: antiTetanusGiven,
+      date: dateOfAntiTetanus,
     },
   };
 }

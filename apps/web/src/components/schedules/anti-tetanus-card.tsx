@@ -22,7 +22,6 @@ import {
 import { cn } from '@/lib/utils';
 
 interface AntiTetanusProps {
-  required: boolean;
   administered: boolean;
   date?: Date;
 }
@@ -59,22 +58,6 @@ export function AntiTetanusCard({
       setDate(today);
     }
   };
-
-  if (!antiTetanus.required) {
-    return (
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="text-lg">Anti-Tetanus</CardTitle>
-          <CardDescription>Not required for this patient</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-20 text-muted-foreground">
-            <p>Anti-tetanus vaccination not indicated</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card

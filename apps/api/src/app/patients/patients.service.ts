@@ -14,6 +14,7 @@ import { SimplifiedPatient } from './types/simplifiedPatients.type';
 import { Schedule } from '../schedules/entities/schedule.entity';
 import { Sex } from '@abc-admin/enums';
 import { Logger } from '@nestjs/common';
+import { PatientSummaryDto } from './dto/patient-summary.dto';
 @Injectable()
 export class PatientsService {
   private readonly logger = new Logger(PatientsService.name);
@@ -126,6 +127,31 @@ export class PatientsService {
     }
 
     return patient;
+  }
+
+  async findOneAsSummary(id: string): Promise<{ patient: PatientSummaryDto }> {
+    const patient = await this.findOne(id);
+
+    const nextVaccination = this.getNextVaccinationDate(
+      patient.schedule || ({} as Schedule)
+    );
+
+    const patientSummary: PatientSummaryDto = {
+      id: patient.id,
+      firstName: patient.firstName,
+      middleName: patient.middleName || '',
+      lastName: patient.lastName,
+      dateOfBirth: patient.dateOfBirth,
+      category: patient.category,
+      antiTetanusGiven: patient.antiTetanusGiven,
+      dateOfAntiTetanus: patient.dateOfAntiTetanus || null,
+      dateRegistered: patient.createdAt,
+      scheduleStatus: patient.schedule?.status || '',
+      nextVaccinationDate: nextVaccination.date || null,
+      nextVaccinationDay: nextVaccination.day,
+    };
+
+    return { patient: patientSummary };
   }
 
   async update(
