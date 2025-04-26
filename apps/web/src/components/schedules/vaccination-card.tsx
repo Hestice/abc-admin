@@ -43,6 +43,7 @@ export function VaccinationCard({
   return (
     <Card
       className={cn(
+        'flex flex-col justify-between h-64',
         vaccination.completed ? 'border-green-200 bg-green-50' : ''
       )}
     >

@@ -160,7 +160,7 @@ export function PersonalInformationStep({
           <FormItem
             className={cn(
               modifiedFields.sex &&
-                ' border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -193,7 +193,7 @@ export function PersonalInformationStep({
                         field.value === option.value ? 'border-primary' : '',
                         modifiedFields.sex &&
                           field.value === option.value &&
-                          'bg-secondary text-secondary-foreground'
+                          'hover:bg-secondary/90 bg-secondary text-secondary-foreground'
                       )}
                       onClick={() => field.onChange(option.value)}
                     >
