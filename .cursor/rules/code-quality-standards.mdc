@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Code Quality Standards
+
+## General Principles
+- Follow SOLID principles throughout the codebase
+- Apply DRY (Don't Repeat Yourself) - extract shared logic
+- Practice KISS (Keep It Simple) - prefer simple solutions
+- Use meaningful names for variables, functions, and classes
+
+## TypeScript Best Practices
+- Use strong typing and avoid `any` type
+- Define interfaces and types in [apps/web/src/types](mdc:apps/web/src/types) or appropriate module
+- Use TypeScript's utility types where appropriate
+- Avoid type assertions unless necessary
+
+## Frontend Guidelines
+- Keep components small and focused
+- Extract reusable logic to custom hooks
+- Avoid prop drilling - use context or composition
+- Follow accessibility best practices
+- Use Tailwind utility classes consistently
+- Write semantic HTML
+
+## Backend Guidelines
+- Follow NestJS architecture patterns
+- Validate all incoming data
+- Properly handle errors and exceptions
+- Document API endpoints
+- Write efficient database queries
+- Use proper error handling
+
+## Testing
+- Write unit tests for critical functionality
+- Test edge cases and error scenarios
+- Mock external dependencies
+- Keep tests simple and focused

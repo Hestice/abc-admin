@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Workflow
+
+## Getting Started
+- This project uses [package.json](mdc:package.json) for npm scripts
+- Development requires Docker for the database ([docker-compose.yml](mdc:docker-compose.yml))
+
+## Common Commands
+- Start the web app: `nx serve web`
+- Start the API: `nx serve api`
+- Start both: `nx run-many --target=serve --projects=api,web --parallel`
+- Build: `nx build [app-name]`
+- Lint: `nx lint [app-name]`
+- Test: `nx test [app-name]`
+
+## Database
+- PostgreSQL is used as the database ([docker-compose.local.postgres.yml](mdc:docker-compose.local.postgres.yml))
+- Database migrations are managed via TypeORM ([apps/api/typeorm.config.ts](mdc:apps/api/typeorm.config.ts))
+
+## Code Organization
+- Follow SOLID principles in your code
+- Keep components small and focused (Single Responsibility)
+- Avoid code duplication (DRY principle)
+- Use descriptive variable and function names
+- Create reusable UI components in [apps/web/src/components](mdc:apps/web/src/components)
+- API endpoints should follow REST conventions

@@ -1,0 +1,44 @@
+---
+description: When making backend modifications
+globs: 
+alwaysApply: false
+---
+# Backend Architecture
+
+## NestJS Application
+- [apps/api/src/main.ts](mdc:apps/api/src/main.ts) - Entry point
+- [apps/api/src/app](mdc:apps/api/src/app) - Application modules
+
+## Module Organization
+- Follow NestJS modular architecture
+- Each feature should have its own module
+- Dependencies should be explicitly imported
+
+## Dependency Injection
+- Use NestJS's built-in DI container
+- Follow the Dependency Inversion principle
+- Define interfaces for services when appropriate
+- Keep services focused on a single responsibility
+
+## Database Access
+- [apps/api/src/db](mdc:apps/api/src/db) - Database related files
+- [apps/api/typeorm.config.ts](mdc:apps/api/typeorm.config.ts) - TypeORM configuration
+- Use TypeORM repositories for database operations
+- Define clear entity models with proper relations
+
+## API Design
+- Follow REST principles
+- Use proper HTTP methods and status codes
+- Group related endpoints in controllers
+- Validate request data using DTOs
+- Properly handle errors and exceptions
+
+## Middleware and Guards
+- Use NestJS interceptors, guards, and pipes
+- Implement proper authentication and authorization
+- Validate and sanitize all user inputs
+
+## Environment Configuration
+- Use environment variables for configuration
+- Don't hardcode sensitive information
+- Separate development and production configs
