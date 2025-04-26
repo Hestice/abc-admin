@@ -20,7 +20,7 @@ export interface PatientSummary {
   middleName: string;
   lastName: string;
   dateOfBirth: Date;
-  category: Category;
+  animalStatus: Status;
   antiTetanusGiven: boolean;
   dateOfAntiTetanus: Date;
   dateRegistered: Date;

@@ -19,6 +19,7 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
     isLoading,
     isSaving,
     scheduleData,
+    animalStatus,
     nextVaccination,
     handleVaccinationToggle,
     handleAntiTetanusUpdate,
@@ -59,6 +60,7 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
               handleVaccinationToggle(vaccination.day, completed)
             }
             disabled={isSaving}
+            animalStatus={animalStatus}
           />
         ))}
       </div>

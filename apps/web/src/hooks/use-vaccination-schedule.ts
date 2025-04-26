@@ -6,6 +6,7 @@ import { updateVaccinationStatus } from '@/utils/vaccination-updater';
 import { getPatient } from '@/utils/get-patients';
 import { PatientVaccination } from '@/types/vaccinations';
 import { updatePatientAntiTetanus } from '@/utils/update-patient';
+import { Status } from '@abc-admin/enums';
 
 export function useVaccinationSchedule(patientId: string) {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,6 +14,7 @@ export function useVaccinationSchedule(patientId: string) {
   const [scheduleData, setScheduleData] = useState<PatientVaccination | null>(
     null
   );
+  const [animalStatus, setAnimalStatus] = useState<Status>(Status.UNKNOWN);
 
   // Fetch vaccination schedule data
   useEffect(() => {
@@ -29,6 +31,9 @@ export function useVaccinationSchedule(patientId: string) {
         if (!patientData || !patientData.id) {
           throw new Error('Patient data not available');
         }
+
+        // Store the animal status
+        setAnimalStatus(patientData.animalStatus);
 
         // Use the retrieved patient data directly
         const scheduleResponse = await getSchedule({
@@ -102,12 +107,12 @@ export function useVaccinationSchedule(patientId: string) {
     }
   };
 
-  // Calculate next vaccination date
+  // Calculate next vaccination date - only consider non-optional vaccinations
   const getNextVaccinationInfo = () => {
     if (!scheduleData) return null;
 
     const nextVaccination = scheduleData.vaccinations.find(
-      (v) => !v.completed && !v.optional
+      (v) => !v.completed && !(v.day === 28 && animalStatus === Status.ALIVE)
     );
     if (!nextVaccination) return null;
 
@@ -121,6 +126,7 @@ export function useVaccinationSchedule(patientId: string) {
     isLoading,
     isSaving,
     scheduleData,
+    animalStatus,
     nextVaccination: getNextVaccinationInfo(),
     handleVaccinationToggle,
     handleAntiTetanusUpdate,

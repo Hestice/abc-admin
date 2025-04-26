@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Status } from '@abc-admin/enums';
 
 interface Vaccination {
   day: number;
@@ -21,20 +22,24 @@ interface Vaccination {
   date: Date;
   completed: boolean;
   completedDate?: Date;
-  optional?: boolean;
 }
 
 interface VaccinationCardProps {
   vaccination: Vaccination;
   onToggleStatus: (completed: boolean) => void;
   disabled?: boolean;
+  animalStatus: Status;
 }
 
 export function VaccinationCard({
   vaccination,
   onToggleStatus,
   disabled = false,
+  animalStatus,
 }: VaccinationCardProps) {
+  console.log('vaccination: ', vaccination);
+  const isBooster = animalStatus === Status.ALIVE && vaccination.day === 28;
+
   return (
     <Card
       className={cn(
@@ -46,11 +51,13 @@ export function VaccinationCard({
           <div className="flex items-center gap-2">
             <div>
               <CardTitle className="text-lg">Day {vaccination.day}</CardTitle>
-              <CardDescription>{vaccination.label}</CardDescription>
+              <CardDescription>
+                {isBooster ? 'Booster' : vaccination.label}
+              </CardDescription>
             </div>
-            {vaccination.optional && (
+            {isBooster && (
               <Badge variant="outline" className="text-xs">
-                Optional
+                Booster
               </Badge>
             )}
           </div>
