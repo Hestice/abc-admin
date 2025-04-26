@@ -14,7 +14,7 @@ EventEmitter.defaultMaxListeners = 15;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bodyParser: true
+    bodyParser: true,
   });
 
   app.use(cookieParser());
@@ -31,12 +31,12 @@ async function bootstrap() {
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  
+
   const port = process.env.PORT || 8080;
 
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS', 'PATCH'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     exposedHeaders: ['Set-Cookie'],
@@ -45,7 +45,7 @@ async function bootstrap() {
   });
 
   const signals = ['SIGTERM', 'SIGINT'];
-  signals.forEach(signal => {
+  signals.forEach((signal) => {
     process.on(signal, async () => {
       Logger.log(`Received ${signal}, closing application...`);
       await app.close();

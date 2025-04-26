@@ -1,58 +1,50 @@
-import { redirect } from 'next/navigation';
-import { AuthApi, Configuration } from '@abc-admin/api-lib';
+import { signIn, signOut } from 'next-auth/react';
 
-interface LoginResponse {
-  user?: {
-    id?: string;
+export interface LoginResponse {
+  user: {
     email?: string;
+    id?: string;
     role?: string;
   };
 }
 
-const createAuthApiClient = () => {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-  const config = new Configuration({
-    basePath: backendUrl,
-    baseOptions: {
-      withCredentials: true,
-    }
-  });
-  
-  return new AuthApi(config);
-};
-
-export async function login(email: string, password: string): Promise<LoginResponse> {
+export async function login(
+  email: string,
+  password: string
+): Promise<LoginResponse> {
   try {
-    const authApi = createAuthApiClient();
-    const response = await authApi.authControllerLogin({
-      data: { email, password },
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
     });
-    
-    return { user: response.data.user };
-  } catch (error: any) {
-    console.error('Login failed:', error);
-    if (error.response?.status === 401) {
-      throw new Error('Invalid credentials');
+
+    if (result?.error) {
+      throw new Error(
+        result.error === 'CredentialsSignin'
+          ? 'Invalid credentials'
+          : result.error
+      );
     }
-    throw new Error(`Login failed: ${error.message}`);
+
+    return { user: { email } };
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;
   }
 }
 
-export async function logout(): Promise<void> {
+export async function logout() {
   try {
-    const authApi = createAuthApiClient();
-    await authApi.authControllerLogout();
-    
-    redirect('/');
+    await signOut({ redirect: false });
   } catch (error) {
     console.error('Logout failed:', error);
     throw error;
   }
 }
 
-export function isAuthenticated(): boolean {
-  return document.cookie.includes(`${process.env.NEXT_PUBLIC_COOKIE_NAME || 'auth_token'}=`);
+export function isAuthenticated() {
+  // This will be managed by the useSession hook from next-auth/react
+  // This function can be kept for compatibility, but should use the session state
+  return false; // Placeholder - use useSession in components instead
 }

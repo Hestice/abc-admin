@@ -7,9 +7,13 @@ import { Request } from 'express';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
-    const cookieName = configService.get('AUTH_COOKIE_NAME') || 'auth_token';
-    const secretKey = configService.get<string>('JWT_SECRET') || 'your-secret-key';
-    
+    // Use NextAuth's default cookie name
+    const cookieName = 'next-auth.session-token';
+    const secretKey = configService.get<string>('JWT_SECRET');
+    if (!secretKey) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
@@ -27,4 +31,4 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     return { id: payload.sub, email: payload.email, role: payload.role };
   }
-} 
+}

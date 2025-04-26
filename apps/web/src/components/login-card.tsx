@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '@/utils/login';
-
+import { AppRoutes } from '@/constants/routes';
 // Define Zod schema for form validation
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -28,8 +29,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginCard() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+
   const {
     register,
     handleSubmit,
@@ -42,14 +45,20 @@ export default function LoginCard() {
     },
   });
 
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.push(AppRoutes.DASHBOARD);
+    }
+  }, [session, status, router]);
+
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     setServerError('');
 
     try {
-      const response = await login(data.email, data.password);
-      console.log('Logged in successfully', response);
-      router.push('/dashboard');
+      await login(data.email, data.password);
+      router.push(AppRoutes.DASHBOARD);
     } catch (err) {
       setServerError(
         err instanceof Error ? err.message : 'An error occurred during login'
@@ -58,6 +67,17 @@ export default function LoginCard() {
       setIsLoading(false);
     }
   };
+
+  // If checking authentication status, show loading
+  if (status === 'loading') {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="pt-6">
+          <div className="text-center">Checking authentication...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">

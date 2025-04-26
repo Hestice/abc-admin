@@ -1,0 +1,38 @@
+---
+description: When making frontend modifications
+globs: 
+alwaysApply: false
+---
+# Frontend Architecture
+
+## Next.js App Structure
+- [apps/web/src/app](mdc:apps/web/src/app) - App Router routes
+- [apps/web/next.config.js](mdc:apps/web/next.config.js) - Next.js configuration
+- [apps/web/tailwind.config.js](mdc:apps/web/tailwind.config.js) - Tailwind CSS configuration
+
+## Component Organization
+- [apps/web/src/components](mdc:apps/web/src/components) - UI components
+  - Keep components small and focused on a single responsibility
+  - Use composition over inheritance
+  - Export components from index files for cleaner imports
+
+## State Management
+- [apps/web/src/contexts](mdc:apps/web/src/contexts) - React context providers
+- Use React Context for global state when appropriate
+- Prefer local component state when possible
+
+## Utility Functions
+- [apps/web/src/utils](mdc:apps/web/src/utils) - Helper functions
+- [apps/web/src/hooks](mdc:apps/web/src/hooks) - Custom React hooks
+  - Extract reusable logic into custom hooks
+  - Name hooks with `use` prefix following React conventions
+
+## API Integration
+- Use custom hooks for API calls
+- Handle loading and error states consistently
+- Use TypeScript types from [apps/web/src/types](mdc:apps/web/src/types)
+
+## Styling
+- This project uses Tailwind CSS
+- Follow utility-first approach
+- Extract common patterns into reusable components

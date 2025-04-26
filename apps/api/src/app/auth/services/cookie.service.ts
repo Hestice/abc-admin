@@ -8,7 +8,16 @@ export class CookieService {
 
   getCookieOptions() {
     const isProd = this.configService.get('NODE_ENV') === 'production';
-    const domain = isProd ? this.configService.get('FRONTEND_URL') : 'http://localhost:3000';
+    let domain = isProd ? this.configService.get('FRONTEND_URL') : undefined;
+    if (domain && domain.includes('://')) {
+      try {
+        const url = new URL(domain);
+        domain = url.hostname;
+      } catch (e) {
+        this.logger.error(`Invalid domain URL: ${domain}`);
+        domain = undefined;
+      }
+    }
 
     const cookieOptions = {
       httpOnly: true,
@@ -17,13 +26,16 @@ export class CookieService {
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
       ...(domain && { domain }),
-    }
+    };
+
     this.logger.log(`Cookie options: ${JSON.stringify(cookieOptions)}`);
+
     return cookieOptions;
   }
 
   getCookieName() {
-    return this.configService.get('AUTH_COOKIE_NAME') || 'auth_token';
+    // Use NextAuth's default cookie name
+    return 'next-auth.session-token';
   }
 
   getCookieWithJwtToken(token: string) {
@@ -40,8 +52,8 @@ export class CookieService {
       value: '',
       options: {
         ...this.getCookieOptions(),
-        maxAge: 0
-      }
+        maxAge: 0,
+      },
     };
   }
 }
