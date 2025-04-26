@@ -9,34 +9,52 @@ import { FormValues, formSchema, steps } from './schema';
 import { addPatient } from '@/utils/add-patient';
 import { NewPatient } from '@/types/patient';
 import { AppRoutes } from '@/constants/routes';
+import { capitalizeFields } from '@/utils/string-utils';
+
 // Helper to convert form data to NewPatient format
 const formatPatientData = (data: FormValues): NewPatient => {
-  // Create base patient object
+  // Define fields that should be capitalized
+  const fieldsToCapitalize = [
+    'firstName',
+    'middleName',
+    'lastName',
+    'address',
+    'bodyPartsAffected',
+    'placeOfExposure',
+    'sourceOfExposure',
+    'allergy',
+    'medications',
+  ];
+
+  // Capitalize relevant fields
+  const capitalizedData = capitalizeFields(data, fieldsToCapitalize);
+
+  // Create base patient object with capitalized data
   const patient: any = {
-    firstName: data.firstName,
-    middleName: data.middleName || '',
-    lastName: data.lastName,
-    dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
-    dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
-    sex: data.sex as Sex,
-    address: data.address,
-    email: data.email || '',
-    category: Number(data.category),
-    bodyPartsAffected: data.bodyPartsAffected,
-    placeOfExposure: data.placeOfExposure,
-    isExposureAtHome: data.isExposureAtHome,
-    sourceOfExposure: data.sourceOfExposure,
-    animalStatus: data.animalStatus,
-    isWoundCleaned: data.isWoundCleaned,
-    antiTetanusGiven: data.antiTetanusGiven,
-    briefHistory: data.briefHistory,
-    allergy: data.allergy,
-    medications: data.medications,
+    firstName: capitalizedData.firstName,
+    middleName: capitalizedData.middleName || '',
+    lastName: capitalizedData.lastName,
+    dateOfBirth: capitalizedData.dateOfBirth.toISOString().split('T')[0],
+    dateOfExposure: capitalizedData.dateOfExposure.toISOString().split('T')[0],
+    sex: capitalizedData.sex as Sex,
+    address: capitalizedData.address,
+    email: capitalizedData.email || '',
+    category: Number(capitalizedData.category),
+    bodyPartsAffected: capitalizedData.bodyPartsAffected,
+    placeOfExposure: capitalizedData.placeOfExposure,
+    isExposureAtHome: capitalizedData.isExposureAtHome,
+    sourceOfExposure: capitalizedData.sourceOfExposure,
+    animalStatus: capitalizedData.animalStatus,
+    isWoundCleaned: capitalizedData.isWoundCleaned,
+    antiTetanusGiven: capitalizedData.antiTetanusGiven,
+    briefHistory: capitalizedData.briefHistory,
+    allergy: capitalizedData.allergy,
+    medications: capitalizedData.medications,
   };
 
   // Only include dateOfAntiTetanus if anti-tetanus was given and a date was selected
-  if (data.antiTetanusGiven && data.dateOfAntiTetanus) {
-    patient.dateOfAntiTetanus = data.dateOfAntiTetanus
+  if (capitalizedData.antiTetanusGiven && capitalizedData.dateOfAntiTetanus) {
+    patient.dateOfAntiTetanus = capitalizedData.dateOfAntiTetanus
       .toISOString()
       .split('T')[0];
   }
