@@ -9,8 +9,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
     // Use NextAuth's default cookie name
     const cookieName = 'next-auth.session-token';
-    const secretKey =
-      configService.get<string>('JWT_SECRET') || 'your-secret-key';
+    const secretKey = configService.get<string>('JWT_SECRET');
+    if (!secretKey) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
 
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([

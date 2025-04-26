@@ -22,7 +22,7 @@ export class CookieService {
     const cookieOptions = {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'lax' as const,
+      sameSite: 'strict' as const,
       maxAge: 24 * 60 * 60 * 1000,
       path: '/',
       ...(domain && { domain }),

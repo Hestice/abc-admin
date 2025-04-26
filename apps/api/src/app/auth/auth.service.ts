@@ -10,26 +10,30 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
     this.logger.debug(`🔍 Validating user credentials...`);
     const user = await this.usersService.findByEmail(email);
-    
+
     if (!user || !user.isActive) {
-      this.logger.warn(`❌ User validation failed: ${email} - ${!user ? 'Not found' : 'Inactive account'}`);
+      this.logger.warn(
+        `❌ User validation failed: ${email} - ${
+          !user ? 'Not found' : 'Inactive account'
+        }`
+      );
       return null;
     }
-    
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (isPasswordValid) {
       this.logger.log(`✅ User authenticated: ${email}`);
       const { password, ...result } = user;
       return result;
     }
-    
+
     this.logger.warn(`❌ Authentication failed: Invalid password for ${email}`);
     return null;
   }
@@ -37,22 +41,17 @@ export class AuthService {
   async login(loginDto: LoginDto, request?: any) {
     this.logger.log(`🔐 Login attempt for user: ${loginDto.email}`);
     const user = await this.validateUser(loginDto.email, loginDto.password);
-    
+
     if (!user) {
-      this.logger.warn(`Login rejected: Invalid credentials for ${loginDto.email}`);
+      this.logger.warn(
+        `Login rejected: Invalid credentials for ${loginDto.email}`
+      );
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
     const payload = { email: user.email, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
-    
-    // For debugging - detailed token info (only visible in debug logs)
-    this.logger.debug(`Token details:
-      Token: ${token}
-      Payload: ${JSON.stringify(payload, null, 2)}
-      Generated: ${new Date().toISOString()}
-    `);
-    
+
     const logData = {
       event: 'USER_LOGIN_SUCCESS',
       user: {
@@ -61,14 +60,17 @@ export class AuthService {
         role: user.role,
       },
       token: {
-        value: token.substring(0, 20) + '...' + token.substring(token.length - 20), // Partial token for security
+        value:
+          token.substring(0, 3) + '...' + token.substring(token.length - 3), // Partial token for security
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
       },
       timestamp: new Date().toISOString(),
     };
-    
-    this.logger.log(`Authentication successful:\n${JSON.stringify(logData, null, 2)}`);
-    
+
+    this.logger.log(
+      `Authentication successful:\n${JSON.stringify(logData, null, 2)}`
+    );
+
     return {
       access_token: token,
       user: {
@@ -79,4 +81,4 @@ export class AuthService {
       },
     };
   }
-} 
+}
