@@ -15,6 +15,7 @@ import {
   UserIcon,
   Syringe,
   AlertTriangle,
+  Construction,
 } from 'lucide-react';
 import { Chart } from '@/components/ui/chart';
 import {
@@ -138,7 +139,16 @@ export function DataOverview() {
   const isPositive = Number.parseFloat(percentChange) >= 0;
 
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 max-w-full overflow-hidden">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 max-w-full overflow-hidden relative">
+      {/* Construction overlay */}
+      <div className="absolute inset-0 bg-black/5 rounded-lg backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+        <Construction className="h-16 w-16 text-yellow-500 mb-4" />
+        <h2 className="text-xl font-bold text-black">Under Construction</h2>
+        <p className="text-black/80 mt-2 text-center max-w-md px-6">
+          This feature is currently being developed and will be available soon.
+        </p>
+      </div>
+
       <Card className="w-full overflow-hidden">
         <CardHeader className="flex flex-col items-center justify-between space-y-2 pb-2 px-3">
           <CardTitle className="text-sm font-medium text-left w-full px-3">
