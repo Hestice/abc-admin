@@ -14,7 +14,6 @@ import { getSchedule } from '@/utils/get-schedule';
 import { transformScheduleData } from '@/utils/transform-schedule';
 import { updateVaccinationStatus } from '@/utils/vaccination-updater';
 import { getPatient } from '@/utils/get-patients';
-import { PatientSummary } from '@/types/patient';
 import { PatientVaccination } from '@/types/vaccinations';
 
 interface VaccinationScheduleProps {
