@@ -20,6 +20,58 @@ interface UpdatePatientConnectionProps {
   updatedPatient: Partial<NewPatient>;
 }
 
+interface UpdateAntiTetanusProps {
+  setIsLoading: (isLoading: boolean) => void;
+  patientId: string;
+  administered: boolean;
+  date?: Date;
+}
+
+// Create a shared API client
+async function getApiClient() {
+  const session = (await getSession()) as ExtendedSession | null;
+  const accessToken = session?.accessToken;
+
+  if (!accessToken) {
+    throw new ApiError('No authentication token found. Please log in again.');
+  }
+
+  return new PatientsApi(
+    new Configuration({
+      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+      accessToken: accessToken,
+    })
+  );
+}
+
+// Shared error handling function
+function handleApiError(error: any, context: string): never {
+  console.error(`API connection failed (${context}):`, error);
+
+  if (error.response) {
+    const status = error.response.status;
+    let message = `An error occurred while ${context}`;
+
+    if (status === 404) {
+      message = 'Patient not found.';
+    } else if (status === 400 && context.includes('update')) {
+      message = 'Invalid input data. Please check your form and try again.';
+    } else if (status === 401 || status === 403) {
+      message = `You are not authorized to ${
+        context.includes('update') ? 'update' : 'view'
+      } this patient.`;
+    } else if (status >= 500) {
+      message = 'Server error. Please try again later.';
+    }
+
+    throw new ApiError(message, status);
+  }
+
+  throw new ApiError(
+    error instanceof Error ? error.message : 'Unknown error occurred'
+  );
+}
+
 // Adapter function to convert Partial<NewPatient> to CreatePatientDto
 const adaptToUpdatePatientDto = (patient: Partial<NewPatient>): any => {
   // Only transform fields that are defined
@@ -45,43 +97,11 @@ export const getPatient = async ({
   setIsLoading(true);
 
   try {
-    const session = (await getSession()) as ExtendedSession | null;
-    const accessToken = session?.accessToken;
-
-    if (!accessToken) {
-      throw new ApiError('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
-    const patientsApi = new PatientsApi(config);
+    const patientsApi = await getApiClient();
     const response = await patientsApi.patientsControllerFindOne(patientId);
-    // Cast to unknown first then to the expected type
     return (response as any).data as EditablePatient;
   } catch (error: any) {
-    console.error('API connection failed:', error);
-
-    if (error.response) {
-      const status = error.response.status;
-      let message = 'An error occurred while retrieving the patient';
-
-      if (status === 404) {
-        message = 'Patient not found.';
-      } else if (status === 401 || status === 403) {
-        message = 'You are not authorized to view this patient.';
-      } else if (status >= 500) {
-        message = 'Server error. Please try again later.';
-      }
-
-      throw new ApiError(message, status);
-    }
-
-    throw new ApiError(
-      error instanceof Error ? error.message : 'Unknown error occurred'
-    );
+    handleApiError(error, 'retrieving the patient');
   } finally {
     setIsLoading(false);
   }
@@ -95,51 +115,49 @@ export const updatePatient = async ({
   setIsLoading(true);
 
   try {
-    const session = (await getSession()) as ExtendedSession | null;
-    const accessToken = session?.accessToken;
-
-    if (!accessToken) {
-      throw new ApiError('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
-    const patientsApi = new PatientsApi(config);
-    // Adapt the patient data to the expected format
+    const patientsApi = await getApiClient();
     const adaptedPatient = adaptToUpdatePatientDto(updatedPatient);
-
     const response = await patientsApi.patientsControllerUpdate(
       patientId,
       adaptedPatient
     );
-    // Cast to unknown first then to the expected type
     return (response as any).data as EditablePatient;
   } catch (error: any) {
-    console.error('API connection failed:', error);
+    handleApiError(error, 'updating the patient');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    if (error.response) {
-      const status = error.response.status;
-      let message = 'An error occurred while updating the patient';
+export const updatePatientAntiTetanus = async ({
+  setIsLoading,
+  patientId,
+  administered,
+  date,
+}: UpdateAntiTetanusProps): Promise<EditablePatient> => {
+  setIsLoading(true);
 
-      if (status === 404) {
-        message = 'Patient not found.';
-      } else if (status === 400) {
-        message = 'Invalid input data. Please check your form and try again.';
-      } else if (status === 401 || status === 403) {
-        message = 'You are not authorized to update this patient.';
-      } else if (status >= 500) {
-        message = 'Server error. Please try again later.';
-      }
+  try {
+    const patientsApi = await getApiClient();
 
-      throw new ApiError(message, status);
+    // Create the update payload with only anti-tetanus fields
+    const updatePayload: any = {
+      antiTetanusGiven: administered,
+    };
+
+    // Only include the date if administered is true and date is provided
+    if (administered && date) {
+      updatePayload.dateOfAntiTetanus = date.toISOString().split('T')[0];
     }
 
-    throw new ApiError(
-      error instanceof Error ? error.message : 'Unknown error occurred'
+    const response = await patientsApi.patientsControllerUpdate(
+      patientId,
+      updatePayload
     );
+
+    return (response as any).data as EditablePatient;
+  } catch (error: any) {
+    handleApiError(error, 'updating anti-tetanus information');
   } finally {
     setIsLoading(false);
   }
