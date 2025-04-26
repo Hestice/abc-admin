@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Overview
+
+This is an ABC Admin application with a monorepo structure using NX for workspace management. The application consists of:
+
+## Architecture
+- [package.json](mdc:package.json) - Root package configuration
+- [nx.json](mdc:nx.json) - NX workspace configuration
+
+## Frontend (Next.js)
+- [apps/web/src/app](mdc:apps/web/src/app) - Next.js app router
+- [apps/web/src/components](mdc:apps/web/src/components) - Reusable UI components
+- [apps/web/src/contexts](mdc:apps/web/src/contexts) - React context providers
+- [apps/web/src/hooks](mdc:apps/web/src/hooks) - Custom React hooks
+- [apps/web/src/utils](mdc:apps/web/src/utils) - Utility functions
+- [apps/web/tailwind.config.js](mdc:apps/web/tailwind.config.js) - Tailwind CSS configuration
+
+## Backend (NestJS)
+- [apps/api/src/main.ts](mdc:apps/api/src/main.ts) - API entry point
+- [apps/api/src/app](mdc:apps/api/src/app) - NestJS application modules
+- [apps/api/src/db](mdc:apps/api/src/db) - Database related files
+- [apps/api/typeorm.config.ts](mdc:apps/api/typeorm.config.ts) - TypeORM configuration
+
+## Shared Libraries
+- [libs](mdc:libs) - Shared libraries and utilities
