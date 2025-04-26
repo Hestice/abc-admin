@@ -13,13 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { CalendarNav } from '../ui/calendar-nav';
 
 interface AntiTetanusProps {
   administered: boolean;
@@ -38,11 +38,13 @@ export function AntiTetanusCard({
   disabled = false,
 }: AntiTetanusCardProps) {
   const [date, setDate] = useState<Date | undefined>(antiTetanus.date);
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const handleDateChange = (newDate: Date | undefined) => {
     setDate(newDate);
     if (newDate) {
       onUpdate(true, newDate);
+      setPopoverOpen(false); // Close popover after selection
     }
   };
 
@@ -91,22 +93,21 @@ export function AntiTetanusCard({
             </div>
           )}
 
-          <Popover>
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-start text-left font-normal"
+                className="w-full whitespace-normal h-auto justify-start text-left font-normal"
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 {date ? format(date, 'PPP') : 'Select administration date'}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
+              <CalendarNav
                 mode="single"
                 selected={date}
                 onSelect={handleDateChange}
-                disabled={(date) => date > new Date()}
                 initialFocus
               />
             </PopoverContent>
@@ -115,8 +116,13 @@ export function AntiTetanusCard({
       </CardContent>
       <CardFooter className="pt-2">
         <Button
-          variant={antiTetanus.administered ? 'destructive' : 'default'}
-          className="w-full"
+          variant="outline"
+          className={cn(
+            'w-full whitespace-normal h-auto',
+            antiTetanus.administered
+              ? 'border-red-600 text-red-600 hover:border-gray-600 hover:text-gray-600'
+              : 'border-green-600 text-green-600 hover:border-green-600 hover:bg-green-600 hover:text-white'
+          )}
           onClick={handleToggle}
           disabled={disabled}
         >
