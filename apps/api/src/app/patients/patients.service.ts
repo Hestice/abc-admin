@@ -142,7 +142,7 @@ export class PatientsService {
       middleName: patient.middleName || '',
       lastName: patient.lastName,
       dateOfBirth: patient.dateOfBirth,
-      category: patient.category,
+      animalStatus: patient.animalStatus,
       antiTetanusGiven: patient.antiTetanusGiven,
       dateOfAntiTetanus: patient.dateOfAntiTetanus || null,
       dateRegistered: patient.createdAt,

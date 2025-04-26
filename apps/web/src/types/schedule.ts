@@ -1,5 +1,4 @@
 import { ScheduleStatus } from '@/enums/schedule-status';
-
 export interface Schedule {
   id: string;
   patientId: string;

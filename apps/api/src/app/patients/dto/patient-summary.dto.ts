@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Category } from '@abc-admin/enums';
+import { Status } from '@abc-admin/enums';
 
 export class PatientSummaryDto {
   @ApiProperty({ example: 'uuid' })
@@ -17,8 +17,8 @@ export class PatientSummaryDto {
   @ApiProperty({ example: '1990-01-01' })
   dateOfBirth!: Date;
 
-  @ApiProperty({ enum: Category })
-  category!: Category;
+  @ApiProperty({ enum: Status })
+  animalStatus!: Status;
 
   @ApiProperty({ example: true })
   antiTetanusGiven!: boolean;
