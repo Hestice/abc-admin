@@ -62,7 +62,10 @@ export function PersonalInformationStep({
                 <Input
                   placeholder="ex: Juana Marie"
                   {...field}
-                  className={cn(modifiedFields.firstName && 'border-secondary')}
+                  className={cn(
+                    'capitalize',
+                    modifiedFields.firstName && 'border-secondary'
+                  )}
                 />
               </FormControl>
             </FormItem>
@@ -96,6 +99,7 @@ export function PersonalInformationStep({
                   placeholder="ex: Cruz"
                   {...field}
                   className={cn(
+                    'capitalize',
                     modifiedFields.middleName && 'border-secondary'
                   )}
                 />
@@ -131,7 +135,10 @@ export function PersonalInformationStep({
               <Input
                 placeholder="ex: Del Rosario"
                 {...field}
-                className={cn(modifiedFields.lastName && 'border-secondary')}
+                className={cn(
+                  'capitalize',
+                  modifiedFields.lastName && 'border-secondary'
+                )}
               />
             </FormControl>
           </FormItem>
@@ -214,7 +221,7 @@ export function PersonalInformationStep({
           <FormItem
             className={cn(
               modifiedFields.address &&
-                ' border-secondary pl-2 rounded transition-all'
+                'border-secondary pl-2 rounded transition-all'
             )}
           >
             <div className="flex flex-row items-center justify-start gap-2">
@@ -234,7 +241,7 @@ export function PersonalInformationStep({
               <Textarea
                 placeholder="123 Main St, City, Country"
                 className={cn(
-                  'resize-none',
+                  'resize-none capitalize',
                   modifiedFields.address && 'border-secondary'
                 )}
                 {...field}

@@ -173,7 +173,7 @@ export function MedicalInformationStep({
               <Textarea
                 placeholder="Describe how the incident occurred"
                 className={cn(
-                  'resize-none',
+                  'normal-case resize-none',
                   modifiedFields.briefHistory && 'border-secondary'
                 )}
                 {...field}
@@ -214,6 +214,7 @@ export function MedicalInformationStep({
                   {...field}
                   disabled={field.value === 'none'}
                   className={cn(
+                    'capitalize',
                     field.value === 'none' && 'opacity-50',
                     modifiedFields.allergy && 'border-secondary'
                   )}
@@ -277,6 +278,7 @@ export function MedicalInformationStep({
                   {...field}
                   disabled={field.value === 'none'}
                   className={cn(
+                    'capitalize',
                     field.value === 'none' && 'opacity-50',
                     modifiedFields.medications && 'border-secondary'
                   )}

@@ -163,6 +163,7 @@ export function ExposureDetailsStep({
                 placeholder="Hand, arm, leg, etc."
                 {...field}
                 className={cn(
+                  'capitalize',
                   modifiedFields.bodyPartsAffected && 'border-secondary'
                 )}
               />
@@ -297,6 +298,7 @@ export function ExposureDetailsStep({
                     placeholder="Park, school, etc."
                     {...field}
                     className={cn(
+                      'capitalize',
                       modifiedFields.placeOfExposure && 'border-secondary'
                     )}
                   />
@@ -336,6 +338,7 @@ export function ExposureDetailsStep({
                 placeholder="Dog, Cat, Hamster, etc."
                 {...field}
                 className={cn(
+                  'capitalize',
                   modifiedFields.sourceOfExposure && 'border-secondary'
                 )}
               />
