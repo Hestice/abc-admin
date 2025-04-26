@@ -62,6 +62,7 @@ export function AntiTetanusCard({
   return (
     <Card
       className={cn(
+        'h-full',
         antiTetanus.administered ? 'border-blue-200 bg-blue-50' : ''
       )}
     >

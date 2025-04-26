@@ -45,24 +45,32 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
         onBack={handleBack}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <AntiTetanusCard
-          antiTetanus={scheduleData.antiTetanus}
-          onUpdate={handleAntiTetanusUpdate}
-          disabled={isSaving}
-        />
-
-        {scheduleData.vaccinations.map((vaccination) => (
-          <VaccinationCard
-            key={vaccination.day}
-            vaccination={vaccination}
-            onToggleStatus={(completed) =>
-              handleVaccinationToggle(vaccination.day, completed)
-            }
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+        {/* Anti-tetanus card in the first column */}
+        <div className="xl:col-span-1 h-full">
+          <AntiTetanusCard
+            antiTetanus={scheduleData.antiTetanus}
+            onUpdate={handleAntiTetanusUpdate}
             disabled={isSaving}
-            animalStatus={animalStatus}
           />
-        ))}
+        </div>
+
+        {/* Vaccination cards grid in the remaining 3 columns */}
+        <div className="xl:col-span-3 grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {scheduleData.vaccinations
+            .sort((a, b) => a.day - b.day)
+            .map((vaccination) => (
+              <VaccinationCard
+                key={vaccination.day}
+                vaccination={vaccination}
+                onToggleStatus={(completed) =>
+                  handleVaccinationToggle(vaccination.day, completed)
+                }
+                disabled={isSaving}
+                animalStatus={animalStatus}
+              />
+            ))}
+        </div>
       </div>
     </div>
   );
