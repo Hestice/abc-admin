@@ -1,16 +1,24 @@
 import { Schedule, VaccinationDay } from '@/types/schedule';
 import { PatientVaccination } from '@/types/vaccinations';
+import { getPatientName } from '@/utils/patient-utils';
+import { Patient } from '@/types/patient';
 
 export function transformScheduleData(
   scheduleResponse: Schedule,
-  patientName: string = 'Patient',
+  patientFirstName: string = 'Patient',
+  patientMiddleName: string = '',
+  patientLastName: string = '',
   antiTetanusGiven: boolean = false,
   dateOfAntiTetanus: Date = new Date()
 ): PatientVaccination {
   return {
     id: scheduleResponse.id,
     patientId: scheduleResponse.patientId,
-    patientName,
+    patientName: getPatientName({
+      firstName: patientFirstName,
+      middleName: patientMiddleName,
+      lastName: patientLastName,
+    } as Partial<Patient> as Patient),
     exposureDate: new Date(scheduleResponse.day0Date),
     vaccinations: [
       {

@@ -31,6 +31,7 @@ export async function updateVaccinationStatus({
         setIsLoading: setIsSaving,
         patientId,
         vaccinationDay,
+        scheduleId: scheduleData.id,
       });
     }
 

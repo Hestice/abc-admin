@@ -27,42 +27,53 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
   const [scheduleData, setScheduleData] = useState<PatientVaccination | null>(
     null
   );
-  const [patient, setPatient] = useState<PatientSummary | null>(null);
   const router = useRouter();
 
   // Fetch vaccination schedule data
   useEffect(() => {
-    const fetchPatient = async () => {
-      const patientResponse = await getPatient({ setIsLoading, patientId });
-      console.log('patientResponse', patientResponse);
-      setPatient(patientResponse.patient);
-    };
-
-    fetchPatient();
-  }, [patientId]);
-
-  useEffect(() => {
-    const fetchSchedule = async () => {
+    const fetchData = async () => {
       try {
-        const scheduleResponse = await getSchedule({ setIsLoading, patientId });
+        setIsLoading(true);
+        // Get patient data first
+        const patientResponse = await getPatient({
+          setIsLoading: () => {},
+          patientId,
+        });
+        const patientData = patientResponse.patient;
+
+        if (!patientData || !patientData.id) {
+          throw new Error('Patient data not available');
+        }
+
+        // Use the retrieved patient data directly (not from state)
+        const scheduleResponse = await getSchedule({
+          setIsLoading: () => {},
+          patientId: patientData.id,
+        });
+
         const transformedData = transformScheduleData(
           scheduleResponse,
-          patient?.firstName,
-          patient?.antiTetanusGiven,
-          patient?.dateOfAntiTetanus
+          patientData.firstName,
+          patientData.middleName,
+          patientData.lastName,
+          patientData.antiTetanusGiven,
+          patientData.dateOfAntiTetanus
         );
+
         setScheduleData(transformedData);
       } catch (error) {
-        console.error('Error fetching vaccination schedule:', error);
+        console.error('Error fetching data:', error);
         toast({
           title: 'Error',
-          description: 'Failed to load vaccination schedule. Please try again.',
+          description: 'Failed to load vaccination data. Please try again.',
           variant: 'destructive',
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchSchedule();
+    fetchData();
   }, [patientId]);
 
   const handleVaccinationToggle = async (day: number, completed: boolean) => {

@@ -88,8 +88,6 @@ export const getPatient = async ({
       patient: PatientSummary;
     };
 
-    console.log('typedResponse', typedResponse);
-
     return typedResponse;
   } catch (error) {
     console.error('API connection failed:', error);

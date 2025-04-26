@@ -10,12 +10,14 @@ interface ExtendedSession extends Session {
 interface UpdateVaccinationConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
   patientId: string;
+  scheduleId: string;
   vaccinationDay: VaccinationDay;
 }
 
 export const updateVaccination = async ({
   setIsLoading,
   patientId,
+  scheduleId,
   vaccinationDay,
 }: UpdateVaccinationConnectionProps): Promise<void> => {
   setIsLoading(true);
@@ -34,7 +36,7 @@ export const updateVaccination = async ({
     });
 
     const schedulesApi = new SchedulesApi(config);
-    await schedulesApi.schedulesControllerUpdateVaccination(patientId, {
+    await schedulesApi.schedulesControllerUpdateVaccination(scheduleId, {
       patientId,
       day: vaccinationDay,
     });
