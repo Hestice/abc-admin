@@ -91,7 +91,7 @@ export function VaccinationCard({
       </CardContent>
       <CardFooter className="flex justify-end pt-2">
         <Button
-          variant={vaccination.completed ? 'destructive' : 'default'}
+          variant={vaccination.completed ? 'outline' : 'default'}
           size="sm"
           onClick={() => onToggleStatus(!vaccination.completed)}
           disabled={disabled}
