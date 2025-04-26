@@ -17,13 +17,13 @@ import CalculateAge from '@/utils/calculate-age';
 import { formatDate } from '@/utils/date-utils';
 import { CopyableItem } from '../ui/copyable-item';
 import { Sex } from '@abc-admin/enums';
-import { BsGenderFemale } from 'react-icons/bs';
-import { BsGenderMale } from 'react-icons/bs';
+import { BsGenderFemale, BsGenderMale } from 'react-icons/bs';
 import { AppRoutes } from '@/constants/routes';
+
 interface ViewPatientDialogProps {
   isViewDialogOpen: boolean;
   setIsViewDialogOpen: (isOpen: boolean) => void;
-  selectedPatient: Patient;
+  selectedPatient: Patient | null;
 }
 
 export default function ViewPatientDialog({
@@ -33,30 +33,59 @@ export default function ViewPatientDialog({
 }: ViewPatientDialogProps) {
   const router = useRouter();
 
-  const handleEditPatient = (patientId: string) => {
+  // Return early if selectedPatient is null
+  if (!selectedPatient) {
+    return (
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)]">
+          <DialogHeader>
+            <DialogTitle>Patient Details</DialogTitle>
+            <DialogDescription>No patient selected</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewDialogOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  const navigateTo = (route: string) => {
     setIsViewDialogOpen(false);
-    router.push(AppRoutes.EDIT_PATIENT.replace(':id', patientId));
+    router.push(route);
   };
 
+  const handleEditPatient = () =>
+    navigateTo(AppRoutes.EDIT_PATIENT.replace(':id', selectedPatient.id));
+
+  const handleViewSchedule = () =>
+    navigateTo(AppRoutes.PATIENT_SCHEDULE.replace(':id', selectedPatient.id));
+
   const renderSexBadge = (sex: Sex) => {
-    const sexConfig: Record<
-      string,
-      { Icon: React.ComponentType<any>; label: string }
-    > = {
+    const sexConfig = {
       [Sex.MALE]: { Icon: BsGenderMale, label: 'Male' },
       [Sex.FEMALE]: { Icon: BsGenderFemale, label: 'Female' },
       [Sex.OTHER]: { Icon: Users, label: 'Other' },
     };
 
-    const { Icon, label } = sexConfig[sex] || null;
+    const config = sexConfig[sex] || { Icon: null, label: '' };
 
     return (
       <div className="flex items-center gap-1">
-        {Icon && <Icon className="w-5 h-5" />}
-        <p className="text-xs text-muted-foreground italic">{label}</p>
+        {config.Icon && <config.Icon className="w-5 h-5" />}
+        <p className="text-xs text-muted-foreground italic">{config.label}</p>
       </div>
     );
   };
+
+  const isCompleted =
+    selectedPatient.scheduleStatus === ScheduleStatus.completed;
 
   return (
     <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
@@ -67,90 +96,78 @@ export default function ViewPatientDialog({
             Detailed information about the patient.
           </DialogDescription>
         </DialogHeader>
-        {selectedPatient && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between sm:gap-1 gap-3">
-              <div className="flex items-center gap-2 sm:gap-4">
-                <h3 className="text-lg font-medium">
-                  {selectedPatient.firstName} {selectedPatient.middleName}{' '}
-                  {selectedPatient.lastName}
-                </h3>
-                {renderSexBadge(selectedPatient.sex)}
-              </div>
-              <Badge
-                variant={
-                  selectedPatient.scheduleStatus === ScheduleStatus.completed
-                    ? 'default'
-                    : 'outline'
-                }
-              >
-                {
-                  ScheduleStatus[
-                    selectedPatient.scheduleStatus as keyof typeof ScheduleStatus
-                  ]
-                }
-              </Badge>
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between sm:gap-1 gap-3">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <h3 className="text-lg font-medium">
+                {selectedPatient.firstName} {selectedPatient.middleName}{' '}
+                {selectedPatient.lastName}
+              </h3>
+              {renderSexBadge(selectedPatient.sex)}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <CopyableItem
-                label="Patient ID"
-                value={selectedPatient.id}
-                displayValue={
-                  <span className="truncate w-20">#{selectedPatient.id}</span>
-                }
-                copyMessage="Patient ID copied to clipboard"
-              />
-
-              <CopyableItem
-                label="Age"
-                value={String(CalculateAge(selectedPatient.dateOfBirth))}
-                copyMessage="Age copied to clipboard"
-              />
-
-              {selectedPatient.email ? (
-                <CopyableItem
-                  label="Contact"
-                  value={selectedPatient.email}
-                  copyMessage="Email copied to clipboard"
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground italic">
-                  No contact information provided
-                </p>
-              )}
-
-              <CopyableItem
-                label="Date Registered"
-                value={formatDate(selectedPatient.dateRegistered)}
-                copyMessage="Date registered copied to clipboard"
-              />
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full h-auto"
-              onClick={() => {
-                setIsViewDialogOpen(false);
-                router.push(
-                  AppRoutes.PATIENT_SCHEDULE.replace(':id', selectedPatient.id)
-                );
-              }}
-            >
-              <div className="flex items-center gap-4">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Next Vaccination:
-                  </p>
-                  <p className="text-sm">
-                    {formatDate(selectedPatient.nextVaccinationDate)}
-                  </p>
-                </div>
-              </div>
-            </Button>
+            <Badge variant={isCompleted ? 'default' : 'outline'}>
+              {
+                ScheduleStatus[
+                  selectedPatient.scheduleStatus as keyof typeof ScheduleStatus
+                ]
+              }
+            </Badge>
           </div>
-        )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CopyableItem
+              label="Patient ID"
+              value={selectedPatient.id}
+              displayValue={
+                <span className="truncate w-20">#{selectedPatient.id}</span>
+              }
+              copyMessage="Patient ID copied to clipboard"
+            />
+
+            <CopyableItem
+              label="Age"
+              value={String(CalculateAge(selectedPatient.dateOfBirth))}
+              copyMessage="Age copied to clipboard"
+            />
+
+            {selectedPatient.email ? (
+              <CopyableItem
+                label="Contact"
+                value={selectedPatient.email}
+                copyMessage="Email copied to clipboard"
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                No contact information provided
+              </p>
+            )}
+
+            <CopyableItem
+              label="Date Registered"
+              value={formatDate(selectedPatient.dateRegistered)}
+              copyMessage="Date registered copied to clipboard"
+            />
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full h-auto"
+            onClick={handleViewSchedule}
+          >
+            <div className="flex items-center gap-4">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {isCompleted ? 'Vaccines Completed' : 'Next Vaccination:'}
+                </p>
+                <p className="text-sm">
+                  {!isCompleted &&
+                    formatDate(selectedPatient.nextVaccinationDate)}
+                </p>
+              </div>
+            </div>
+          </Button>
+        </div>
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between">
           <Button
             variant="outline"
@@ -159,13 +176,7 @@ export default function ViewPatientDialog({
           >
             Close
           </Button>
-          <Button
-            onClick={() => {
-              setIsViewDialogOpen(false);
-              handleEditPatient(selectedPatient.id);
-            }}
-            className="w-full sm:w-auto"
-          >
+          <Button onClick={handleEditPatient} className="w-full sm:w-auto">
             More Details <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         </DialogFooter>

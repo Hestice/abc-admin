@@ -74,10 +74,10 @@ export function ExposureDetailsStep({
                     className="w-full justify-start text-left h-auto py-3 px-4 group"
                     onClick={() => field.onChange(Number(value))}
                   >
-                    <div className="flex items-center gap-2 group-hover:text-background">
+                    <div className="flex items-center gap-2">
                       <div
                         className={cn(
-                          'w-5 h-5 rounded-full border flex items-center justify-center group-hover:border-background ',
+                          'w-5 h-5 rounded-full border flex items-center justify-center group-hover:border-accent ',
                           field.value === Number(value)
                             ? modifiedFields.category
                               ? 'border-secondary-foreground bg-secondary-foreground text-background'
@@ -97,13 +97,27 @@ export function ExposureDetailsStep({
                         )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-medium group-hover:text-background">
+                        <span
+                          className={cn(
+                            'font-medium group-hover:text-accent',
+                            modifiedFields.category &&
+                              field.value === Number(value) &&
+                              'group-hover:text-secondary-foreground',
+                            field.value === Number(value) &&
+                              'group-hover:text-background'
+                          )}
+                        >
                           Category {value}
                         </span>
                         <span
                           className={cn(
-                            'text-xs text-muted-foreground group-hover:text-background',
-                            field.value === Number(value) && 'text-background'
+                            'text-xs text-muted-foreground group-hover:text-accent',
+                            field.value === Number(value) && 'text-background',
+                            modifiedFields.category &&
+                              field.value === Number(value) &&
+                              'group-hover:text-secondary-foreground',
+                            field.value === Number(value) &&
+                              'group-hover:text-background'
                           )}
                         >
                           {label.split(' - ')[1]}

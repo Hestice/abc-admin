@@ -43,6 +43,7 @@ export function VaccinationCard({
   return (
     <Card
       className={cn(
+        'flex flex-col justify-between h-64',
         vaccination.completed ? 'border-green-200 bg-green-50' : ''
       )}
     >
@@ -90,10 +91,15 @@ export function VaccinationCard({
       </CardContent>
       <CardFooter className="flex justify-end pt-2">
         <Button
-          variant={vaccination.completed ? 'destructive' : 'default'}
+          variant="outline"
           size="sm"
           onClick={() => onToggleStatus(!vaccination.completed)}
           disabled={disabled}
+          className={cn(
+            vaccination.completed
+              ? 'border-red-600 text-red-600 hover:border-gray-600 hover:text-gray-600'
+              : 'border-green-600 text-green-600 hover:border-green-600 hover:bg-green-600 hover:text-white'
+          )}
         >
           {vaccination.completed ? (
             <>
