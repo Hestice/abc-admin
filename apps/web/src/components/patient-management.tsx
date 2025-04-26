@@ -19,7 +19,7 @@ import { getPatients } from '@/utils/get-patients';
 import { Patient } from '@/types/patient';
 import ViewPatientDialog from './dialog/view-patient';
 import { useRouter } from 'next/navigation';
-
+import { AppRoutes } from '@/constants/routes';
 const PATIENTS_PER_PAGE = 10;
 
 export function PatientManagement() {
@@ -59,7 +59,7 @@ export function PatientManagement() {
   }, []);
 
   const handleAddNewPatient = () => {
-    router.push('/patients/register');
+    router.push(AppRoutes.REGISTER_PATIENT);
   };
 
   const handleViewPatient = (patient: any) => {

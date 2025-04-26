@@ -4,6 +4,7 @@ import type React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { BarChart3, UserCog, Users } from 'lucide-react';
+import { AppRoutes } from '@/constants/routes';
 
 interface NavItem {
   title: string;
@@ -14,17 +15,17 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     title: 'Overview',
-    href: '/',
+    href: AppRoutes.DASHBOARD,
     icon: BarChart3,
   },
   {
     title: 'Patients',
-    href: '/patients',
+    href: AppRoutes.PATIENTS,
     icon: Users,
   },
   {
     title: 'Admin Management',
-    href: '/admins',
+    href: AppRoutes.ADMINS,
     icon: UserCog,
   },
 ];
