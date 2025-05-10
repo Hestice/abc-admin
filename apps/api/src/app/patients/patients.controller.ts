@@ -8,6 +8,7 @@ import {
   Request,
   Query,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -56,9 +57,10 @@ export class PatientsController {
     schema: { type: 'integer', default: 1 },
   })
   async findAll(
-    @Query('page') page = 1
+    @Query('page') page = 1,
+    @Request() req: any
   ): Promise<{ patients: SimplifiedPatient[]; total: number }> {
-    return this.patientsService.findAll(page, 10);
+    return this.patientsService.findAll(page, 10, req.user.id);
   }
 
   @Get(':id')
@@ -67,8 +69,11 @@ export class PatientsController {
   @ApiOperation({ summary: 'Get a patient by ID' })
   @ApiResponse({ status: 200, description: 'Return the patient.' })
   @ApiResponse({ status: 404, description: 'Patient not found.' })
-  async findOne(@Param('id') id: string): Promise<Patient> {
-    return this.patientsService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @Request() req: any
+  ): Promise<Patient> {
+    return this.patientsService.findOne(id, req.user.id);
   }
 
   @Get(':id/summary')
@@ -78,9 +83,10 @@ export class PatientsController {
   @ApiResponse({ status: 200, description: 'Return the patient sumamry.' })
   @ApiResponse({ status: 404, description: 'Patient not found.' })
   async findOneAsSummary(
-    @Param('id') id: string
+    @Param('id') id: string,
+    @Request() req: any
   ): Promise<{ patient: PatientSummaryDto }> {
-    return this.patientsService.findOneAsSummary(id);
+    return this.patientsService.findOneAsSummary(id, req.user.id);
   }
 
   @Patch(':id')
@@ -99,9 +105,23 @@ export class PatientsController {
   })
   async update(
     @Param('id') id: string,
-    @Body() updatePatientDto: Partial<CreatePatientDto>
+    @Body() updatePatientDto: Partial<CreatePatientDto>,
+    @Request() req: any
   ): Promise<Patient> {
-    return this.patientsService.update(id, updatePatientDto);
+    return this.patientsService.update(id, updatePatientDto, req.user.id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a patient' })
+  @ApiResponse({
+    status: 200,
+    description: 'Patient has been deleted successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Patient not found.' })
+  async remove(@Param('id') id: string, @Request() req: any): Promise<void> {
+    return this.patientsService.remove(id, req.user.id);
   }
 
   // Add other endpoints as needed (update, delete, etc.)
