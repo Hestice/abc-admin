@@ -53,7 +53,7 @@ export interface AuthControllerLogin200ResponseUser {
      * @type {string}
      * @memberof AuthControllerLogin200ResponseUser
      */
-    'email'?: string;
+    'username'?: string;
     /**
      * 
      * @type {string}
@@ -283,7 +283,7 @@ export interface LoginDto {
      * @type {string}
      * @memberof LoginDto
      */
-    'email': string;
+    'username': string;
     /**
      * 
      * @type {string}

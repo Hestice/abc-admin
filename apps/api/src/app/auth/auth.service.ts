@@ -13,13 +13,13 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(username: string, password: string): Promise<any> {
     this.logger.debug(`🔍 Validating user credentials...`);
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByUsername(username);
 
     if (!user || !user.isActive) {
       this.logger.warn(
-        `❌ User validation failed: ${email} - ${
+        `❌ User validation failed: ${username} - ${
           !user ? 'Not found' : 'Inactive account'
         }`
       );
@@ -29,34 +29,36 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (isPasswordValid) {
-      this.logger.log(`✅ User authenticated: ${email}`);
+      this.logger.log(`✅ User authenticated: ${username}`);
       const { password, ...result } = user;
       return result;
     }
 
-    this.logger.warn(`❌ Authentication failed: Invalid password for ${email}`);
+    this.logger.warn(
+      `❌ Authentication failed: Invalid password for ${username}`
+    );
     return null;
   }
 
   async login(loginDto: LoginDto, request?: any) {
-    this.logger.log(`🔐 Login attempt for user: ${loginDto.email}`);
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+    this.logger.log(`🔐 Login attempt for user: ${loginDto.username}`);
+    const user = await this.validateUser(loginDto.username, loginDto.password);
 
     if (!user) {
       this.logger.warn(
-        `Login rejected: Invalid credentials for ${loginDto.email}`
+        `Login rejected: Invalid credentials for ${loginDto.username}`
       );
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { username: user.username, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
 
     const logData = {
       event: 'USER_LOGIN_SUCCESS',
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         role: user.role,
       },
       token: {
@@ -76,7 +78,6 @@ export class AuthService {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email,
         role: user.role,
       },
     };
