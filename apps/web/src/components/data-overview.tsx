@@ -15,7 +15,6 @@ import {
   UserIcon,
   Syringe,
   AlertTriangle,
-  Construction,
 } from 'lucide-react';
 import { Chart } from '@/components/ui/chart';
 import {
