@@ -40,7 +40,7 @@ export class AuthController {
           type: 'object',
           properties: {
             id: { type: 'string' },
-            email: { type: 'string' },
+            username: { type: 'string' },
             role: { type: 'string' },
           },
         },
@@ -89,7 +89,7 @@ export class AuthController {
       valid: true,
       user: {
         id: req.user.id,
-        email: req.user.email,
+        username: req.user.username,
         role: req.user.role,
       },
     };

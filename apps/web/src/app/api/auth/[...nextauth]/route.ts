@@ -5,11 +5,13 @@ import { JWT } from 'next-auth/jwt';
 import { Session, User } from 'next-auth';
 
 interface ExtendedUser extends User {
+  username?: string;
   role?: string;
   accessToken?: string;
 }
 
 interface ExtendedJWT extends JWT {
+  id?: string;
   role?: string;
   accessToken?: string;
 }
@@ -19,7 +21,7 @@ interface ExtendedSession extends Session {
   user: {
     id?: string;
     name?: string | null;
-    email?: string | null;
+    username?: string | null;
     image?: string | null;
     role?: string;
   };
@@ -33,11 +35,11 @@ const handler = NextAuth({
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null;
         }
 
@@ -50,7 +52,7 @@ const handler = NextAuth({
           const authApi = new AuthApi(config);
 
           const response = await authApi.authControllerLogin({
-            email: credentials.email,
+            username: credentials.username,
             password: credentials.password,
           });
 
@@ -60,7 +62,7 @@ const handler = NextAuth({
 
           // Get token
           const tokenResponse = await authApi.authControllerGetToken({
-            email: credentials.email,
+            username: credentials.username,
             password: credentials.password,
           });
 
@@ -71,7 +73,7 @@ const handler = NextAuth({
           // Ensure we return a valid User object
           return {
             id: String(user.id || ''),
-            email: user.email || '',
+            username: user.username || '',
             name: '',
             image: '',
             role: user.role || '',
@@ -92,7 +94,7 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.email = user.email;
+        token.username = (user as ExtendedUser).username;
         token.role = (user as ExtendedUser).role;
         token.accessToken = (user as ExtendedUser).accessToken;
       }
@@ -106,7 +108,7 @@ const handler = NextAuth({
         // Create a new user object with all properties
         extendedSession.user = {
           name: session.user?.name || null,
-          email: session.user?.email || null,
+          username: (session.user as ExtendedUser)?.username || null,
           image: session.user?.image || null,
           id: token.sub || '',
           role: extendedToken.role || '',

@@ -24,23 +24,8 @@ import {
 import { DialogFooter } from '../ui/dialog';
 import { addUser } from '@/utils/add-admin';
 import { NewAdmin } from '@/types/admin';
-
-// Define Zod schema for form validation
-const adminFormSchema = z
-  .object({
-    firstName: z.string().optional().default(''),
-    lastName: z.string().optional().default(''),
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    email: z.string().email('Please enter a valid email address'),
-    role: z.string().optional().default('Admin'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    isActive: z.boolean().optional().default(true),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+import { adminFormSchema } from '@/schema/add-admin.schema';
+import PasswordRequirements from './password-requirements';
 
 interface AddAdminProps {
   isAddDialogOpen: boolean;
@@ -165,9 +150,13 @@ export default function AddAdmin({
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-              <Label htmlFor="password" className="sm:text-right">
-                Password
-              </Label>
+              <div className="relative mb-1 sm:justify-self-end flex flex-row gap-2">
+                <Label htmlFor="password" className="sm:text-right">
+                  Password
+                </Label>
+                <PasswordRequirements />
+              </div>
+
               <div className="sm:col-span-3">
                 <Input
                   id="password"

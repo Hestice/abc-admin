@@ -50,7 +50,10 @@ export class PatientsService {
 
     // Return the patient with the newly added schedule
     this.logger.log('Patient created successfully: ', savedPatient);
-    return this.findOne(savedPatient.id);
+    if (!userId) {
+      throw new Error('User ID is required to create a patient');
+    }
+    return this.findOne(savedPatient.id, userId);
   }
 
   private getNextVaccinationDate(schedule: Schedule): {
@@ -82,12 +85,14 @@ export class PatientsService {
 
   async findAll(
     page = 1,
-    limit = 10
+    limit = 10,
+    userId: string
   ): Promise<{
     patients: SimplifiedPatient[];
     total: number;
   }> {
     const [patients, total] = await this.patientsRepository.findAndCount({
+      where: { managedBy: { id: userId } },
       relations: ['managedBy', 'schedule'],
       skip: (page - 1) * limit,
       take: limit,
@@ -116,9 +121,9 @@ export class PatientsService {
     return { patients: simplifiedPatients, total };
   }
 
-  async findOne(id: string): Promise<Patient> {
+  async findOne(id: string, userId: string): Promise<Patient> {
     const patient = await this.patientsRepository.findOne({
-      where: { id },
+      where: { id, managedBy: { id: userId } },
       relations: ['managedBy', 'schedule'],
     });
 
@@ -129,8 +134,11 @@ export class PatientsService {
     return patient;
   }
 
-  async findOneAsSummary(id: string): Promise<{ patient: PatientSummaryDto }> {
-    const patient = await this.findOne(id);
+  async findOneAsSummary(
+    id: string,
+    userId: string
+  ): Promise<{ patient: PatientSummaryDto }> {
+    const patient = await this.findOne(id, userId);
 
     const nextVaccination = this.getNextVaccinationDate(
       patient.schedule || ({} as Schedule)
@@ -156,9 +164,10 @@ export class PatientsService {
 
   async update(
     id: string,
-    updatePatientDto: Partial<CreatePatientDto>
+    updatePatientDto: Partial<CreatePatientDto>,
+    userId: string
   ): Promise<Patient> {
-    const patient = await this.findOne(id);
+    const patient = await this.findOne(id, userId);
     this.logger.log(updatePatientDto);
     Object.assign(patient, updatePatientDto);
     patient.updatedAt = new Date();
@@ -166,8 +175,8 @@ export class PatientsService {
     return this.patientsRepository.save(patient);
   }
 
-  async remove(id: string): Promise<void> {
-    const patient = await this.findOne(id);
+  async remove(id: string, userId: string): Promise<void> {
+    const patient = await this.findOne(id, userId);
     await this.patientsRepository.remove(patient);
   }
 }
