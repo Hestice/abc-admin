@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '../ui/button';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, HelpCircle } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import {
@@ -25,6 +25,12 @@ import { DialogFooter } from '../ui/dialog';
 import { addUser } from '@/utils/add-admin';
 import { NewAdmin } from '@/types/admin';
 import { adminFormSchema } from '@/schema/add-admin.schema';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface AddAdminProps {
   isAddDialogOpen: boolean;
@@ -149,10 +155,30 @@ export default function AddAdmin({
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-              <Label htmlFor="password" className="sm:text-right">
-                Password
-              </Label>
-              <div className="sm:col-span-3">
+              <div className="relative mb-1 sm:mb-2 sm:justify-self-end flex flex-row gap-2">
+                <Label htmlFor="password" className="sm:text-right">
+                  Password
+                </Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="w-80 p-4">
+                      <p className="font-medium mb-2">Password Requirements:</p>
+                      <ul className="text-sm space-y-1">
+                        <li>• At least 14 characters long</li>
+                        <li>• At least one uppercase letter</li>
+                        <li>• At least one lowercase letter</li>
+                        <li>• At least one number</li>
+                        <li>• At least one special character</li>
+                      </ul>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+
+              <div className="sm:col-span-3 sm:ml-1">
                 <Input
                   id="password"
                   type="password"
