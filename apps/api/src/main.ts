@@ -27,7 +27,10 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, documentFactory);
+
+  if (process.env.NODE_ENV === 'local') {
+    SwaggerModule.setup('api-docs', app, documentFactory);
+  }
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
