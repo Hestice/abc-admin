@@ -28,7 +28,8 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
 
-  if (process.env.NODE_ENV === 'local') {
+  if (process.env.NODE_ENV === 'development') {
+    Logger.log('Setting up Swagger');
     SwaggerModule.setup('api-docs', app, documentFactory);
   }
 
