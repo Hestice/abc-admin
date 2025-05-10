@@ -19,9 +19,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '@/utils/login';
 import { AppRoutes } from '@/constants/routes';
+
 // Define Zod schema for form validation
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -40,7 +41,7 @@ export default function LoginCard() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
@@ -57,7 +58,7 @@ export default function LoginCard() {
     setServerError('');
 
     try {
-      await login(data.email, data.password);
+      await login(data.username, data.password);
       router.push(AppRoutes.DASHBOARD);
     } catch (err) {
       setServerError(
@@ -85,7 +86,7 @@ export default function LoginCard() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
           <CardDescription>
-            Enter your email and password to sign in to your account
+            Enter your username and password to sign in to your account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -95,16 +96,16 @@ export default function LoginCard() {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              {...register('email')}
-              aria-invalid={errors.email ? 'true' : 'false'}
+              id="username"
+              type="text"
+              placeholder="johndoe"
+              {...register('username')}
+              aria-invalid={errors.username ? 'true' : 'false'}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
+            {errors.username && (
+              <p className="text-sm text-red-500">{errors.username.message}</p>
             )}
           </div>
           <div className="space-y-2">

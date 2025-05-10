@@ -2,19 +2,19 @@ import { signIn, signOut } from 'next-auth/react';
 
 export interface LoginResponse {
   user: {
-    email?: string;
+    username?: string;
     id?: string;
     role?: string;
   };
 }
 
 export async function login(
-  email: string,
+  username: string,
   password: string
 ): Promise<LoginResponse> {
   try {
     const result = await signIn('credentials', {
-      email,
+      username,
       password,
       redirect: false,
     });
@@ -27,7 +27,7 @@ export async function login(
       );
     }
 
-    return { user: { email } };
+    return { user: { username } };
   } catch (error) {
     console.error('Login failed:', error);
     throw error;
