@@ -1,14 +1,16 @@
 import React from 'react';
-import { TooltipContent } from '../ui/tooltip';
-import { TooltipTrigger } from '../ui/tooltip';
-import { Tooltip } from '../ui/tooltip';
-import { TooltipProvider } from '../ui/tooltip';
 import { HelpCircle } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function PasswordRequirements() {
   return (
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip delayDuration={0} disableHoverableContent>
         <TooltipTrigger asChild>
           <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
         </TooltipTrigger>
