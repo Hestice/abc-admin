@@ -24,23 +24,7 @@ import {
 import { DialogFooter } from '../ui/dialog';
 import { addUser } from '@/utils/add-admin';
 import { NewAdmin } from '@/types/admin';
-
-// Define Zod schema for form validation
-const adminFormSchema = z
-  .object({
-    firstName: z.string().optional().default(''),
-    lastName: z.string().optional().default(''),
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    email: z.string().email('Please enter a valid email address'),
-    role: z.string().optional().default('Admin'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    isActive: z.boolean().optional().default(true),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+import { adminFormSchema } from '@/schema/add-admin.schema';
 
 interface AddAdminProps {
   isAddDialogOpen: boolean;
