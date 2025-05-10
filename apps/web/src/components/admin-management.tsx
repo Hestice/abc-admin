@@ -142,9 +142,6 @@ export function AdminManagement() {
                       >
                         <div className="space-y-1">
                           <div className="font-medium">{admin.username}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {admin.email}
-                          </div>
                           <div className="mt-1 flex items-center gap-2">
                             <div className="text-sm">{admin.role}</div>
                             <Badge
@@ -189,10 +186,7 @@ export function AdminManagement() {
                   filteredAdmins.map((admin) => (
                     <TableRow key={admin.id}>
                       <TableCell>
-                        <div className="font-medium">{admin.username}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {admin.email}
-                        </div>
+                        <div className="font-normal">{admin.username}</div>
                       </TableCell>
                       <TableCell className="capitalize">{admin.role}</TableCell>
                       <TableCell>
