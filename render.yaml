@@ -3,6 +3,7 @@ services:
     name: api
     env: node
     plan: free
+    region: singapore
     buildCommand: |
       npm install
       npx nx build api
