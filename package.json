@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "update-sources": "npx @openapitools/openapi-generator-cli generate -i http://localhost:8080/api-docs-json -g typescript-axios -o libs/api-lib/src",
-    "start:render": "node dist/apps/api/main.js"
+    "start:render": "node apps/api/dist/main.js"
   },
   "private": true,
   "dependencies": {
