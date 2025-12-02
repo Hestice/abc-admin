@@ -20,11 +20,11 @@
     "glob": "^13.0.0",
     "jose": "^6.0.10",
     "js-cookie": "^3.0.5",
-    "next": "^15.2.4",
-    "next-auth": "^4.24.11",
+    "next": "16.0.6",
+    "next-auth": "^5.0.0-beta.30",
     "pg": "^8.14.1",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-hook-form": "^7.55.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
@@ -58,10 +58,12 @@
     "@types/cookie-parser": "^1.4.8",
     "@types/node": "~18.16.9",
     "@types/passport-jwt": "^4.0.1",
-    "@types/react": "19.0.0",
-    "@types/react-dom": "19.0.0",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
     "autoprefixer": "10.4.13",
     "bcrypt": "^5.1.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.6",
     "nx": "20.6.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -75,5 +77,9 @@
   "workspaces": [
     "apps/*",
     "libs/*"
-  ]
+  ],
+  "overrides": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3"
+  }
 }
