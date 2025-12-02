@@ -39,7 +39,17 @@ const handler = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) {
+        // Type guard and validation
+        if (!credentials) {
+          return null;
+        }
+
+        const { username, password } = credentials as {
+          username: string;
+          password: string;
+        };
+
+        if (!username || !password) {
           return null;
         }
 
@@ -48,12 +58,11 @@ const handler = NextAuth({
             basePath: backendUrl,
             baseOptions: { withCredentials: true },
           });
-
           const authApi = new AuthApi(config);
 
           const response = await authApi.authControllerLogin({
-            username: credentials.username,
-            password: credentials.password,
+            username,
+            password,
           });
 
           if (!response.data.user) {
@@ -62,8 +71,8 @@ const handler = NextAuth({
 
           // Get token
           const tokenResponse = await authApi.authControllerGetToken({
-            username: credentials.username,
-            password: credentials.password,
+            username,
+            password,
           });
 
           const user = response.data.user;
@@ -113,8 +122,8 @@ const handler = NextAuth({
           id: token.sub || '',
           role: extendedToken.role || '',
         };
-
         extendedSession.accessToken = extendedToken.accessToken;
+
         return extendedSession;
       }
       return session as ExtendedSession;

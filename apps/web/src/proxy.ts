@@ -4,7 +4,7 @@ import { AppRoutes } from './constants/routes';
 import { getToken } from 'next-auth/jwt';
 import { isProtectedRoute } from './utils/get-routes';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Add security headers to all responses
   const response = NextResponse.next();
 
