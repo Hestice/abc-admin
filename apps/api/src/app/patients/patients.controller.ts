@@ -21,7 +21,7 @@ import {
 import { PatientsService } from './patients.service';
 import { Patient } from './entities/patient.entity';
 import { CreatePatientDto } from './dto/create-patient.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { SimplifiedPatient } from './types/simplifiedPatients.type';
 import { PatientSummaryDto } from './dto/patient-summary.dto';
 @ApiTags('patients')
@@ -30,7 +30,7 @@ export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new patient' })
   @ApiResponse({
@@ -46,7 +46,7 @@ export class PatientsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all patients' })
   @ApiResponse({ status: 200, description: 'Return all patients.' })
@@ -64,7 +64,7 @@ export class PatientsController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a patient by ID' })
   @ApiResponse({ status: 200, description: 'Return the patient.' })
@@ -77,7 +77,7 @@ export class PatientsController {
   }
 
   @Get(':id/summary')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a patient by ID as a summary' })
   @ApiResponse({ status: 200, description: 'Return the patient sumamry.' })
@@ -90,7 +90,7 @@ export class PatientsController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a patient' })
   @ApiResponse({
@@ -112,7 +112,7 @@ export class PatientsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a patient' })
   @ApiResponse({
