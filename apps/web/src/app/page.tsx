@@ -1,22 +1,26 @@
 'use client';
-import React, { useState } from 'react';
-import LoginCard from '@/components/login-card';
-import { Button } from '@/components/ui/button';
-import { testApiConnection } from '@/utils/test-api-connection';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { AppRoutes } from '@/constants/routes';
 
 export default function Index() {
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { isLoggedIn, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (isLoggedIn) {
+        router.push(AppRoutes.DASHBOARD);
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [isLoggedIn, isLoading, router]);
 
   return (
-    <div className="w-full flex flex-col items-center justify-center h-auto gap-16">
-      <LoginCard />
-      <Button
-        onClick={() => testApiConnection({ setIsLoading })}
-        disabled={isLoading}
-        variant="link"
-      >
-        {isLoading ? 'Testing...' : 'Test API Connection'}
-      </Button>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">Loading...</div>
     </div>
   );
 }

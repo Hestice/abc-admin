@@ -77,11 +77,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    checkAuthStatus();
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!mounted) return;
+
+        if (session?.user) {
+          setSupabaseUser(session.user);
+          setAccessToken(session.access_token);
+          setUser({
+            id: session.user.id,
+            email: session.user.email || null,
+            role: null, // Role will be fetched from backend if needed
+          });
+        } else {
+          setSupabaseUser(null);
+          setAccessToken(null);
+          setUser(emptyUser);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setSupabaseUser(null);
+          setAccessToken(null);
+          setUser(emptyUser);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+
       if (session?.user) {
         setSupabaseUser(session.user);
         setAccessToken(session.access_token);
@@ -90,16 +129,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: session.user.email || null,
           role: null, // Role will be fetched from backend if needed
         });
-        setIsLoading(false);
       } else {
         setSupabaseUser(null);
         setAccessToken(null);
         setUser(emptyUser);
-        setIsLoading(false);
       }
+      setIsLoading(false);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
