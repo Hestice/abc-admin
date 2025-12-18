@@ -29,7 +29,8 @@ import { SchedulesModule } from './schedules/schedules.module';
           database: configService.get('DB_DATABASE'),
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           autoLoadEntities: true,
-          synchronize: isDevelopment,
+          synchronize: false, // Always false when using migrations
+          migrationsRun: false, // Don't auto-run migrations on startup
           logging: isDevelopment ? ['query', 'error'] : ['error'],
           // Only apply SSL for non-local, non-development environments
           ssl: !isLocalhost && !isDevelopment,
