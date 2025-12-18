@@ -15,108 +15,150 @@ export class UpdatePatientsCreation1744540133881 implements MigrationInterface {
       );
     }
 
-    // Add new columns with appropriate default values
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "category" "public"."patients_category_enum" NULL`
-    );
-    await queryRunner.query(`UPDATE "patients" SET "category" = '1'`);
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "category" SET NOT NULL`
-    );
+    // Helper function to check if column exists
+    const columnExists = async (columnName: string): Promise<boolean> => {
+      const result = await queryRunner.query(`
+        SELECT EXISTS (
+          SELECT column_name 
+          FROM information_schema.columns 
+          WHERE table_schema = 'public' 
+          AND table_name = 'patients' 
+          AND column_name = '${columnName}'
+        ) as exists
+      `);
+      return result[0]?.exists || false;
+    };
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "bodyPartsAffected" character varying NULL`
-    );
-    await queryRunner.query(
-      `UPDATE "patients" SET "bodyPartsAffected" = 'Unknown'`
-    );
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "bodyPartsAffected" SET NOT NULL`
-    );
+    // Add new columns with appropriate default values (only if they don't exist)
+    if (!(await columnExists('category'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "category" "public"."patients_category_enum" NULL`
+      );
+      await queryRunner.query(`UPDATE "patients" SET "category" = '1'`);
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "category" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "placeOfExposure" character varying NULL`
-    );
-    await queryRunner.query(
-      `UPDATE "patients" SET "placeOfExposure" = 'Unknown'`
-    );
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "placeOfExposure" SET NOT NULL`
-    );
+    if (!(await columnExists('bodyPartsAffected'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "bodyPartsAffected" character varying NULL`
+      );
+      await queryRunner.query(
+        `UPDATE "patients" SET "bodyPartsAffected" = 'Unknown'`
+      );
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "bodyPartsAffected" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "dateOfExposure" date NULL`
-    );
-    await queryRunner.query(
-      `UPDATE "patients" SET "dateOfExposure" = CURRENT_DATE`
-    );
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "dateOfExposure" SET NOT NULL`
-    );
+    if (!(await columnExists('placeOfExposure'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "placeOfExposure" character varying NULL`
+      );
+      await queryRunner.query(
+        `UPDATE "patients" SET "placeOfExposure" = 'Unknown'`
+      );
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "placeOfExposure" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "isExposureAtHome" boolean NULL`
-    );
-    await queryRunner.query(`UPDATE "patients" SET "isExposureAtHome" = false`);
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "isExposureAtHome" SET NOT NULL`
-    );
+    if (!(await columnExists('dateOfExposure'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "dateOfExposure" date NULL`
+      );
+      await queryRunner.query(
+        `UPDATE "patients" SET "dateOfExposure" = CURRENT_DATE`
+      );
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "dateOfExposure" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "sourceOfExposure" character varying NULL`
-    );
-    await queryRunner.query(
-      `UPDATE "patients" SET "sourceOfExposure" = 'Unknown'`
-    );
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "sourceOfExposure" SET NOT NULL`
-    );
+    if (!(await columnExists('isExposureAtHome'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "isExposureAtHome" boolean NULL`
+      );
+      await queryRunner.query(
+        `UPDATE "patients" SET "isExposureAtHome" = false`
+      );
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "isExposureAtHome" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "isWoundCleaned" boolean NULL`
-    );
-    await queryRunner.query(`UPDATE "patients" SET "isWoundCleaned" = false`);
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "isWoundCleaned" SET NOT NULL`
-    );
+    if (!(await columnExists('sourceOfExposure'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "sourceOfExposure" character varying NULL`
+      );
+      await queryRunner.query(
+        `UPDATE "patients" SET "sourceOfExposure" = 'Unknown'`
+      );
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "sourceOfExposure" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "antiTetanusGiven" boolean NULL`
-    );
-    await queryRunner.query(`UPDATE "patients" SET "antiTetanusGiven" = false`);
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "antiTetanusGiven" SET NOT NULL`
-    );
+    if (!(await columnExists('isWoundCleaned'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "isWoundCleaned" boolean NULL`
+      );
+      await queryRunner.query(`UPDATE "patients" SET "isWoundCleaned" = false`);
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "isWoundCleaned" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "dateOfAntiTetanus" date NULL`
-    );
+    if (!(await columnExists('antiTetanusGiven'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "antiTetanusGiven" boolean NULL`
+      );
+      await queryRunner.query(
+        `UPDATE "patients" SET "antiTetanusGiven" = false`
+      );
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "antiTetanusGiven" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "briefHistory" character varying NULL`
-    );
-    await queryRunner.query(
-      `UPDATE "patients" SET "briefHistory" = 'No history provided'`
-    );
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "briefHistory" SET NOT NULL`
-    );
+    if (!(await columnExists('dateOfAntiTetanus'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "dateOfAntiTetanus" date NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "allergy" character varying NULL`
-    );
-    await queryRunner.query(`UPDATE "patients" SET "allergy" = 'none'`);
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "allergy" SET NOT NULL`
-    );
+    if (!(await columnExists('briefHistory'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "briefHistory" character varying NULL`
+      );
+      await queryRunner.query(
+        `UPDATE "patients" SET "briefHistory" = 'No history provided'`
+      );
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "briefHistory" SET NOT NULL`
+      );
+    }
 
-    await queryRunner.query(
-      `ALTER TABLE "patients" ADD "medications" character varying NULL`
-    );
-    await queryRunner.query(`UPDATE "patients" SET "medications" = 'none'`);
-    await queryRunner.query(
-      `ALTER TABLE "patients" ALTER COLUMN "medications" SET NOT NULL`
-    );
+    if (!(await columnExists('allergy'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "allergy" character varying NULL`
+      );
+      await queryRunner.query(`UPDATE "patients" SET "allergy" = 'none'`);
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "allergy" SET NOT NULL`
+      );
+    }
+
+    if (!(await columnExists('medications'))) {
+      await queryRunner.query(
+        `ALTER TABLE "patients" ADD "medications" character varying NULL`
+      );
+      await queryRunner.query(`UPDATE "patients" SET "medications" = 'none'`);
+      await queryRunner.query(
+        `ALTER TABLE "patients" ALTER COLUMN "medications" SET NOT NULL`
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
