@@ -6,17 +6,17 @@ import {
   UseGuards,
   Get,
   Request,
+  Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiBody,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CookieService } from './services/cookie.service';
 
@@ -28,37 +28,51 @@ export class AuthController {
     private readonly cookieService: CookieService
   ) {}
 
-  @Post('login')
-  @ApiBody({ type: LoginDto })
-  @ApiOperation({ summary: 'User login' })
+  @Post('verify-supabase-token')
+  @ApiOperation({ summary: 'Verify Supabase JWT token' })
   @ApiResponse({
     status: 200,
-    description: 'Login successful',
+    description: 'Token verified successfully',
     schema: {
       properties: {
+        valid: { type: 'boolean' },
         user: {
           type: 'object',
           properties: {
             id: { type: 'string' },
-            username: { type: 'string' },
+            email: { type: 'string' },
             role: { type: 'string' },
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Invalid credentials.' })
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
+  @ApiResponse({ status: 401, description: 'Invalid token.' })
+  async verifySupabaseToken(
+    @Headers('authorization') authorization: string,
     @Request() req: any
   ) {
-    const { access_token, user } = await this.authService.login(loginDto, req);
+    if (!authorization || !authorization.startsWith('Bearer ')) {
+      throw new UnauthorizedException(
+        'Missing or invalid authorization header'
+      );
+    }
 
-    const authCookie = this.cookieService.getCookieWithJwtToken(access_token);
-    response.cookie(authCookie.name, authCookie.value, authCookie.options);
+    const token = authorization.substring(7);
+    const user = await this.authService.verifySupabaseToken(token);
 
-    return { user };
+    if (!user) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    return {
+      valid: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -89,16 +103,9 @@ export class AuthController {
       valid: true,
       user: {
         id: req.user.id,
-        username: req.user.username,
+        email: req.user.email,
         role: req.user.role,
       },
     };
-  }
-
-  @Post('get-token')
-  @ApiOperation({ summary: 'Get token for manual cookie setting' })
-  async getToken(@Body() loginDto: LoginDto) {
-    const { access_token, user } = await this.authService.login(loginDto);
-    return { access_token, user };
   }
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { AppRoutes } from './constants/routes';
-import { getToken } from 'next-auth/jwt';
+import { createClient } from '@/lib/supabase/server';
 import { isProtectedRoute } from './utils/get-routes';
 
 export async function proxy(request: NextRequest) {
@@ -79,11 +79,11 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = isProtectedRoute(pathname);
   const isHomePage = pathname === AppRoutes.HOME;
 
-  // Get session token from NextAuth
-  const session = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  // Get session from Supabase
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // Redirect to login page if accessing protected route without session
   if (isAuthRoute && !session) {
@@ -98,10 +98,9 @@ export async function proxy(request: NextRequest) {
   // Add session metadata for client-side access
   if (session) {
     headers.set('x-user-authenticated', 'true');
-    // Only expose minimal role information
-    const userRole = (session as any).role;
-    if (userRole) {
-      headers.set('x-user-role', userRole);
+    // Only expose minimal user information
+    if (session.user?.email) {
+      headers.set('x-user-email', session.user.email);
     }
   }
 
