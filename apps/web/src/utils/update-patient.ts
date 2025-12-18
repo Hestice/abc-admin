@@ -1,13 +1,8 @@
 import { Configuration, PatientsApi } from '@abc-admin/api-lib';
-import { getSession } from 'next-auth/react';
-import { Session } from 'next-auth';
+import { createClient } from '@/lib/supabase/client';
 import { EditablePatient, NewPatient } from '@/types/patient';
 import { ApiError } from './add-patient';
 import { Category } from '@abc-admin/enums';
-
-interface ExtendedSession extends Session {
-  accessToken?: string;
-}
 
 interface GetPatientConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
@@ -29,8 +24,11 @@ interface UpdateAntiTetanusProps {
 
 // Create a shared API client
 async function getApiClient() {
-  const session = (await getSession()) as ExtendedSession | null;
-  const accessToken = session?.accessToken;
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
 
   if (!accessToken) {
     throw new ApiError('No authentication token found. Please log in again.');

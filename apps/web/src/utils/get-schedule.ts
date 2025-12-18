@@ -1,12 +1,7 @@
 import { Configuration, SchedulesApi } from '@abc-admin/api-lib';
-import { getSession } from 'next-auth/react';
-import { Session } from 'next-auth';
+import { createClient } from '@/lib/supabase/client';
 import { Schedule } from '@/types/schedule';
 import { ScheduleStatus } from '@/enums/schedule-status';
-
-interface ExtendedSession extends Session {
-  accessToken?: string;
-}
 
 interface GetScheduleConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
@@ -20,8 +15,11 @@ export const getSchedule = async ({
   setIsLoading(true);
 
   try {
-    const session = (await getSession()) as ExtendedSession | null;
-    const accessToken = session?.accessToken;
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
 
     if (!accessToken) {
       throw new Error('No authentication token found. Please log in again.');

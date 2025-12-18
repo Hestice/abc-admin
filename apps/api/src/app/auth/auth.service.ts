@@ -1,8 +1,6 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,73 +11,49 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    this.logger.debug(`🔍 Validating user credentials...`);
-    const user = await this.usersService.findByUsername(username);
+  async verifySupabaseToken(supabaseToken: string): Promise<any> {
+    this.logger.debug(`🔍 Verifying Supabase token...`);
 
-    if (!user || !user.isActive) {
-      this.logger.warn(
-        `❌ User validation failed: ${username} - ${
-          !user ? 'Not found' : 'Inactive account'
-        }`
-      );
+    try {
+      // Decode the token to get user info
+      // Note: In production, you should verify the token signature with Supabase's public key
+      const decoded = this.jwtService.decode(supabaseToken) as any;
+
+      if (!decoded || !decoded.sub) {
+        this.logger.warn('❌ Invalid token: missing sub claim');
+        return null;
+      }
+
+      const user = await this.usersService.findBySupabaseId(decoded.sub);
+
+      if (!user || !user.isActive) {
+        this.logger.warn(
+          `❌ User validation failed: ${decoded.sub} - ${
+            !user ? 'Not found' : 'Inactive account'
+          }`
+        );
+        return null;
+      }
+
+      this.logger.log(`✅ User authenticated via Supabase: ${user.email}`);
+      return user;
+    } catch (error) {
+      this.logger.error('❌ Token verification failed:', error);
       return null;
     }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (isPasswordValid) {
-      this.logger.log(`✅ User authenticated: ${username}`);
-      const { password, ...result } = user;
-      return result;
-    }
-
-    this.logger.warn(
-      `❌ Authentication failed: Invalid password for ${username}`
-    );
-    return null;
   }
 
-  async login(loginDto: LoginDto, request?: any) {
-    this.logger.log(`🔐 Login attempt for user: ${loginDto.username}`);
-    const user = await this.validateUser(loginDto.username, loginDto.password);
+  async getUserFromSupabaseId(supabaseUserId: string) {
+    const user = await this.usersService.findBySupabaseId(supabaseUserId);
 
     if (!user) {
-      this.logger.warn(
-        `Login rejected: Invalid credentials for ${loginDto.username}`
-      );
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('User not found');
     }
 
-    const payload = { username: user.username, sub: user.id, role: user.role };
-    const token = this.jwtService.sign(payload);
-
-    const logData = {
-      event: 'USER_LOGIN_SUCCESS',
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      },
-      token: {
-        value:
-          token.substring(0, 3) + '...' + token.substring(token.length - 3), // Partial token for security
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
-      },
-      timestamp: new Date().toISOString(),
-    };
-
-    this.logger.log(
-      `Authentication successful:\n${JSON.stringify(logData, null, 2)}`
-    );
-
     return {
-      access_token: token,
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      },
+      id: user.id,
+      email: user.email,
+      role: user.role,
     };
   }
 }

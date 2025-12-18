@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,12 +16,14 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { login } from '@/utils/login';
+import { useAuth } from '@/contexts/AuthContext';
+import { createClient } from '@/lib/supabase/client';
 import { AppRoutes } from '@/constants/routes';
+import Link from 'next/link';
 
 // Define Zod schema for form validation
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -30,9 +31,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginCard() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+  const supabase = createClient();
 
   const {
     register,
@@ -41,25 +43,37 @@ export default function LoginCard() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   });
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
-    if (status === 'authenticated' && session) {
+    if (!authLoading && isLoggedIn) {
       router.push(AppRoutes.DASHBOARD);
     }
-  }, [session, status, router]);
+  }, [isLoggedIn, authLoading, router]);
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     setServerError('');
 
     try {
-      await login(data.username, data.password);
-      router.push(AppRoutes.DASHBOARD);
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) {
+        setServerError(error.message || 'An error occurred during login');
+        return;
+      }
+
+      if (authData.user) {
+        router.push(AppRoutes.DASHBOARD);
+        router.refresh();
+      }
     } catch (err) {
       setServerError(
         err instanceof Error ? err.message : 'An error occurred during login'
@@ -70,7 +84,7 @@ export default function LoginCard() {
   };
 
   // If checking authentication status, show loading
-  if (status === 'loading') {
+  if (authLoading) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="pt-6">
@@ -86,7 +100,7 @@ export default function LoginCard() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
           <CardDescription>
-            Enter your username and password to sign in to your account
+            Enter your email and password to sign in to your account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -96,16 +110,16 @@ export default function LoginCard() {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="username"
-              type="text"
-              placeholder="johndoe"
-              {...register('username')}
-              aria-invalid={errors.username ? 'true' : 'false'}
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              {...register('email')}
+              aria-invalid={errors.email ? 'true' : 'false'}
             />
-            {errors.username && (
-              <p className="text-sm text-red-500">{errors.username.message}</p>
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email.message}</p>
             )}
           </div>
           <div className="space-y-2">
@@ -119,6 +133,14 @@ export default function LoginCard() {
             {errors.password && (
               <p className="text-sm text-red-500">{errors.password.message}</p>
             )}
+          </div>
+          <div className="text-sm text-right">
+            <Link
+              href="/auth/reset-password"
+              className="text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
         </CardContent>
         <CardFooter>
