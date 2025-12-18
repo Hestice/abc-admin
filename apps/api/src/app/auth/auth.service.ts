@@ -1,6 +1,8 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { UserRole } from '@abc-admin/enums';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,14 +26,52 @@ export class AuthService {
         return null;
       }
 
-      const user = await this.usersService.findBySupabaseId(decoded.sub);
+      let user = await this.usersService.findBySupabaseId(decoded.sub);
 
-      if (!user || !user.isActive) {
-        this.logger.warn(
-          `❌ User validation failed: ${decoded.sub} - ${
-            !user ? 'Not found' : 'Inactive account'
-          }`
+      // If user doesn't exist in our database but exists in Supabase auth, create them
+      if (!user) {
+        this.logger.log(
+          `🆕 Creating new user record for Supabase user: ${decoded.sub}`
         );
+
+        const email = decoded.email || decoded.user_email;
+        if (!email) {
+          this.logger.warn('❌ Cannot create user: email not found in token');
+          return null;
+        }
+
+        // Check if user with this email already exists (edge case)
+        const existingUserByEmail = await this.usersService.findByEmail(email);
+        if (existingUserByEmail) {
+          this.logger.warn(
+            `⚠️ User with email ${email} already exists but with different ID. Using existing user.`
+          );
+          user = existingUserByEmail;
+        } else {
+          // Create new user record
+          const createUserDto: CreateUserDto = {
+            id: decoded.sub, // Use Supabase user ID
+            email: email,
+            role: UserRole.ADMIN, // Default role for new users
+            isActive: true,
+          };
+
+          try {
+            user = await this.usersService.createUser(createUserDto);
+            this.logger.log(`✅ Created new user: ${user.email} (${user.id})`);
+          } catch (error) {
+            this.logger.error(
+              `❌ Failed to create user record: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return null;
+          }
+        }
+      }
+
+      if (!user.isActive) {
+        this.logger.warn(`❌ User account is inactive: ${user.email}`);
         return null;
       }
 
