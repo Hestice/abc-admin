@@ -1,10 +1,12 @@
 'use client';
 
 import type React from 'react';
+import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { BarChart3, UserCog, Users } from 'lucide-react';
+import { BarChart3, UserCog, Users, LogOut } from 'lucide-react';
 import { AppRoutes } from '@/constants/routes';
+import { LogoutConfirmation } from '@/components/dialog/logout-confirmation';
 
 interface NavItem {
   title: string;
@@ -41,6 +43,7 @@ export function DashboardNav({
 }: DashboardNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const handleNavClick = (href: string) => {
     if (onNavItemClick) {
@@ -50,21 +53,41 @@ export function DashboardNav({
   };
 
   return (
-    <nav className="grid items-start px-2 text-sm font-medium">
-      {navItems.map((item, index) => (
+    <>
+      <nav className="grid items-start px-2 text-sm font-medium flex-1 justify-start">
+        <div className="flex flex-col gap-2">
+          {navItems.map((item, index) => (
+            <button
+              key={index}
+              onClick={() => handleNavClick(item.href)}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground text-left',
+                pathname === item.href && 'bg-muted text-foreground',
+                collapsed ? 'justify-center' : ''
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {!collapsed && <span>{item.title}</span>}
+            </button>
+          ))}
+        </div>
+      </nav>
+      <div className="px-2 pb-2 border-t pt-2">
         <button
-          key={index}
-          onClick={() => handleNavClick(item.href)}
+          onClick={() => setShowLogoutDialog(true)}
           className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground text-left',
-            pathname === item.href && 'bg-muted text-foreground',
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground text-left w-full',
             collapsed ? 'justify-center' : ''
           )}
         >
-          <item.icon className="h-4 w-4" />
-          {!collapsed && <span>{item.title}</span>}
+          <LogOut className="h-4 w-4" />
+          {!collapsed && <span>Sign Out</span>}
         </button>
-      ))}
-    </nav>
+      </div>
+      <LogoutConfirmation
+        isOpen={showLogoutDialog}
+        onOpenChange={setShowLogoutDialog}
+      />
+    </>
   );
 }
