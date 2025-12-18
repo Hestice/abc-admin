@@ -79,6 +79,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    const fetchUserFromBackend = async (accessToken: string) => {
+      try {
+        const { Configuration, UsersApi } = await import('@abc-admin/api-lib');
+        const config = new Configuration({
+          basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+          accessToken: accessToken,
+        });
+        const usersApi = new UsersApi(config);
+        const response = await usersApi.usersControllerGetMe();
+        return response.data as any;
+      } catch (error) {
+        console.error('Error fetching user from backend:', error);
+        return null;
+      }
+    };
+
     const initializeAuth = async () => {
       try {
         const {
@@ -87,14 +103,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!mounted) return;
 
-        if (session?.user) {
+        if (session?.user && session.access_token) {
           setSupabaseUser(session.user);
           setAccessToken(session.access_token);
-          setUser({
-            id: session.user.id,
-            email: session.user.email || null,
-            role: null, // Role will be fetched from backend if needed
-          });
+
+          // Call /me endpoint to ensure user exists in database and get role
+          const userData = await fetchUserFromBackend(session.access_token);
+          if (userData) {
+            setUser({
+              id: userData.id,
+              email: userData.email,
+              role: userData.role,
+            });
+          } else {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || null,
+              role: null,
+            });
+          }
         } else {
           setSupabaseUser(null);
           setAccessToken(null);
@@ -118,17 +145,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return;
 
-      if (session?.user) {
+      if (session?.user && session.access_token) {
         setSupabaseUser(session.user);
         setAccessToken(session.access_token);
-        setUser({
-          id: session.user.id,
-          email: session.user.email || null,
-          role: null, // Role will be fetched from backend if needed
-        });
+
+        // Call /me endpoint to ensure user exists in database and get role
+        const userData = await fetchUserFromBackend(session.access_token);
+        if (userData) {
+          setUser({
+            id: userData.id,
+            email: userData.email,
+            role: userData.role,
+          });
+        } else {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || null,
+            role: null,
+          });
+        }
       } else {
         setSupabaseUser(null);
         setAccessToken(null);
