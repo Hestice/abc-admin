@@ -1,12 +1,7 @@
 import { PatientsApi, Configuration } from '@abc-admin/api-lib';
-import { getSession } from 'next-auth/react';
-import { Session } from 'next-auth';
+import { createClient } from '@/lib/supabase/client';
 import { NewPatient } from '@/types/patient';
 import { Category, Sex } from '@abc-admin/enums';
-
-interface ExtendedSession extends Session {
-  accessToken?: string;
-}
 
 interface AddPatientConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
@@ -60,8 +55,11 @@ export const addPatient = async ({
   setIsLoading(true);
 
   try {
-    const session = (await getSession()) as ExtendedSession | null;
-    const accessToken = session?.accessToken;
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
 
     if (!accessToken) {
       throw new ApiError('No authentication token found. Please log in again.');

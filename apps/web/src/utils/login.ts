@@ -1,33 +1,29 @@
-import { signIn, signOut } from 'next-auth/react';
+import { createClient } from '@/lib/supabase/client';
 
 export interface LoginResponse {
   user: {
-    username?: string;
+    email?: string;
     id?: string;
     role?: string;
   };
 }
 
 export async function login(
-  username: string,
+  email: string,
   password: string
 ): Promise<LoginResponse> {
   try {
-    const result = await signIn('credentials', {
-      username,
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
       password,
-      redirect: false,
     });
 
-    if (result?.error) {
-      throw new Error(
-        result.error === 'CredentialsSignin'
-          ? 'Invalid credentials'
-          : result.error
-      );
+    if (error) {
+      throw new Error(error.message || 'Invalid credentials');
     }
 
-    return { user: { username } };
+    return { user: { email: data.user?.email, id: data.user?.id } };
   } catch (error) {
     console.error('Login failed:', error);
     throw error;
@@ -36,7 +32,8 @@ export async function login(
 
 export async function logout() {
   try {
-    await signOut({ redirect: false });
+    const supabase = createClient();
+    await supabase.auth.signOut();
   } catch (error) {
     console.error('Logout failed:', error);
     throw error;
@@ -44,7 +41,6 @@ export async function logout() {
 }
 
 export function isAuthenticated() {
-  // This will be managed by the useSession hook from next-auth/react
-  // This function can be kept for compatibility, but should use the session state
-  return false; // Placeholder - use useSession in components instead
+  // This function can be kept for compatibility, but should use useAuth hook instead
+  return false; // Placeholder - use useAuth in components instead
 }

@@ -7,7 +7,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
 import { UserRole } from '@abc-admin/enums';
 
 @Injectable()
@@ -19,20 +18,15 @@ export class UsersService {
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
-      where: [
-        { username: createUserDto.username },
-        { email: createUserDto.email },
-      ],
+      where: { email: createUserDto.email },
     });
 
     if (existingUser) {
-      throw new ConflictException('Username or email already exists');
+      throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.usersRepository.create({
       ...createUserDto,
-      password: hashedPassword,
     });
 
     return this.usersRepository.save(user);
@@ -57,8 +51,13 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(username: string): Promise<User | undefined> {
-    const user = await this.usersRepository.findOne({ where: { username } });
+  async findByEmail(email: string): Promise<User | undefined> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    return user || undefined;
+  }
+
+  async findBySupabaseId(id: string): Promise<User | undefined> {
+    const user = await this.usersRepository.findOne({ where: { id } });
     return user || undefined;
   }
 }

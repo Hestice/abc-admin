@@ -5,26 +5,25 @@ import {
   IsEnum,
   IsNotEmpty,
   IsString,
-  MinLength,
   IsBoolean,
   IsOptional,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateUserDto {
-  @ApiProperty({ example: 'juanacruz' })
-  @IsString()
-  @IsNotEmpty()
-  username!: string;
+  @ApiProperty({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'Supabase user ID',
+    required: false,
+  })
+  @IsUUID()
+  @IsOptional()
+  id?: string;
 
   @ApiProperty({ example: 'juanacruz@gmail.com' })
   @IsEmail()
   @IsNotEmpty()
   email!: string;
-
-  @ApiProperty({ example: 'password123' })
-  @IsString()
-  @MinLength(8)
-  password!: string;
 
   @ApiProperty({ example: 'John', description: 'First name' })
   @IsString()
