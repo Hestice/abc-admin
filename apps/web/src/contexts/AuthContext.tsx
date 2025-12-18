@@ -7,8 +7,8 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
-import { useSession } from 'next-auth/react';
-import { SessionProvider } from 'next-auth/react';
+import { createClient } from '@/lib/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
   id: string | null;
@@ -16,23 +16,13 @@ interface User {
   role: string | null;
 }
 
-// Extension of NextAuth Session to include custom properties
-interface ExtendedSession {
-  user: {
-    id?: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    role?: string;
-  };
-  accessToken?: string;
-}
-
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User;
   isLoading: boolean;
   checkAuthStatus: () => Promise<void>;
+  supabaseUser: SupabaseUser | null;
+  accessToken: string | null;
 }
 
 const emptyUser: User = {
@@ -46,58 +36,85 @@ const AuthContext = createContext<AuthContextType>({
   user: emptyUser,
   isLoading: true,
   checkAuthStatus: async () => {},
+  supabaseUser: null,
+  accessToken: null,
 });
 
-/**
- * Internal AuthContext provider that depends on SessionProvider
- */
-function AuthContextProvider({ children }: { children: ReactNode }) {
-  const { data: session, status } = useSession();
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(emptyUser);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
 
   const checkAuthStatus = async () => {
-    // This is now a no-op as NextAuth handles session refresh
-    // But we keep it for API compatibility
-    return Promise.resolve();
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        setSupabaseUser(session.user);
+        setAccessToken(session.access_token);
+        setUser({
+          id: session.user.id,
+          email: session.user.email || null,
+          role: null, // Role will be fetched from backend if needed
+        });
+      } else {
+        setSupabaseUser(null);
+        setAccessToken(null);
+        setUser(emptyUser);
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setSupabaseUser(null);
+      setAccessToken(null);
+      setUser(emptyUser);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Update user when session changes
   useEffect(() => {
-    setIsLoading(status === 'loading');
+    checkAuthStatus();
 
-    if (status === 'authenticated' && session) {
-      const extendedSession = session as unknown as ExtendedSession;
-      setUser({
-        id: extendedSession.user.id || null,
-        email: extendedSession.user.email || null,
-        role: extendedSession.user.role || null,
-      });
-    } else {
-      setUser(emptyUser);
-    }
-  }, [session, status]);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setSupabaseUser(session.user);
+        setAccessToken(session.access_token);
+        setUser({
+          id: session.user.id,
+          email: session.user.email || null,
+          role: null, // Role will be fetched from backend if needed
+        });
+        setIsLoading(false);
+      } else {
+        setSupabaseUser(null);
+        setAccessToken(null);
+        setUser(emptyUser);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const contextValue = {
-    isLoggedIn: status === 'authenticated',
+    isLoggedIn: !!supabaseUser,
     user,
     isLoading,
     checkAuthStatus,
+    supabaseUser,
+    accessToken,
   };
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
-  );
-}
-
-/**
- * Main AuthProvider that includes both NextAuth's SessionProvider and our AuthContext
- */
-export function AuthProvider({ children }: { children: ReactNode }) {
-  return (
-    <SessionProvider>
-      <AuthContextProvider>{children}</AuthContextProvider>
-    </SessionProvider>
   );
 }
 
