@@ -26,38 +26,44 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
- * @interface AuthControllerLogin200Response
+ * @interface AuthControllerVerifySupabaseToken200Response
  */
-export interface AuthControllerLogin200Response {
+export interface AuthControllerVerifySupabaseToken200Response {
     /**
      * 
-     * @type {AuthControllerLogin200ResponseUser}
-     * @memberof AuthControllerLogin200Response
+     * @type {boolean}
+     * @memberof AuthControllerVerifySupabaseToken200Response
      */
-    'user'?: AuthControllerLogin200ResponseUser;
+    'valid'?: boolean;
+    /**
+     * 
+     * @type {AuthControllerVerifySupabaseToken200ResponseUser}
+     * @memberof AuthControllerVerifySupabaseToken200Response
+     */
+    'user'?: AuthControllerVerifySupabaseToken200ResponseUser;
 }
 /**
  * 
  * @export
- * @interface AuthControllerLogin200ResponseUser
+ * @interface AuthControllerVerifySupabaseToken200ResponseUser
  */
-export interface AuthControllerLogin200ResponseUser {
+export interface AuthControllerVerifySupabaseToken200ResponseUser {
     /**
      * 
      * @type {string}
-     * @memberof AuthControllerLogin200ResponseUser
+     * @memberof AuthControllerVerifySupabaseToken200ResponseUser
      */
     'id'?: string;
     /**
      * 
      * @type {string}
-     * @memberof AuthControllerLogin200ResponseUser
+     * @memberof AuthControllerVerifySupabaseToken200ResponseUser
      */
-    'username'?: string;
+    'email'?: string;
     /**
      * 
      * @type {string}
-     * @memberof AuthControllerLogin200ResponseUser
+     * @memberof AuthControllerVerifySupabaseToken200ResponseUser
      */
     'role'?: string;
 }
@@ -223,11 +229,11 @@ export interface CreateScheduleDto {
  */
 export interface CreateUserDto {
     /**
-     * 
+     * Supabase user ID
      * @type {string}
      * @memberof CreateUserDto
      */
-    'username': string;
+    'id'?: string;
     /**
      * 
      * @type {string}
@@ -235,23 +241,17 @@ export interface CreateUserDto {
      */
     'email': string;
     /**
-     * 
-     * @type {string}
-     * @memberof CreateUserDto
-     */
-    'password': string;
-    /**
      * First name
      * @type {string}
      * @memberof CreateUserDto
      */
-    'firstName': string;
+    'firstName'?: string;
     /**
      * Last name
      * @type {string}
      * @memberof CreateUserDto
      */
-    'lastName': string;
+    'lastName'?: string;
     /**
      * User role
      * @type {string}
@@ -272,25 +272,6 @@ export const CreateUserDtoRoleEnum = {
 
 export type CreateUserDtoRoleEnum = typeof CreateUserDtoRoleEnum[keyof typeof CreateUserDtoRoleEnum];
 
-/**
- * 
- * @export
- * @interface LoginDto
- */
-export interface LoginDto {
-    /**
-     * 
-     * @type {string}
-     * @memberof LoginDto
-     */
-    'username': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof LoginDto
-     */
-    'password': string;
-}
 /**
  * 
  * @export
@@ -626,78 +607,6 @@ export const AuthApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * 
-         * @summary Get token for manual cookie setting
-         * @param {LoginDto} loginDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        authControllerGetToken: async (loginDto: LoginDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'loginDto' is not null or undefined
-            assertParamExists('authControllerGetToken', 'loginDto', loginDto)
-            const localVarPath = `/api/auth/get-token`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(loginDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary User login
-         * @param {LoginDto} loginDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        authControllerLogin: async (loginDto: LoginDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'loginDto' is not null or undefined
-            assertParamExists('authControllerLogin', 'loginDto', loginDto)
-            const localVarPath = `/api/auth/login`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(loginDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary User logout
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -728,7 +637,43 @@ export const AuthApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * 
-         * @summary Verify JWT token validity
+         * @summary Verify Supabase JWT token
+         * @param {string} authorization 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerVerifySupabaseToken: async (authorization: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'authorization' is not null or undefined
+            assertParamExists('authControllerVerifySupabaseToken', 'authorization', authorization)
+            const localVarPath = `/api/auth/verify-supabase-token`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            if (authorization != null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Verify Supabase token validity
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -784,32 +729,6 @@ export const AuthApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get token for manual cookie setting
-         * @param {LoginDto} loginDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async authControllerGetToken(loginDto: LoginDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.authControllerGetToken(loginDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AuthApi.authControllerGetToken']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary User login
-         * @param {LoginDto} loginDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async authControllerLogin(loginDto: LoginDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AuthControllerLogin200Response>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.authControllerLogin(loginDto, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AuthApi.authControllerLogin']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary User logout
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -822,7 +741,20 @@ export const AuthApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Verify JWT token validity
+         * @summary Verify Supabase JWT token
+         * @param {string} authorization 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async authControllerVerifySupabaseToken(authorization: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AuthControllerVerifySupabaseToken200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.authControllerVerifySupabaseToken(authorization, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AuthApi.authControllerVerifySupabaseToken']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Verify Supabase token validity
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -853,26 +785,6 @@ export const AuthApiFactory = function (configuration?: Configuration, basePath?
         },
         /**
          * 
-         * @summary Get token for manual cookie setting
-         * @param {LoginDto} loginDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        authControllerGetToken(loginDto: LoginDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.authControllerGetToken(loginDto, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary User login
-         * @param {LoginDto} loginDto 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        authControllerLogin(loginDto: LoginDto, options?: RawAxiosRequestConfig): AxiosPromise<AuthControllerLogin200Response> {
-            return localVarFp.authControllerLogin(loginDto, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary User logout
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -882,7 +794,17 @@ export const AuthApiFactory = function (configuration?: Configuration, basePath?
         },
         /**
          * 
-         * @summary Verify JWT token validity
+         * @summary Verify Supabase JWT token
+         * @param {string} authorization 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authControllerVerifySupabaseToken(authorization: string, options?: RawAxiosRequestConfig): AxiosPromise<AuthControllerVerifySupabaseToken200Response> {
+            return localVarFp.authControllerVerifySupabaseToken(authorization, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Verify Supabase token validity
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -912,30 +834,6 @@ export class AuthApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get token for manual cookie setting
-     * @param {LoginDto} loginDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AuthApi
-     */
-    public authControllerGetToken(loginDto: LoginDto, options?: RawAxiosRequestConfig) {
-        return AuthApiFp(this.configuration).authControllerGetToken(loginDto, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary User login
-     * @param {LoginDto} loginDto 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AuthApi
-     */
-    public authControllerLogin(loginDto: LoginDto, options?: RawAxiosRequestConfig) {
-        return AuthApiFp(this.configuration).authControllerLogin(loginDto, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary User logout
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -947,7 +845,19 @@ export class AuthApi extends BaseAPI {
 
     /**
      * 
-     * @summary Verify JWT token validity
+     * @summary Verify Supabase JWT token
+     * @param {string} authorization 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AuthApi
+     */
+    public authControllerVerifySupabaseToken(authorization: string, options?: RawAxiosRequestConfig) {
+        return AuthApiFp(this.configuration).authControllerVerifySupabaseToken(authorization, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Verify Supabase token validity
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AuthApi
@@ -1122,6 +1032,44 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
         },
         /**
          * 
+         * @summary Delete a patient
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsControllerRemove: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('patientsControllerRemove', 'id', id)
+            const localVarPath = `/api/patients/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Update a patient
          * @param {string} id 
          * @param {CreatePatientDto} createPatientDto Patient data to update. All fields are optional.
@@ -1228,6 +1176,19 @@ export const PatientsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Delete a patient
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientsControllerRemove(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientsControllerRemove(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientsControllerRemove']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Update a patient
          * @param {string} id 
          * @param {CreatePatientDto} createPatientDto Patient data to update. All fields are optional.
@@ -1289,6 +1250,16 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
          */
         patientsControllerFindOneAsSummary(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.patientsControllerFindOneAsSummary(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete a patient
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientsControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.patientsControllerRemove(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1357,6 +1328,18 @@ export class PatientsApi extends BaseAPI {
      */
     public patientsControllerFindOneAsSummary(id: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientsControllerFindOneAsSummary(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete a patient
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientsControllerRemove(id: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientsControllerRemove(id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2096,6 +2079,40 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Get current user or create if not exists
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetMe: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/users/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2157,6 +2174,18 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerFindOne']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * 
+         * @summary Get current user or create if not exists
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async usersControllerGetMe(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.usersControllerGetMe(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.usersControllerGetMe']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -2205,6 +2234,15 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         usersControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.usersControllerFindOne(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get current user or create if not exists
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersControllerGetMe(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.usersControllerGetMe(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2261,6 +2299,17 @@ export class UsersApi extends BaseAPI {
      */
     public usersControllerFindOne(id: string, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).usersControllerFindOne(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get current user or create if not exists
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersControllerGetMe(options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).usersControllerGetMe(options).then((request) => request(this.axios, this.basePath));
     }
 }
 

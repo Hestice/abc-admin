@@ -17,7 +17,7 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { SupabaseAuthGuard } from './guards/supabase-auth.guard';
 import { CookieService } from './services/cookie.service';
 
 @ApiTags('auth')
@@ -75,7 +75,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @Get('profile')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user profile' })
@@ -92,10 +92,10 @@ export class AuthController {
     return { success: true };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SupabaseAuthGuard)
   @Get('verify-token')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Verify JWT token validity' })
+  @ApiOperation({ summary: 'Verify Supabase token validity' })
   @ApiResponse({ status: 200, description: 'Token is valid' })
   @ApiResponse({ status: 401, description: 'Invalid or expired token' })
   verifyToken(@Request() req: any) {

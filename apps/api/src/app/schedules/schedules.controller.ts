@@ -20,7 +20,7 @@ import { SchedulesService } from './schedules.service';
 import { Schedule } from './entities/schedule.entity';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { UpdateVaccinationDto } from './dto/update-vaccination.dto';
 
 // Response class for better Swagger documentation
@@ -73,7 +73,7 @@ class ScheduleResponse {
 
 @ApiTags('schedules')
 @Controller('schedules')
-@UseGuards(JwtAuthGuard)
+@UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth()
 export class SchedulesController {
   constructor(private readonly schedulesService: SchedulesService) {}
