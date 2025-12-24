@@ -1,6 +1,6 @@
 import { UsersApi, Configuration } from '@abc-admin/api-lib';
 import { Admin } from '@/types/admin';
-import { createClient } from '@/lib/supabase/client';
+import { getSession } from '@/lib/auth/client';
 
 interface GetUsersConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
@@ -12,10 +12,7 @@ export const getUsers = async ({
   setIsLoading(true);
 
   try {
-    const supabase = createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const { session } = await getSession();
     const accessToken = session?.access_token;
 
     if (!accessToken) {

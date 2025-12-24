@@ -1,5 +1,5 @@
 import { Configuration, PatientsApi } from '@abc-admin/api-lib';
-import { createClient } from '@/lib/supabase/client';
+import { getSession } from '@/lib/auth/client';
 import { EditablePatient, NewPatient } from '@/types/patient';
 import { ApiError } from './add-patient';
 import { Category } from '@abc-admin/enums';
@@ -24,10 +24,7 @@ interface UpdateAntiTetanusProps {
 
 // Create a shared API client
 async function getApiClient() {
-  const supabase = createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { session } = await getSession();
   const accessToken = session?.access_token;
 
   if (!accessToken) {

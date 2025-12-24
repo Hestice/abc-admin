@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client';
+import { signIn, signOut } from '@/lib/auth/client';
 
 export interface LoginResponse {
   user: {
@@ -13,17 +13,9 @@ export async function login(
   password: string
 ): Promise<LoginResponse> {
   try {
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { user } = await signIn(email, password);
 
-    if (error) {
-      throw new Error(error.message || 'Invalid credentials');
-    }
-
-    return { user: { email: data.user?.email, id: data.user?.id } };
+    return { user: { email: user?.email, id: user?.id } };
   } catch (error) {
     console.error('Login failed:', error);
     throw error;
@@ -32,8 +24,7 @@ export async function login(
 
 export async function logout() {
   try {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await signOut();
   } catch (error) {
     console.error('Logout failed:', error);
     throw error;
