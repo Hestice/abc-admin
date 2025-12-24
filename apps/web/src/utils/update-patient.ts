@@ -2,7 +2,6 @@ import { Configuration, PatientsApi } from '@abc-admin/api-lib';
 import { getSession } from '@/lib/auth/client';
 import { EditablePatient, NewPatient } from '@/types/patient';
 import { ApiError } from './add-patient';
-import { Category } from '@abc-admin/enums';
 
 interface GetPatientConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
@@ -68,19 +67,22 @@ function handleApiError(error: any, context: string): never {
 }
 
 // Adapter function to convert Partial<NewPatient> to CreatePatientDto
+// Only includes patient metadata fields (exposure fields should be updated separately)
 const adaptToUpdatePatientDto = (patient: Partial<NewPatient>): any => {
-  // Only transform fields that are defined
-  const adaptedPatient: any = { ...patient };
+  // Only include patient metadata fields
+  const adaptedPatient: any = {};
 
-  // Handle category if present
-  if (patient.category !== undefined) {
-    adaptedPatient.category = patient.category as Category;
-  }
-
-  // Handle dateOfAntiTetanus special case
-  if (patient.antiTetanusGiven === false || !patient.dateOfAntiTetanus) {
-    delete adaptedPatient.dateOfAntiTetanus;
-  }
+  if (patient.firstName !== undefined)
+    adaptedPatient.firstName = patient.firstName;
+  if (patient.middleName !== undefined)
+    adaptedPatient.middleName = patient.middleName;
+  if (patient.lastName !== undefined)
+    adaptedPatient.lastName = patient.lastName;
+  if (patient.dateOfBirth !== undefined)
+    adaptedPatient.dateOfBirth = patient.dateOfBirth;
+  if (patient.sex !== undefined) adaptedPatient.sex = patient.sex;
+  if (patient.address !== undefined) adaptedPatient.address = patient.address;
+  if (patient.email !== undefined) adaptedPatient.email = patient.email;
 
   return adaptedPatient;
 };
@@ -130,30 +132,10 @@ export const updatePatientAntiTetanus = async ({
   administered,
   date,
 }: UpdateAntiTetanusProps): Promise<EditablePatient> => {
-  setIsLoading(true);
-
-  try {
-    const patientsApi = await getApiClient();
-
-    // Create the update payload with only anti-tetanus fields
-    const updatePayload: any = {
-      antiTetanusGiven: administered,
-    };
-
-    // Only include the date if administered is true and date is provided
-    if (administered && date) {
-      updatePayload.dateOfAntiTetanus = date.toISOString().split('T')[0];
-    }
-
-    const response = await patientsApi.patientsControllerUpdate(
-      patientId,
-      updatePayload
-    );
-
-    return (response as any).data as EditablePatient;
-  } catch (error: any) {
-    handleApiError(error, 'updating anti-tetanus information');
-  } finally {
-    setIsLoading(false);
-  }
+  // Note: Anti-tetanus is now part of exposure, not patient
+  // This function should be updated to update the exposure instead
+  // For now, this is a placeholder that will need to be refactored
+  throw new Error(
+    'updatePatientAntiTetanus should be updated to update exposure instead of patient'
+  );
 };

@@ -5,6 +5,8 @@ export const AppRoutes = {
   REGISTER: '/register',
   ADMINS: '/admins',
   REGISTER_PATIENT: '/patients/register',
-  EDIT_PATIENT: '/patients/:id',
+  EDIT_PATIENT: '/patients/:id/edit/:scheduleId',
+  PATIENT_SCHEDULES: '/patients/:id',
   PATIENT_SCHEDULE: '/patients/:id/schedule',
+  CREATE_EXPOSURE: '/patients/:id/new',
 };

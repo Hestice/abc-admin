@@ -6,11 +6,13 @@ import { ScheduleStatus } from '@/enums/schedule-status';
 interface GetScheduleConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
   patientId: string;
+  scheduleId?: string;
 }
 
 export const getSchedule = async ({
   setIsLoading,
   patientId,
+  scheduleId,
 }: GetScheduleConnectionProps): Promise<Schedule> => {
   setIsLoading(true);
 
@@ -28,21 +30,36 @@ export const getSchedule = async ({
     });
 
     const schedulesApi = new SchedulesApi(config);
-    const response = await schedulesApi.schedulesControllerFindByPatientId(
-      patientId
-    );
+
+    let response;
+    if (scheduleId) {
+      // Fetch by schedule ID
+      response = await schedulesApi.schedulesControllerFindOne(scheduleId);
+    } else {
+      // Fetch by patient ID (returns most recent schedule for backward compatibility)
+      const schedulesResponse =
+        await schedulesApi.schedulesControllerFindAllByPatientId(patientId);
+      if (!schedulesResponse.data || schedulesResponse.data.length === 0) {
+        throw new Error('No schedule found for patient');
+      }
+      // Use the first schedule (most recent)
+      response = { data: schedulesResponse.data[0] };
+    }
 
     const {
       day0CompletedAt,
       day3CompletedAt,
       day7CompletedAt,
       day28CompletedAt,
+      exposure,
       ...rest
-    } = response.data;
+    } = response.data as any;
 
     return {
       ...rest,
-      patientId,
+      exposureId: exposure?.id,
+      patientId: exposure?.patient?.id || patientId,
+      exposure: exposure,
       status:
         response.data.status === ScheduleStatus.completed
           ? ScheduleStatus.completed

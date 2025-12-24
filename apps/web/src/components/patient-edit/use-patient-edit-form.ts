@@ -11,65 +11,52 @@ import { EditablePatient, NewPatient } from '@/types/patient';
 import { deepEquals } from '@/utils/object-utils';
 import { AppRoutes } from '@/constants/routes';
 // Helper to convert Patient data to form values
+// Note: Exposure data should be loaded separately and merged
 const patientToFormValues = (patient: EditablePatient): FormValues => {
-  // Create form values object
+  // For now, only include patient metadata fields
+  // Exposure fields will need to be loaded separately from the most recent exposure
+  // This is a simplified version - full implementation would load exposure data
   return {
     firstName: patient.firstName,
     middleName: patient.middleName || '',
     lastName: patient.lastName,
     dateOfBirth: new Date(patient.dateOfBirth),
-    dateOfExposure: new Date(patient.dateOfExposure),
+    dateOfExposure: new Date(), // Placeholder - should come from exposure
     sex: patient.sex as Sex,
     address: patient.address || '',
     email: patient.email || '',
-    category: patient.category as Category,
-    bodyPartsAffected: patient.bodyPartsAffected,
-    placeOfExposure: patient.placeOfExposure,
-    isExposureAtHome: patient.isExposureAtHome,
-    sourceOfExposure: patient.sourceOfExposure,
-    animalStatus: patient.animalStatus || Status.UNKNOWN,
-    isWoundCleaned: patient.isWoundCleaned,
-    antiTetanusGiven: patient.antiTetanusGiven,
-    dateOfAntiTetanus: patient.dateOfAntiTetanus
-      ? new Date(patient.dateOfAntiTetanus)
-      : undefined,
-    briefHistory: patient.briefHistory,
-    allergy: patient.allergy,
-    medications: patient.medications,
+    category: Category.ONE, // Placeholder - should come from exposure
+    bodyPartsAffected: '', // Placeholder - should come from exposure
+    placeOfExposure: '', // Placeholder - should come from exposure
+    isExposureAtHome: false, // Placeholder - should come from exposure
+    sourceOfExposure: '', // Placeholder - should come from exposure
+    animalStatus: Status.UNKNOWN, // Placeholder - should come from exposure
+    isWoundCleaned: false, // Placeholder - should come from exposure
+    antiTetanusGiven: false, // Placeholder - should come from exposure
+    dateOfAntiTetanus: undefined, // Placeholder - should come from exposure
+    briefHistory: '', // Placeholder - should come from exposure
+    allergy: '', // Placeholder - should come from exposure
+    medications: '', // Placeholder - should come from exposure
   };
 };
 
 // Helper to convert form data to Patient update format
+// Only includes patient metadata (exposure fields should be updated separately)
 const formatPatientUpdateData = (data: FormValues): Partial<NewPatient> => {
-  // Create base patient object
+  // Only include patient metadata fields
   const patient: Partial<NewPatient> = {
     firstName: data.firstName,
     middleName: data.middleName || '',
     lastName: data.lastName,
     dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
-    dateOfExposure: data.dateOfExposure.toISOString().split('T')[0],
     sex: data.sex as Sex,
     address: data.address,
     email: data.email || '',
-    category: Number(data.category),
-    bodyPartsAffected: data.bodyPartsAffected,
-    placeOfExposure: data.placeOfExposure,
-    isExposureAtHome: data.isExposureAtHome,
-    sourceOfExposure: data.sourceOfExposure,
-    animalStatus: data.animalStatus,
-    isWoundCleaned: data.isWoundCleaned,
-    antiTetanusGiven: data.antiTetanusGiven,
-    briefHistory: data.briefHistory,
-    allergy: data.allergy,
-    medications: data.medications,
   };
 
-  // Only include dateOfAntiTetanus if anti-tetanus was given and a date was selected
-  if (data.antiTetanusGiven && data.dateOfAntiTetanus) {
-    patient.dateOfAntiTetanus = data.dateOfAntiTetanus
-      .toISOString()
-      .split('T')[0];
-  }
+  // Note: Exposure fields (category, bodyPartsAffected, etc.) should be updated
+  // through a separate exposure update endpoint, not through patient update
+
   return patient;
 };
 
