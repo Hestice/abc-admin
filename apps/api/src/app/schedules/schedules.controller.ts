@@ -8,8 +8,13 @@ import {
   Delete,
   UseGuards,
   BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+  ConflictException,
   Request,
+  Logger,
 } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
 import {
   ApiTags,
   ApiOperation,
@@ -77,6 +82,8 @@ class ScheduleResponse {
 @UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth()
 export class SchedulesController {
+  private readonly logger = new Logger(SchedulesController.name);
+
   constructor(private readonly schedulesService: SchedulesService) {}
 
   @Post()
@@ -90,11 +97,58 @@ export class SchedulesController {
     status: 400,
     description: 'Invalid input.',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Patient not found.',
+  })
   async create(
     @Body() createScheduleDto: CreateScheduleDto,
     @Request() req: any
   ): Promise<Schedule> {
-    return this.schedulesService.create(createScheduleDto, req.user.id);
+    try {
+      if (!req.user?.id) {
+        this.logger.error('User ID not found in request');
+        throw new BadRequestException('User authentication failed');
+      }
+
+      this.logger.log(
+        `Creating schedule for patient ${createScheduleDto.patientId} by user ${req.user.id}`
+      );
+
+      return await this.schedulesService.create(createScheduleDto, req.user.id);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(`Error creating schedule: ${errorMessage}`, errorStack);
+
+      // Re-throw known exceptions (they'll be handled by NestJS exception filters)
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+
+      // Handle database constraint violations
+      if (error instanceof QueryFailedError) {
+        if (error.message.includes('unique constraint')) {
+          throw new ConflictException(
+            'A schedule already exists for this patient. Please use the existing schedule or contact support.'
+          );
+        }
+        if (error.message.includes('foreign key constraint')) {
+          throw new BadRequestException('Invalid patient ID provided.');
+        }
+      }
+
+      // Wrap unexpected errors
+      throw new InternalServerErrorException(
+        errorMessage || 'Failed to create schedule'
+      );
+    }
   }
 
   @Get()

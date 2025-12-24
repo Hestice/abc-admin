@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, Plus, Calendar, CheckCircle2, Clock } from 'lucide-react';
+import { Plus, Calendar, CheckCircle2, Clock } from 'lucide-react';
 import { getPatientSchedules } from '@/utils/get-patient-schedules';
 import { getPatient } from '@/utils/get-patients';
 import { Schedule } from '@/types/schedule';
@@ -20,9 +20,8 @@ import { PatientSummary } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
 import { formatDate } from '@/utils/date-utils';
 import { AppRoutes } from '@/constants/routes';
-import { Configuration, SchedulesApi } from '@abc-admin/api-lib';
-import { getSession } from '@/lib/auth/client';
 import { useToast } from '@/hooks/use-toast';
+import CreateScheduleDialog from '@/components/dialog/create-schedule';
 
 interface PatientSchedulesListProps {
   patientId: string;
@@ -32,72 +31,41 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [patient, setPatient] = useState<PatientSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [schedulesData, patientData] = await Promise.all([
-          getPatientSchedules({ setIsLoading: () => {}, patientId }),
-          getPatient({ setIsLoading: () => {}, patientId }),
-        ]);
-        setSchedules(schedulesData);
-        setPatient(patientData.patient);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load schedules. Please try again.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [patientId, toast]);
-
-  const handleCreateSchedule = async () => {
+  const fetchData = async () => {
     try {
-      setIsCreating(true);
-      const { session } = await getSession();
-      const accessToken = session?.access_token;
-
-      if (!accessToken) {
-        throw new Error('No authentication token found. Please log in again.');
-      }
-
-      const config = new Configuration({
-        basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-        accessToken: accessToken,
-      });
-
-      const schedulesApi = new SchedulesApi(config);
-      const response = await schedulesApi.schedulesControllerCreate({
-        patientId,
-      });
-
-      // Navigate to the edit page for the new schedule
-      router.push(
-        AppRoutes.EDIT_PATIENT.replace(':id', patientId).replace(
-          ':scheduleId',
-          response.data.id
-        )
-      );
+      setIsLoading(true);
+      const [schedulesData, patientData] = await Promise.all([
+        getPatientSchedules({ setIsLoading: () => {}, patientId }),
+        getPatient({ setIsLoading: () => {}, patientId }),
+      ]);
+      setSchedules(schedulesData);
+      setPatient(patientData.patient);
     } catch (error) {
-      console.error('Error creating schedule:', error);
+      console.error('Error fetching data:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create schedule. Please try again.',
+        description: 'Failed to load schedules. Please try again.',
         variant: 'destructive',
       });
     } finally {
-      setIsCreating(false);
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [patientId, toast]);
+
+  const handleCreateSchedule = () => {
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleScheduleCreated = () => {
+    fetchData();
   };
 
   const handleScheduleClick = (scheduleId: string) => {
@@ -149,18 +117,9 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
 
       {/* Create New Schedule Button */}
       <div className="flex justify-end">
-        <Button onClick={handleCreateSchedule} disabled={isCreating}>
-          {isCreating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
-            </>
-          ) : (
-            <>
-              <Plus className="mr-2 h-4 w-4" />
-              Create New Schedule
-            </>
-          )}
+        <Button type="button" onClick={handleCreateSchedule}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create New Schedule
         </Button>
       </div>
 
@@ -173,7 +132,7 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
             <p className="text-sm text-muted-foreground mb-4">
               Create a new vaccination schedule to get started.
             </p>
-            <Button onClick={handleCreateSchedule} disabled={isCreating}>
+            <Button type="button" onClick={handleCreateSchedule}>
               <Plus className="mr-2 h-4 w-4" />
               Create Schedule
             </Button>
@@ -186,7 +145,7 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
             return (
               <Card
                 key={schedule.id}
-                className="cursor-pointer hover:bg-accent transition-colors"
+                className="cursor-pointer hover:bg-muted transition-colors"
                 onClick={() => handleScheduleClick(schedule.id)}
               >
                 <CardHeader>
@@ -225,6 +184,14 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
           })}
         </div>
       )}
+
+      {/* Create Schedule Dialog */}
+      <CreateScheduleDialog
+        isDialogOpen={isCreateDialogOpen}
+        setIsDialogOpen={setIsCreateDialogOpen}
+        patientId={patientId}
+        onScheduleCreated={handleScheduleCreated}
+      />
     </div>
   );
 }
