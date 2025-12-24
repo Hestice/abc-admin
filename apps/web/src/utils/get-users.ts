@@ -1,41 +1,25 @@
 import { UsersApi, Configuration } from '@abc-admin/api-lib';
 import { Admin } from '@/types/admin';
 import { getSession } from '@/lib/auth/client';
+import { ApiError } from './add-patient';
 
-interface GetUsersConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-}
+export const getUsers = async (): Promise<Admin[]> => {
+  const { session } = await getSession();
+  const accessToken = session?.access_token;
 
-export const getUsers = async ({
-  setIsLoading,
-}: GetUsersConnectionProps): Promise<Admin[]> => {
-  setIsLoading(true);
-
-  try {
-    const { session } = await getSession();
-    const accessToken = session?.access_token;
-
-    if (!accessToken) {
-      throw new Error('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
-    const usersApi = new UsersApi(config);
-    const response = await usersApi.usersControllerFindAll();
-    return (response as unknown as { data: Admin[] }).data;
-  } catch (error) {
-    console.error('API connection failed:', error);
-    alert(
-      `failed to get users: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`
+  if (!accessToken) {
+    throw new ApiError(
+      'No authentication token found. Please log in again.',
+      401
     );
-    return [];
-  } finally {
-    setIsLoading(false);
   }
+
+  const config = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+    accessToken: accessToken,
+  });
+
+  const usersApi = new UsersApi(config);
+  const response = await usersApi.usersControllerFindAll();
+  return (response as unknown as { data: Admin[] }).data;
 };

@@ -1,6 +1,7 @@
 import './global.css';
 import { Metadata } from 'next';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { QueryProvider } from '@/components/providers/query-provider';
 import { Toaster } from '@/components/ui/toaster';
 export const metadata: Metadata = {
   title: 'Admin',
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen">
-        <AuthProvider>{children}</AuthProvider>
-        <Toaster />
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );

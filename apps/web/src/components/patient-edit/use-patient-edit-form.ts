@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Resolver } from 'react-hook-form';
 import { Category, Sex, Status } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from '../patient-registration/schema';
-import { getPatient, updatePatient } from '@/utils/update-patient';
+import { usePatient } from '@/hooks/queries/use-patients';
+import { useUpdatePatient } from '@/hooks/mutations/use-patient-mutations';
 import { EditablePatient, NewPatient } from '@/types/patient';
 import { deepEquals } from '@/utils/object-utils';
 import { AppRoutes } from '@/constants/routes';
@@ -62,8 +63,6 @@ const formatPatientUpdateData = (data: FormValues): Partial<NewPatient> => {
 
 export function usePatientEditForm(patientId: string) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
   const [modifiedFields, setModifiedFields] = useState<Record<string, boolean>>(
     {}
@@ -75,6 +74,8 @@ export function usePatientEditForm(patientId: string) {
   const modifiedFieldsRef = useRef<Record<string, boolean>>({});
 
   const router = useRouter();
+  const { data: patient, isLoading } = usePatient(patientId);
+  const updatePatientMutation = useUpdatePatient();
 
   // Initialize the form with default values
   const form = useForm<FormValues>({
@@ -84,25 +85,12 @@ export function usePatientEditForm(patientId: string) {
 
   // Fetch patient data on mount
   useEffect(() => {
-    const fetchPatient = async () => {
-      try {
-        const patient = await getPatient({
-          setIsLoading,
-          patientId,
-        });
-
-        const formValues = patientToFormValues(patient);
-        form.reset(formValues);
-        setOriginalValues(formValues);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching patient:', error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchPatient();
-  }, [patientId, form]);
+    if (patient) {
+      const formValues = patientToFormValues(patient);
+      form.reset(formValues);
+      setOriginalValues(formValues);
+    }
+  }, [patient, form]);
 
   // Watch all form values to track modifications
   const formValues = form.watch();
@@ -252,12 +240,9 @@ export function usePatientEditForm(patientId: string) {
         return; // Stop if validation fails
       }
 
-      setIsSubmitting(true);
-
       // We'll send the entire object - the API will handle partial updates
       const formattedData = formatPatientUpdateData(data);
-      await updatePatient({
-        setIsLoading: setIsSubmitting,
+      await updatePatientMutation.mutateAsync({
         patientId,
         updatedPatient: formattedData,
       });
@@ -274,15 +259,13 @@ export function usePatientEditForm(patientId: string) {
       router.push(AppRoutes.PATIENTS);
     } catch (error) {
       console.error('Error updating patient:', error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return {
     form,
     currentStep,
-    isSubmitting,
+    isSubmitting: updatePatientMutation.isPending,
     isLoading,
     modifiedFields,
     handleNext,

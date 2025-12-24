@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -39,10 +39,10 @@ import {
 
 import { useMediaQuery } from '@/hooks/use-media-query';
 
-import { getUsers } from '@/utils/get-users';
-import { Admin } from '@/types/admin';
+import { useUsers } from '@/hooks/queries/use-users';
 import ViewAdmin from './dialog/view-admin';
 import GenerateInviteCode from './dialog/generate-invite-code';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function AdminManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,26 +51,12 @@ export function AdminManagement() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [admins, setAdmins] = useState<Admin[]>([]);
+  const { data: admins = [], isLoading } = useUsers();
+  const queryClient = useQueryClient();
 
-  // Function to fetch users
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true);
-      const users = await getUsers({ setIsLoading });
-      setAdmins(users);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleInviteCodeGenerated = () => {
+    queryClient.invalidateQueries({ queryKey: ['users'] });
   };
-
-  // Fetch users when component mounts
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const filteredAdmins = admins.filter(
     (admin) =>
@@ -99,7 +85,7 @@ export function AdminManagement() {
         <GenerateInviteCode
           isDialogOpen={isInviteCodeDialogOpen}
           setIsDialogOpen={setIsInviteCodeDialogOpen}
-          onInviteCodeGenerated={fetchUsers}
+          onInviteCodeGenerated={handleInviteCodeGenerated}
         />
       </div>
 
