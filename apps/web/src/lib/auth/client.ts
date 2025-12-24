@@ -23,7 +23,40 @@ interface SignUpResponse {
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
-  const data = await response.json();
+  // Check if response has content before trying to parse JSON
+  const contentType = response.headers.get('content-type');
+  const text = await response.text();
+
+  // If response is empty, handle it gracefully
+  if (!text || text.trim().length === 0) {
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+    // Return empty object for successful empty responses
+    return {} as T;
+  }
+
+  // Check if response is JSON
+  if (!contentType || !contentType.includes('application/json')) {
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}: ${text}`);
+    }
+    throw new Error('Response is not JSON');
+  }
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (error) {
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}: ${text}`);
+    }
+    throw new Error(
+      `Failed to parse JSON response: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
+  }
 
   if (!response.ok) {
     const error = (data as ApiError).error || {
