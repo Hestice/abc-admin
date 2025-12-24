@@ -1,7 +1,11 @@
 import { ScheduleStatus } from '@/enums/schedule-status';
+import { Exposure } from './exposure';
+
 export interface Schedule {
   id: string;
-  patientId: string;
+  exposureId: string;
+  patientId?: string; // For backward compatibility, may be present via exposure.patient
+  exposure?: Exposure; // Exposure data
   status: ScheduleStatus;
   day0Date: string;
   day3Date: string;

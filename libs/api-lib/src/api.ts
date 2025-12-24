@@ -83,6 +83,97 @@ export interface ConsumeInviteCodeDto {
 /**
  * 
  * @export
+ * @interface CreateExposureDto
+ */
+export interface CreateExposureDto {
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'patientId': string;
+    /**
+     * 
+     * @type {object}
+     * @memberof CreateExposureDto
+     */
+    'category': object;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'bodyPartsAffected': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'placeOfExposure': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'dateOfExposure': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateExposureDto
+     */
+    'isExposureAtHome': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'sourceOfExposure': string;
+    /**
+     * 
+     * @type {object}
+     * @memberof CreateExposureDto
+     */
+    'animalStatus': object;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateExposureDto
+     */
+    'isWoundCleaned': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CreateExposureDto
+     */
+    'antiTetanusGiven': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'dateOfAntiTetanus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'briefHistory': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'allergy': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateExposureDto
+     */
+    'medications': string;
+}
+/**
+ * 
+ * @export
  * @interface CreatePatientDto
  */
 export interface CreatePatientDto {
@@ -128,84 +219,6 @@ export interface CreatePatientDto {
      * @memberof CreatePatientDto
      */
     'email': string;
-    /**
-     * 
-     * @type {object}
-     * @memberof CreatePatientDto
-     */
-    'category': object;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'bodyPartsAffected': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'placeOfExposure': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'dateOfExposure': string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof CreatePatientDto
-     */
-    'isExposureAtHome': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'sourceOfExposure': string;
-    /**
-     * 
-     * @type {object}
-     * @memberof CreatePatientDto
-     */
-    'animalStatus': object;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof CreatePatientDto
-     */
-    'isWoundCleaned': boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof CreatePatientDto
-     */
-    'antiTetanusGiven': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'dateOfAntiTetanus': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'briefHistory': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'allergy': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreatePatientDto
-     */
-    'medications': string;
 }
 
 export const CreatePatientDtoSexEnum = {
@@ -223,11 +236,17 @@ export type CreatePatientDtoSexEnum = typeof CreatePatientDtoSexEnum[keyof typeo
  */
 export interface CreateScheduleDto {
     /**
-     * The patient ID this schedule belongs to
+     * The exposure ID this schedule belongs to
      * @type {string}
      * @memberof CreateScheduleDto
      */
-    'patientId': string;
+    'exposureId'?: string;
+    /**
+     * The patient ID (for backward compatibility - will use most recent exposure or create new one)
+     * @type {string}
+     * @memberof CreateScheduleDto
+     */
+    'patientId'?: string;
     /**
      * Optional start date for the vaccination schedule (defaults to today if not provided)
      * @type {string}
@@ -321,7 +340,7 @@ export interface ScheduleResponse {
      * @type {object}
      * @memberof ScheduleResponse
      */
-    'patient': object;
+    'exposure': object;
     /**
      * 
      * @type {string}
@@ -404,6 +423,97 @@ export interface ScheduleResponse {
 /**
  * 
  * @export
+ * @interface UpdateExposureDto
+ */
+export interface UpdateExposureDto {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'patientId'?: string;
+    /**
+     * 
+     * @type {object}
+     * @memberof UpdateExposureDto
+     */
+    'category'?: object;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'bodyPartsAffected'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'placeOfExposure'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'dateOfExposure'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateExposureDto
+     */
+    'isExposureAtHome'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'sourceOfExposure'?: string;
+    /**
+     * 
+     * @type {object}
+     * @memberof UpdateExposureDto
+     */
+    'animalStatus'?: object;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateExposureDto
+     */
+    'isWoundCleaned'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateExposureDto
+     */
+    'antiTetanusGiven'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'dateOfAntiTetanus'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'briefHistory'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'allergy'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateExposureDto
+     */
+    'medications'?: string;
+}
+/**
+ * 
+ * @export
  * @interface UpdateScheduleDto
  */
 export interface UpdateScheduleDto {
@@ -477,11 +587,17 @@ export type UpdateScheduleDtoStatusEnum = typeof UpdateScheduleDtoStatusEnum[key
  */
 export interface UpdateVaccinationDto {
     /**
-     * The patient ID associated with this vaccination
+     * The exposure ID associated with this vaccination
      * @type {string}
      * @memberof UpdateVaccinationDto
      */
-    'patientId': string;
+    'exposureId'?: string;
+    /**
+     * The patient ID (for backward compatibility)
+     * @type {string}
+     * @memberof UpdateVaccinationDto
+     */
+    'patientId'?: string;
     /**
      * The vaccination day to mark as completed
      * @type {number}
@@ -909,6 +1025,487 @@ export class AuthApi extends BaseAPI {
      */
     public authControllerVerifyToken(options?: RawAxiosRequestConfig) {
         return AuthApiFp(this.configuration).authControllerVerifyToken(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * ExposuresApi - axios parameter creator
+ * @export
+ */
+export const ExposuresApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create a new exposure
+         * @param {CreateExposureDto} createExposureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerCreate: async (createExposureDto: CreateExposureDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createExposureDto' is not null or undefined
+            assertParamExists('exposuresControllerCreate', 'createExposureDto', createExposureDto)
+            const localVarPath = `/api/exposures`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createExposureDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get all exposures
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerFindAll: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/exposures`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get all exposures for a patient
+         * @param {string} patientId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerFindAllByPatientId: async (patientId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'patientId' is not null or undefined
+            assertParamExists('exposuresControllerFindAllByPatientId', 'patientId', patientId)
+            const localVarPath = `/api/exposures/patient/{patientId}`
+                .replace(`{${"patientId"}}`, encodeURIComponent(String(patientId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get an exposure by ID
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerFindOne: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('exposuresControllerFindOne', 'id', id)
+            const localVarPath = `/api/exposures/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete an exposure
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerRemove: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('exposuresControllerRemove', 'id', id)
+            const localVarPath = `/api/exposures/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update an exposure
+         * @param {string} id 
+         * @param {UpdateExposureDto} updateExposureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerUpdate: async (id: string, updateExposureDto: UpdateExposureDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('exposuresControllerUpdate', 'id', id)
+            // verify required parameter 'updateExposureDto' is not null or undefined
+            assertParamExists('exposuresControllerUpdate', 'updateExposureDto', updateExposureDto)
+            const localVarPath = `/api/exposures/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateExposureDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ExposuresApi - functional programming interface
+ * @export
+ */
+export const ExposuresApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ExposuresApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create a new exposure
+         * @param {CreateExposureDto} createExposureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async exposuresControllerCreate(createExposureDto: CreateExposureDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.exposuresControllerCreate(createExposureDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExposuresApi.exposuresControllerCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get all exposures
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async exposuresControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<object>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.exposuresControllerFindAll(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExposuresApi.exposuresControllerFindAll']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get all exposures for a patient
+         * @param {string} patientId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async exposuresControllerFindAllByPatientId(patientId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<object>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.exposuresControllerFindAllByPatientId(patientId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExposuresApi.exposuresControllerFindAllByPatientId']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get an exposure by ID
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async exposuresControllerFindOne(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.exposuresControllerFindOne(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExposuresApi.exposuresControllerFindOne']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete an exposure
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async exposuresControllerRemove(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.exposuresControllerRemove(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExposuresApi.exposuresControllerRemove']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update an exposure
+         * @param {string} id 
+         * @param {UpdateExposureDto} updateExposureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async exposuresControllerUpdate(id: string, updateExposureDto: UpdateExposureDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.exposuresControllerUpdate(id, updateExposureDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExposuresApi.exposuresControllerUpdate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ExposuresApi - factory interface
+ * @export
+ */
+export const ExposuresApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ExposuresApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create a new exposure
+         * @param {CreateExposureDto} createExposureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerCreate(createExposureDto: CreateExposureDto, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.exposuresControllerCreate(createExposureDto, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get all exposures
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<Array<object>> {
+            return localVarFp.exposuresControllerFindAll(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get all exposures for a patient
+         * @param {string} patientId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerFindAllByPatientId(patientId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<object>> {
+            return localVarFp.exposuresControllerFindAllByPatientId(patientId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get an exposure by ID
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.exposuresControllerFindOne(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete an exposure
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerRemove(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.exposuresControllerRemove(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update an exposure
+         * @param {string} id 
+         * @param {UpdateExposureDto} updateExposureDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        exposuresControllerUpdate(id: string, updateExposureDto: UpdateExposureDto, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.exposuresControllerUpdate(id, updateExposureDto, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ExposuresApi - object-oriented interface
+ * @export
+ * @class ExposuresApi
+ * @extends {BaseAPI}
+ */
+export class ExposuresApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create a new exposure
+     * @param {CreateExposureDto} createExposureDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExposuresApi
+     */
+    public exposuresControllerCreate(createExposureDto: CreateExposureDto, options?: RawAxiosRequestConfig) {
+        return ExposuresApiFp(this.configuration).exposuresControllerCreate(createExposureDto, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get all exposures
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExposuresApi
+     */
+    public exposuresControllerFindAll(options?: RawAxiosRequestConfig) {
+        return ExposuresApiFp(this.configuration).exposuresControllerFindAll(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get all exposures for a patient
+     * @param {string} patientId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExposuresApi
+     */
+    public exposuresControllerFindAllByPatientId(patientId: string, options?: RawAxiosRequestConfig) {
+        return ExposuresApiFp(this.configuration).exposuresControllerFindAllByPatientId(patientId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get an exposure by ID
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExposuresApi
+     */
+    public exposuresControllerFindOne(id: string, options?: RawAxiosRequestConfig) {
+        return ExposuresApiFp(this.configuration).exposuresControllerFindOne(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete an exposure
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExposuresApi
+     */
+    public exposuresControllerRemove(id: string, options?: RawAxiosRequestConfig) {
+        return ExposuresApiFp(this.configuration).exposuresControllerRemove(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update an exposure
+     * @param {string} id 
+     * @param {UpdateExposureDto} updateExposureDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExposuresApi
+     */
+    public exposuresControllerUpdate(id: string, updateExposureDto: UpdateExposureDto, options?: RawAxiosRequestConfig) {
+        return ExposuresApiFp(this.configuration).exposuresControllerUpdate(id, updateExposureDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -1884,7 +2481,45 @@ export const SchedulesApiAxiosParamCreator = function (configuration?: Configura
         },
         /**
          * 
-         * @summary Get a schedule by patient ID
+         * @summary Get all schedules for a patient
+         * @param {string} patientId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        schedulesControllerFindAllByPatientId: async (patientId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'patientId' is not null or undefined
+            assertParamExists('schedulesControllerFindAllByPatientId', 'patientId', patientId)
+            const localVarPath = `/api/schedules/patient/{patientId}`
+                .replace(`{${"patientId"}}`, encodeURIComponent(String(patientId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get the most recent schedule for a patient
          * @param {string} patientId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1892,7 +2527,7 @@ export const SchedulesApiAxiosParamCreator = function (configuration?: Configura
         schedulesControllerFindByPatientId: async (patientId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'patientId' is not null or undefined
             assertParamExists('schedulesControllerFindByPatientId', 'patientId', patientId)
-            const localVarPath = `/api/schedules/patient/{patientId}`
+            const localVarPath = `/api/schedules/patient/{patientId}/latest`
                 .replace(`{${"patientId"}}`, encodeURIComponent(String(patientId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2121,7 +2756,20 @@ export const SchedulesApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get a schedule by patient ID
+         * @summary Get all schedules for a patient
+         * @param {string} patientId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async schedulesControllerFindAllByPatientId(patientId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ScheduleResponse>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesControllerFindAllByPatientId(patientId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SchedulesApi.schedulesControllerFindAllByPatientId']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get the most recent schedule for a patient
          * @param {string} patientId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2217,7 +2865,17 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
         },
         /**
          * 
-         * @summary Get a schedule by patient ID
+         * @summary Get all schedules for a patient
+         * @param {string} patientId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        schedulesControllerFindAllByPatientId(patientId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ScheduleResponse>> {
+            return localVarFp.schedulesControllerFindAllByPatientId(patientId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get the most recent schedule for a patient
          * @param {string} patientId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2302,7 +2960,19 @@ export class SchedulesApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get a schedule by patient ID
+     * @summary Get all schedules for a patient
+     * @param {string} patientId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SchedulesApi
+     */
+    public schedulesControllerFindAllByPatientId(patientId: string, options?: RawAxiosRequestConfig) {
+        return SchedulesApiFp(this.configuration).schedulesControllerFindAllByPatientId(patientId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get the most recent schedule for a patient
      * @param {string} patientId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

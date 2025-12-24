@@ -1,7 +1,7 @@
 import { PatientsApi, Configuration } from '@abc-admin/api-lib';
 import { getSession } from '@/lib/auth/client';
-import { NewPatient } from '@/types/patient';
-import { Category, Sex } from '@abc-admin/enums';
+import { NewPatient, Patient } from '@/types/patient';
+import { Sex } from '@abc-admin/enums';
 
 interface AddPatientConnectionProps {
   setIsLoading: (isLoading: boolean) => void;
@@ -29,21 +29,16 @@ export class ApiError extends Error {
 
 // Adapter function to convert NewPatient to CreatePatientDto
 const adaptToCreatePatientDto = (patient: NewPatient): any => {
-  // Create the base object
+  // Create the base object with only patient metadata fields
   const adaptedPatient = {
-    ...patient,
+    firstName: patient.firstName,
     middleName: patient.middleName || '',
-    email: patient.email || '',
+    lastName: patient.lastName,
+    dateOfBirth: patient.dateOfBirth,
     sex: patient.sex as Sex,
-    // Category is already numeric, matching the enum
-    category: patient.category as Category,
+    address: patient.address,
+    email: patient.email || '',
   };
-
-  // Only include dateOfAntiTetanus if it's defined and not empty
-  if (!patient.antiTetanusGiven || !patient.dateOfAntiTetanus) {
-    // If anti-tetanus wasn't given or no date, remove the field
-    delete adaptedPatient.dateOfAntiTetanus;
-  }
 
   return adaptedPatient;
 };
@@ -51,7 +46,7 @@ const adaptToCreatePatientDto = (patient: NewPatient): any => {
 export const addPatient = async ({
   setIsLoading,
   newPatient,
-}: AddPatientConnectionProps): Promise<ApiResponse<NewPatient>> => {
+}: AddPatientConnectionProps): Promise<ApiResponse<Patient>> => {
   setIsLoading(true);
 
   try {
@@ -71,7 +66,7 @@ export const addPatient = async ({
     const response = await patientsApi.patientsControllerCreate(
       adaptToCreatePatientDto(newPatient)
     );
-    return response as unknown as ApiResponse<NewPatient>;
+    return response as unknown as ApiResponse<Patient>;
   } catch (error: any) {
     console.error('API connection failed:', error);
 

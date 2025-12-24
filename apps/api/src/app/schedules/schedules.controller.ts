@@ -8,7 +8,13 @@ import {
   Delete,
   UseGuards,
   BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+  ConflictException,
+  Request,
+  Logger,
 } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
 import {
   ApiTags,
   ApiOperation,
@@ -29,7 +35,7 @@ class ScheduleResponse {
   id!: string;
 
   @ApiProperty()
-  patient!: Record<string, any>;
+  exposure!: Record<string, any>;
 
   @ApiProperty()
   status!: string;
@@ -76,6 +82,8 @@ class ScheduleResponse {
 @UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth()
 export class SchedulesController {
+  private readonly logger = new Logger(SchedulesController.name);
+
   constructor(private readonly schedulesService: SchedulesService) {}
 
   @Post()
@@ -87,12 +95,64 @@ export class SchedulesController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid input or patient already has a schedule.',
+    description: 'Invalid input.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Patient not found.',
   })
   async create(
-    @Body() createScheduleDto: CreateScheduleDto
+    @Body() createScheduleDto: CreateScheduleDto,
+    @Request() req: any
   ): Promise<Schedule> {
-    return this.schedulesService.create(createScheduleDto);
+    try {
+      if (!req.user?.id) {
+        this.logger.error('User ID not found in request');
+        throw new BadRequestException('User authentication failed');
+      }
+
+      this.logger.log(
+        `Creating schedule ${
+          createScheduleDto.exposureId
+            ? `for exposure ${createScheduleDto.exposureId}`
+            : `for patient ${createScheduleDto.patientId}`
+        } by user ${req.user.id}`
+      );
+
+      return await this.schedulesService.create(createScheduleDto, req.user.id);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(`Error creating schedule: ${errorMessage}`, errorStack);
+
+      // Re-throw known exceptions (they'll be handled by NestJS exception filters)
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+
+      // Handle database constraint violations
+      if (error instanceof QueryFailedError) {
+        if (error.message.includes('unique constraint')) {
+          throw new ConflictException(
+            'A schedule already exists for this patient. Please use the existing schedule or contact support.'
+          );
+        }
+        if (error.message.includes('foreign key constraint')) {
+          throw new BadRequestException('Invalid patient ID provided.');
+        }
+      }
+
+      // Wrap unexpected errors
+      throw new InternalServerErrorException(
+        errorMessage || 'Failed to create schedule'
+      );
+    }
   }
 
   @Get()
@@ -119,10 +179,23 @@ export class SchedulesController {
   }
 
   @Get('patient/:patientId')
-  @ApiOperation({ summary: 'Get a schedule by patient ID' })
+  @ApiOperation({ summary: 'Get all schedules for a patient' })
   @ApiResponse({
     status: 200,
-    description: 'Return the schedule for the patient.',
+    description: 'Return all schedules for the patient.',
+    type: [ScheduleResponse],
+  })
+  async findAllByPatientId(
+    @Param('patientId') patientId: string
+  ): Promise<Schedule[]> {
+    return this.schedulesService.findAllByPatientId(patientId);
+  }
+
+  @Get('patient/:patientId/latest')
+  @ApiOperation({ summary: 'Get the most recent schedule for a patient' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the most recent schedule for the patient.',
     type: ScheduleResponse,
   })
   @ApiResponse({
@@ -169,11 +242,19 @@ export class SchedulesController {
     // Get the schedule
     const schedule = await this.schedulesService.findOne(id);
 
-    // Verify that the schedule belongs to the patient
-    if (schedule.patient.id !== updateVaccinationDto.patientId) {
-      throw new BadRequestException(
-        'Schedule does not belong to the specified patient'
-      );
+    // Verify that the schedule belongs to the exposure or patient (for backward compatibility)
+    if (updateVaccinationDto.exposureId) {
+      if (schedule.exposure.id !== updateVaccinationDto.exposureId) {
+        throw new BadRequestException(
+          'Schedule does not belong to the specified exposure'
+        );
+      }
+    } else if (updateVaccinationDto.patientId) {
+      if (schedule.exposure.patient.id !== updateVaccinationDto.patientId) {
+        throw new BadRequestException(
+          'Schedule does not belong to the specified patient'
+        );
+      }
     }
 
     // Update the vaccination day

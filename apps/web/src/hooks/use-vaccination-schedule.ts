@@ -8,7 +8,7 @@ import { PatientVaccination } from '@/types/vaccinations';
 import { updatePatientAntiTetanus } from '@/utils/update-patient';
 import { Status } from '@abc-admin/enums';
 
-export function useVaccinationSchedule(patientId: string) {
+export function useVaccinationSchedule(patientId: string, scheduleId?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [scheduleData, setScheduleData] = useState<PatientVaccination | null>(
@@ -32,22 +32,45 @@ export function useVaccinationSchedule(patientId: string) {
           throw new Error('Patient data not available');
         }
 
-        // Store the animal status
-        setAnimalStatus(patientData.animalStatus);
-
-        // Use the retrieved patient data directly
+        // Use scheduleId if provided, otherwise fetch by patientId
         const scheduleResponse = await getSchedule({
           setIsLoading: () => {},
           patientId: patientData.id,
+          scheduleId,
         });
+
+        // Get exposure data from schedule (preferred) or fallback to patient summary
+        const exposure = scheduleResponse.exposure;
+        const animalStatusFromExposure = exposure?.animalStatus;
+        const antiTetanusFromExposure = exposure?.antiTetanusGiven;
+        const dateOfAntiTetanusFromExposure = exposure?.dateOfAntiTetanus;
+
+        // Store the animal status from exposure (or fallback to patient summary)
+        setAnimalStatus(
+          animalStatusFromExposure || patientData.animalStatus || Status.UNKNOWN
+        );
+
+        // Normalize dateOfAntiTetanus to Date or undefined
+        const normalizeDate = (
+          date: Date | string | undefined
+        ): Date | undefined => {
+          if (!date) return undefined;
+          return date instanceof Date ? date : new Date(date);
+        };
+
+        const dateOfAntiTetanus = normalizeDate(
+          dateOfAntiTetanusFromExposure || patientData.dateOfAntiTetanus
+        );
 
         const transformedData = transformScheduleData(
           scheduleResponse,
           patientData.firstName,
           patientData.middleName,
           patientData.lastName,
-          patientData.antiTetanusGiven,
-          patientData.dateOfAntiTetanus
+          antiTetanusFromExposure !== undefined
+            ? antiTetanusFromExposure
+            : patientData.antiTetanusGiven,
+          dateOfAntiTetanus ?? new Date()
         );
 
         setScheduleData(transformedData);
@@ -64,7 +87,7 @@ export function useVaccinationSchedule(patientId: string) {
     };
 
     fetchData();
-  }, [patientId]);
+  }, [patientId, scheduleId]);
 
   const handleVaccinationToggle = async (day: number, completed: boolean) => {
     if (!scheduleData) return;

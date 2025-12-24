@@ -3,11 +3,11 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Schedule } from '../../schedules/entities/schedule.entity';
-import { Category, Sex, Status } from '@abc-admin/enums';
+import { Exposure } from '../../exposures/entities/exposure.entity';
+import { Sex } from '@abc-admin/enums';
 
 @Entity('patients')
 export class Patient {
@@ -38,57 +38,11 @@ export class Patient {
   @Column({ nullable: true })
   email?: string;
 
-  @Column({
-    type: 'enum',
-    enum: Category,
-  })
-  category!: Category;
-
-  @Column()
-  bodyPartsAffected!: string;
-
-  @Column()
-  placeOfExposure!: string;
-
-  @Column({ type: 'date' })
-  dateOfExposure!: Date;
-
-  @Column()
-  isExposureAtHome!: boolean;
-
-  @Column()
-  sourceOfExposure!: string;
-
-  @Column({
-    type: 'enum',
-    enum: Status,
-    default: Status.UNKNOWN,
-  })
-  animalStatus!: Status;
-
-  @Column()
-  isWoundCleaned!: boolean;
-
-  @Column()
-  antiTetanusGiven!: boolean;
-
-  @Column({ type: 'date', nullable: true })
-  dateOfAntiTetanus?: Date;
-
-  @Column()
-  briefHistory!: string;
-
-  @Column()
-  allergy!: string;
-
-  @Column()
-  medications!: string;
-
   @ManyToOne(() => User, { nullable: true })
   managedBy?: User;
 
-  @OneToOne(() => Schedule, (schedule) => schedule.patient, { nullable: true })
-  schedule?: Schedule;
+  @OneToMany(() => Exposure, (exposure) => exposure.patient)
+  exposures!: Exposure[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;

@@ -16,6 +16,7 @@ import {
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { PatientsService } from '../patients/patients.service';
+import { ExposuresService } from '../exposures/exposures.service';
 import { Status } from '@abc-admin/enums';
 
 @Injectable()
@@ -26,23 +27,54 @@ export class SchedulesService {
     @InjectRepository(Schedule)
     private schedulesRepository: Repository<Schedule>,
     @Inject(forwardRef(() => PatientsService))
-    private patientsService: PatientsService
+    private patientsService: PatientsService,
+    @Inject(forwardRef(() => ExposuresService))
+    private exposuresService: ExposuresService
   ) {}
 
-  async create(createScheduleDto: CreateScheduleDto): Promise<Schedule> {
-    this.logger.log(
-      `Creating schedule for patient: ${createScheduleDto.patientId}`
-    );
+  async create(
+    createScheduleDto: CreateScheduleDto,
+    userId: string
+  ): Promise<Schedule> {
+    let exposure;
 
-    // Check if patient exists
-    const patient = await this.patientsService.findOne(
-      createScheduleDto.patientId
-    );
+    if (createScheduleDto.exposureId) {
+      // Use provided exposureId
+      this.logger.log(
+        `Creating schedule for exposure: ${createScheduleDto.exposureId}`
+      );
+      exposure = await this.exposuresService.findOne(
+        createScheduleDto.exposureId,
+        userId
+      );
+    } else if (createScheduleDto.patientId) {
+      // Backward compatibility: find most recent exposure or create new one
+      this.logger.log(
+        `Creating schedule for patient: ${createScheduleDto.patientId}`
+      );
+      // Verify patient exists
+      await this.patientsService.findOne(createScheduleDto.patientId, userId);
 
-    // Check if patient already has a schedule
-    if (patient.schedule) {
+      // Find most recent exposure for this patient
+      const exposures = await this.exposuresService.findAllByPatientId(
+        createScheduleDto.patientId,
+        userId
+      );
+
+      if (exposures.length > 0) {
+        // Use most recent exposure
+        exposure = exposures[0];
+        this.logger.log(
+          `Using existing exposure: ${exposure.id} for patient: ${createScheduleDto.patientId}`
+        );
+      } else {
+        throw new BadRequestException(
+          'No exposure found for patient. Please create an exposure first.'
+        );
+      }
+    } else {
       throw new BadRequestException(
-        'Patient already has a vaccination schedule'
+        'Either exposureId or patientId must be provided'
       );
     }
 
@@ -83,7 +115,7 @@ export class SchedulesService {
 
     // Create schedule
     const schedule = this.schedulesRepository.create({
-      patient,
+      exposure,
       status: ScheduleStatus.IN_PROGRESS,
       day0Date,
       day3Date,
@@ -140,7 +172,7 @@ export class SchedulesService {
   async findAll(): Promise<Schedule[]> {
     this.logger.log('Finding all schedules');
     const schedules = await this.schedulesRepository.find({
-      relations: ['patient'],
+      relations: ['exposure', 'exposure.patient'],
     });
 
     // Log the first schedule's dates if available
@@ -177,7 +209,7 @@ export class SchedulesService {
     this.logger.log(`Finding schedule with ID: ${id}`);
     const schedule = await this.schedulesRepository.findOne({
       where: { id },
-      relations: ['patient'],
+      relations: ['exposure', 'exposure.patient'],
     });
 
     if (!schedule) {
@@ -212,45 +244,34 @@ export class SchedulesService {
     return schedule;
   }
 
-  async findByPatientId(patientId: string): Promise<Schedule> {
-    this.logger.log(`Finding schedule for patient with ID: ${patientId}`);
-    const schedule = await this.schedulesRepository.findOne({
-      where: { patient: { id: patientId } },
-      relations: ['patient'],
+  async findAllByPatientId(patientId: string): Promise<Schedule[]> {
+    this.logger.log(`Finding all schedules for patient with ID: ${patientId}`);
+    const schedules = await this.schedulesRepository.find({
+      where: { exposure: { patient: { id: patientId } } },
+      relations: ['exposure', 'exposure.patient'],
+      order: { createdAt: 'DESC' },
     });
 
-    if (!schedule) {
+    this.logger.debug(
+      `Found ${schedules.length} schedule(s) for patient ${patientId}`
+    );
+    return schedules;
+  }
+
+  async findByPatientId(patientId: string): Promise<Schedule> {
+    // Keep this method for backward compatibility, but it will return the most recent schedule
+    this.logger.log(`Finding schedule for patient with ID: ${patientId}`);
+    const schedules = await this.findAllByPatientId(patientId);
+
+    if (schedules.length === 0) {
       this.logger.error(`Schedule not found for patient with ID: ${patientId}`);
       throw new NotFoundException(
         `Schedule not found for patient ${patientId}`
       );
     }
 
-    // Log the schedule's dates
-    this.logger.debug(`Patient ${patientId} schedule dates:
-      day0Date: ${
-        schedule.day0Date instanceof Date
-          ? schedule.day0Date.toISOString()
-          : schedule.day0Date
-      }
-      day3Date: ${
-        schedule.day3Date instanceof Date
-          ? schedule.day3Date.toISOString()
-          : schedule.day3Date
-      }
-      day7Date: ${
-        schedule.day7Date instanceof Date
-          ? schedule.day7Date.toISOString()
-          : schedule.day7Date
-      }
-      day28Date: ${
-        schedule.day28Date instanceof Date
-          ? schedule.day28Date.toISOString()
-          : schedule.day28Date
-      }
-    `);
-
-    return schedule;
+    // Return the most recent schedule (first in DESC order)
+    return schedules[0];
   }
 
   async update(
@@ -341,8 +362,8 @@ export class SchedulesService {
 
   async updateVaccination(id: string, day: VaccinationDay): Promise<Schedule> {
     const schedule = await this.findOne(id);
-    const patient = await this.patientsService.findOne(schedule.patient.id);
-    const isAnimalAlive = patient.animalStatus === Status.ALIVE;
+    // Exposure is already loaded in the relation, use it directly
+    const isAnimalAlive = schedule.exposure.animalStatus === Status.ALIVE;
 
     switch (day) {
       case VaccinationDay.DAY_0:
