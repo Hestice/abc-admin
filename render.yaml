@@ -5,6 +5,6 @@ services:
     plan: free
     region: singapore
     buildCommand: |
-      npm install
+      NPM_CONFIG_PRODUCTION=false npm install
       npx nx build api
     startCommand: node apps/api/dist/main.js
