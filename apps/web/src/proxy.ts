@@ -79,28 +79,28 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = isProtectedRoute(pathname);
   const isHomePage = pathname === AppRoutes.HOME;
 
-  // Get session from Supabase
+  // Verify user authentication using getUser() (verifies with Supabase Auth server)
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Redirect to login page if accessing protected route without session
-  if (isAuthRoute && !session) {
+  // Redirect to login page if accessing protected route without authenticated user
+  if (isAuthRoute && !user) {
     return NextResponse.redirect(new URL(AppRoutes.HOME, request.url));
   }
 
   // Redirect to dashboard if already logged in and accessing home page
-  if (isHomePage && session) {
+  if (isHomePage && user) {
     return NextResponse.redirect(new URL(AppRoutes.DASHBOARD, request.url));
   }
 
   // Add session metadata for client-side access
-  if (session) {
+  if (user) {
     headers.set('x-user-authenticated', 'true');
     // Only expose minimal user information
-    if (session.user?.email) {
-      headers.set('x-user-email', session.user.email);
+    if (user.email) {
+      headers.set('x-user-email', user.email);
     }
   }
 

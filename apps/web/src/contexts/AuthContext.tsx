@@ -5,9 +5,10 @@ import {
   useContext,
   useState,
   useEffect,
+  useRef,
   ReactNode,
 } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { getSession } from '@/lib/auth/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
@@ -45,15 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const checkAuthStatus = async () => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { session } = await getSession();
 
-      if (session?.user) {
+      if (session?.user && session.access_token) {
         setSupabaseUser(session.user);
         setAccessToken(session.access_token);
         setUser({
@@ -143,57 +142,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const initializeAuth = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!mounted) return;
-
-        if (session?.user && session.access_token) {
-          setSupabaseUser(session.user);
-          setAccessToken(session.access_token);
-
-          // Call /me endpoint to ensure user exists in database and get role
-          const userData = await fetchUserFromBackend(session.access_token);
-          if (userData) {
-            setUser({
-              id: userData.id,
-              email: userData.email,
-              role: userData.role,
-            });
-          } else {
-            setUser({
-              id: session.user.id,
-              email: session.user.email || null,
-              role: null,
-            });
-          }
-        } else {
-          setSupabaseUser(null);
-          setAccessToken(null);
-          setUser(emptyUser);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        if (mounted) {
-          setSupabaseUser(null);
-          setAccessToken(null);
-          setUser(emptyUser);
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    initializeAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const updateAuthState = async (
+      session: { user: SupabaseUser; access_token: string } | null
+    ) => {
       if (!mounted) return;
 
       if (session?.user && session.access_token) {
@@ -226,11 +177,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(emptyUser);
       }
       setIsLoading(false);
-    });
+    };
+
+    const initializeAuth = async () => {
+      try {
+        const { session } = await getSession();
+
+        if (!mounted) return;
+
+        if (session?.user && session.access_token) {
+          await updateAuthState({
+            user: session.user,
+            access_token: session.access_token,
+          });
+        } else {
+          await updateAuthState(null);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          await updateAuthState(null);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    // Poll for auth state changes (replaces onAuthStateChange)
+    // Poll every 10 seconds, or on window focus/visibility change
+    const pollAuthState = async () => {
+      if (!mounted) return;
+      try {
+        const { session } = await getSession();
+        if (session?.user && session.access_token) {
+          await updateAuthState({
+            user: session.user,
+            access_token: session.access_token,
+          });
+        } else {
+          await updateAuthState(null);
+        }
+      } catch (error) {
+        console.error('Error polling auth state:', error);
+      }
+    };
+
+    // Set up polling interval
+    pollingIntervalRef.current = setInterval(pollAuthState, 10000); // Poll every 10 seconds
+
+    // Also poll on window focus and visibility change
+    const handleFocus = () => {
+      pollAuthState();
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        pollAuthState();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
