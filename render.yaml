@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: api
+    env: node
+    plan: free
+    region: singapore
+    buildCommand: |
+      NPM_CONFIG_PRODUCTION=false npm install
+      cd apps/api && NODE_ENV=production npx webpack-cli build --node-env=production
+    startCommand: node apps/api/dist/main.js
