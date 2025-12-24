@@ -34,7 +34,7 @@ export default function ViewAdmin({
         {selectedAdmin && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">{selectedAdmin.username}</h3>
+              <h3 className="text-lg font-medium">{selectedAdmin.email}</h3>
               <Badge variant={selectedAdmin.isActive ? 'default' : 'secondary'}>
                 {selectedAdmin.isActive ? 'Active' : 'Inactive'}
               </Badge>

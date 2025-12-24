@@ -42,12 +42,11 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { getUsers } from '@/utils/get-users';
 import { Admin } from '@/types/admin';
 import ViewAdmin from './dialog/view-admin';
-import AddAdmin from './dialog/add-admin';
-import { UserRole } from '@abc-admin/enums';
+import GenerateInviteCode from './dialog/generate-invite-code';
 
 export function AdminManagement() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isInviteCodeDialogOpen, setIsInviteCodeDialogOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -73,20 +72,8 @@ export function AdminManagement() {
     fetchUsers();
   }, []);
 
-  const newAdmin = {
-    username: '',
-    email: '',
-    role: UserRole.ADMIN,
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    isActive: true,
-  };
-
   const filteredAdmins = admins.filter(
     (admin) =>
-      admin.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -109,11 +96,10 @@ export function AdminManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <AddAdmin
-          isAddDialogOpen={isAddDialogOpen}
-          setIsAddDialogOpen={setIsAddDialogOpen}
-          newAdmin={newAdmin}
-          onAdminAdded={fetchUsers}
+        <GenerateInviteCode
+          isDialogOpen={isInviteCodeDialogOpen}
+          setIsDialogOpen={setIsInviteCodeDialogOpen}
+          onInviteCodeGenerated={fetchUsers}
         />
       </div>
 
@@ -141,7 +127,7 @@ export function AdminManagement() {
                         onClick={() => handleViewAdmin(admin)}
                       >
                         <div className="space-y-1">
-                          <div className="font-medium">{admin.username}</div>
+                          <div className="font-medium">{admin.email}</div>
                           <div className="mt-1 flex items-center gap-2">
                             <div className="text-sm">{admin.role}</div>
                             <Badge
@@ -186,7 +172,7 @@ export function AdminManagement() {
                   filteredAdmins.map((admin) => (
                     <TableRow key={admin.id}>
                       <TableCell>
-                        <div className="font-normal">{admin.username}</div>
+                        <div className="font-normal">{admin.email}</div>
                       </TableCell>
                       <TableCell className="capitalize">{admin.role}</TableCell>
                       <TableCell>

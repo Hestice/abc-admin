@@ -70,6 +70,19 @@ export interface AuthControllerVerifySupabaseToken200ResponseUser {
 /**
  * 
  * @export
+ * @interface ConsumeInviteCodeDto
+ */
+export interface ConsumeInviteCodeDto {
+    /**
+     * The invite code UUID to consume
+     * @type {string}
+     * @memberof ConsumeInviteCodeDto
+     */
+    'code': string;
+}
+/**
+ * 
+ * @export
  * @interface CreatePatientDto
  */
 export interface CreatePatientDto {
@@ -267,11 +280,30 @@ export interface CreateUserDto {
 }
 
 export const CreateUserDtoRoleEnum = {
-    Admin: 'admin'
+    Admin: 'ADMIN'
 } as const;
 
 export type CreateUserDtoRoleEnum = typeof CreateUserDtoRoleEnum[keyof typeof CreateUserDtoRoleEnum];
 
+/**
+ * 
+ * @export
+ * @interface InviteCodesControllerValidate200Response
+ */
+export interface InviteCodesControllerValidate200Response {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof InviteCodesControllerValidate200Response
+     */
+    'valid'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof InviteCodesControllerValidate200Response
+     */
+    'message'?: string | null;
+}
 /**
  * 
  * @export
@@ -467,6 +499,19 @@ export const UpdateVaccinationDtoDayEnum = {
 
 export type UpdateVaccinationDtoDayEnum = typeof UpdateVaccinationDtoDayEnum[keyof typeof UpdateVaccinationDtoDayEnum];
 
+/**
+ * 
+ * @export
+ * @interface ValidateInviteCodeDto
+ */
+export interface ValidateInviteCodeDto {
+    /**
+     * The invite code UUID to validate
+     * @type {string}
+     * @memberof ValidateInviteCodeDto
+     */
+    'code': string;
+}
 
 /**
  * AppApi - axios parameter creator
@@ -864,6 +909,405 @@ export class AuthApi extends BaseAPI {
      */
     public authControllerVerifyToken(options?: RawAxiosRequestConfig) {
         return AuthApiFp(this.configuration).authControllerVerifyToken(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * InviteCodesApi - axios parameter creator
+ * @export
+ */
+export const InviteCodesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Consume an invite code (requires authentication)
+         * @param {ConsumeInviteCodeDto} consumeInviteCodeDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerConsume: async (consumeInviteCodeDto: ConsumeInviteCodeDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'consumeInviteCodeDto' is not null or undefined
+            assertParamExists('inviteCodesControllerConsume', 'consumeInviteCodeDto', consumeInviteCodeDto)
+            const localVarPath = `/api/invite-codes/consume`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(consumeInviteCodeDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Generate a new invite code (admin only)
+         * @param {object} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerCreate: async (body: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('inviteCodesControllerCreate', 'body', body)
+            const localVarPath = `/api/invite-codes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get all invite codes (admin only)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerFindAll: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/invite-codes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get invite code details by ID (admin only)
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerFindOne: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('inviteCodesControllerFindOne', 'id', id)
+            const localVarPath = `/api/invite-codes/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Validate an invite code (public)
+         * @param {ValidateInviteCodeDto} validateInviteCodeDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerValidate: async (validateInviteCodeDto: ValidateInviteCodeDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'validateInviteCodeDto' is not null or undefined
+            assertParamExists('inviteCodesControllerValidate', 'validateInviteCodeDto', validateInviteCodeDto)
+            const localVarPath = `/api/invite-codes/validate`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(validateInviteCodeDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * InviteCodesApi - functional programming interface
+ * @export
+ */
+export const InviteCodesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = InviteCodesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Consume an invite code (requires authentication)
+         * @param {ConsumeInviteCodeDto} consumeInviteCodeDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async inviteCodesControllerConsume(consumeInviteCodeDto: ConsumeInviteCodeDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.inviteCodesControllerConsume(consumeInviteCodeDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InviteCodesApi.inviteCodesControllerConsume']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Generate a new invite code (admin only)
+         * @param {object} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async inviteCodesControllerCreate(body: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.inviteCodesControllerCreate(body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InviteCodesApi.inviteCodesControllerCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get all invite codes (admin only)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async inviteCodesControllerFindAll(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.inviteCodesControllerFindAll(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InviteCodesApi.inviteCodesControllerFindAll']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get invite code details by ID (admin only)
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async inviteCodesControllerFindOne(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.inviteCodesControllerFindOne(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InviteCodesApi.inviteCodesControllerFindOne']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Validate an invite code (public)
+         * @param {ValidateInviteCodeDto} validateInviteCodeDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async inviteCodesControllerValidate(validateInviteCodeDto: ValidateInviteCodeDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InviteCodesControllerValidate200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.inviteCodesControllerValidate(validateInviteCodeDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InviteCodesApi.inviteCodesControllerValidate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * InviteCodesApi - factory interface
+ * @export
+ */
+export const InviteCodesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = InviteCodesApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Consume an invite code (requires authentication)
+         * @param {ConsumeInviteCodeDto} consumeInviteCodeDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerConsume(consumeInviteCodeDto: ConsumeInviteCodeDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.inviteCodesControllerConsume(consumeInviteCodeDto, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Generate a new invite code (admin only)
+         * @param {object} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerCreate(body: object, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.inviteCodesControllerCreate(body, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get all invite codes (admin only)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerFindAll(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.inviteCodesControllerFindAll(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get invite code details by ID (admin only)
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerFindOne(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.inviteCodesControllerFindOne(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Validate an invite code (public)
+         * @param {ValidateInviteCodeDto} validateInviteCodeDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inviteCodesControllerValidate(validateInviteCodeDto: ValidateInviteCodeDto, options?: RawAxiosRequestConfig): AxiosPromise<InviteCodesControllerValidate200Response> {
+            return localVarFp.inviteCodesControllerValidate(validateInviteCodeDto, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * InviteCodesApi - object-oriented interface
+ * @export
+ * @class InviteCodesApi
+ * @extends {BaseAPI}
+ */
+export class InviteCodesApi extends BaseAPI {
+    /**
+     * 
+     * @summary Consume an invite code (requires authentication)
+     * @param {ConsumeInviteCodeDto} consumeInviteCodeDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InviteCodesApi
+     */
+    public inviteCodesControllerConsume(consumeInviteCodeDto: ConsumeInviteCodeDto, options?: RawAxiosRequestConfig) {
+        return InviteCodesApiFp(this.configuration).inviteCodesControllerConsume(consumeInviteCodeDto, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Generate a new invite code (admin only)
+     * @param {object} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InviteCodesApi
+     */
+    public inviteCodesControllerCreate(body: object, options?: RawAxiosRequestConfig) {
+        return InviteCodesApiFp(this.configuration).inviteCodesControllerCreate(body, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get all invite codes (admin only)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InviteCodesApi
+     */
+    public inviteCodesControllerFindAll(options?: RawAxiosRequestConfig) {
+        return InviteCodesApiFp(this.configuration).inviteCodesControllerFindAll(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get invite code details by ID (admin only)
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InviteCodesApi
+     */
+    public inviteCodesControllerFindOne(id: string, options?: RawAxiosRequestConfig) {
+        return InviteCodesApiFp(this.configuration).inviteCodesControllerFindOne(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Validate an invite code (public)
+     * @param {ValidateInviteCodeDto} validateInviteCodeDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InviteCodesApi
+     */
+    public inviteCodesControllerValidate(validateInviteCodeDto: ValidateInviteCodeDto, options?: RawAxiosRequestConfig) {
+        return InviteCodesApiFp(this.configuration).inviteCodesControllerValidate(validateInviteCodeDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
