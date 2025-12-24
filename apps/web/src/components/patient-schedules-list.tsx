@@ -21,7 +21,6 @@ import { ScheduleStatus } from '@/enums/schedule-status';
 import { formatDate } from '@/utils/date-utils';
 import { AppRoutes } from '@/constants/routes';
 import { useToast } from '@/hooks/use-toast';
-import CreateScheduleDialog from '@/components/dialog/create-schedule';
 
 interface PatientSchedulesListProps {
   patientId: string;
@@ -31,7 +30,6 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [patient, setPatient] = useState<PatientSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -61,11 +59,7 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
   }, [patientId, toast]);
 
   const handleCreateSchedule = () => {
-    setIsCreateDialogOpen(true);
-  };
-
-  const handleScheduleCreated = () => {
-    fetchData();
+    router.push(AppRoutes.CREATE_EXPOSURE.replace(':id', patientId));
   };
 
   const handleScheduleClick = (scheduleId: string) => {
@@ -184,14 +178,6 @@ export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
           })}
         </div>
       )}
-
-      {/* Create Schedule Dialog */}
-      <CreateScheduleDialog
-        isDialogOpen={isCreateDialogOpen}
-        setIsDialogOpen={setIsCreateDialogOpen}
-        patientId={patientId}
-        onScheduleCreated={handleScheduleCreated}
-      />
     </div>
   );
 }
