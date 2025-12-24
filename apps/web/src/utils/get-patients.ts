@@ -1,97 +1,64 @@
 import { Configuration, PatientsApi } from '@abc-admin/api-lib';
 import { getSession } from '@/lib/auth/client';
 import { Patient, PatientSummary } from '@/types/patient';
+import { ApiError } from './add-patient';
 
-interface GetPatientsConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-  page: number;
-}
-
-interface GetPatientConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-  patientId: string;
-}
-
-export const getPatients = async ({
-  setIsLoading,
-  page,
-}: GetPatientsConnectionProps): Promise<{
+export const getPatients = async (
+  page: number
+): Promise<{
   patients: Patient[];
   total: number;
 }> => {
-  setIsLoading(true);
+  const { session } = await getSession();
+  const accessToken = session?.access_token;
 
-  try {
-    const { session } = await getSession();
-    const accessToken = session?.access_token;
-
-    if (!accessToken) {
-      throw new Error('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
-    const patientsApi = new PatientsApi(config);
-    const response = await patientsApi.patientsControllerFindAll(page);
-    const typedResponse = response.data as unknown as {
-      patients: Patient[];
-      total: number;
-    };
-
-    return typedResponse;
-  } catch (error) {
-    console.error('API connection failed:', error);
-    alert(
-      `failed to get patients: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`
+  if (!accessToken) {
+    throw new ApiError(
+      'No authentication token found. Please log in again.',
+      401
     );
-    return { patients: [], total: 0 };
-  } finally {
-    setIsLoading(false);
   }
+
+  const config = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+    accessToken: accessToken,
+  });
+
+  const patientsApi = new PatientsApi(config);
+  const response = await patientsApi.patientsControllerFindAll(page);
+  const typedResponse = response.data as unknown as {
+    patients: Patient[];
+    total: number;
+  };
+
+  return typedResponse;
 };
 
-export const getPatient = async ({
-  setIsLoading,
-  patientId,
-}: GetPatientConnectionProps): Promise<{ patient: PatientSummary | null }> => {
-  setIsLoading(true);
+export const getPatientSummary = async (
+  patientId: string
+): Promise<{ patient: PatientSummary | null }> => {
+  const { session } = await getSession();
+  const accessToken = session?.access_token;
 
-  try {
-    const { session } = await getSession();
-    const accessToken = session?.access_token;
-
-    if (!accessToken) {
-      throw new Error('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
-    const patientsApi = new PatientsApi(config);
-    const response = await patientsApi.patientsControllerFindOneAsSummary(
-      patientId
+  if (!accessToken) {
+    throw new ApiError(
+      'No authentication token found. Please log in again.',
+      401
     );
-    const typedResponse = response.data as unknown as {
-      patient: PatientSummary;
-    };
-
-    return typedResponse;
-  } catch (error) {
-    console.error('API connection failed:', error);
-    alert(
-      `failed to get patient: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`
-    );
-    return { patient: null };
-  } finally {
-    setIsLoading(false);
   }
+
+  const config = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+    accessToken: accessToken,
+  });
+
+  const patientsApi = new PatientsApi(config);
+  const response = await patientsApi.patientsControllerFindOneAsSummary(
+    patientId
+  );
+  const typedResponse = response.data as unknown as {
+    patient: PatientSummary;
+  };
+
+  return typedResponse;
 };

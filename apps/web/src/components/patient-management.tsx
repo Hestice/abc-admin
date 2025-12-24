@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -15,8 +15,7 @@ import { Loader2, Search, UserPlus } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import PatientTableMobile from './patient-management/table-mobile';
 import PatientsTable from './patient-management/table-web';
-import { getPatients } from '@/utils/get-patients';
-import { Patient } from '@/types/patient';
+import { usePatients } from '@/hooks/queries/use-patients';
 import ViewPatientDialog from './dialog/view-patient';
 import { useRouter } from 'next/navigation';
 import { AppRoutes } from '@/constants/routes';
@@ -26,37 +25,20 @@ export function PatientManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   const isMobile = useMediaQuery('(max-width: 768px)');
   // TODO: Filter patients based on search term
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [totalPatients, setTotalPatients] = useState(0);
-  const [page, setPage] = useState(1);
+  const { data, isLoading } = usePatients(page);
+  const patients = data?.patients || [];
+  const totalPatients = data?.total || 0;
 
   const totalPages = Math.ceil(totalPatients / PATIENTS_PER_PAGE);
   const isFirstPage = page === 1;
   const isLastPage = page >= totalPages;
 
   const router = useRouter();
-
-  const fetchPatients = async (page: number) => {
-    try {
-      setIsLoading(true);
-      const response = await getPatients({ setIsLoading, page });
-      setPatients(response.patients);
-      setTotalPatients(response.total);
-    } catch (error) {
-      console.error('Failed to fetch patients:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPatients(1);
-  }, []);
 
   const handleAddNewPatient = () => {
     router.push(AppRoutes.REGISTER_PATIENT);
@@ -69,7 +51,6 @@ export function PatientManagement() {
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    fetchPatients(newPage);
   };
 
   return (

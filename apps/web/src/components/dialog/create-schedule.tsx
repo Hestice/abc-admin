@@ -28,7 +28,7 @@ import {
 } from '@/components/patient-registration/schema';
 import { Form } from '@/components/ui/form';
 import { Category, Status } from '@abc-admin/enums';
-import { addExposure } from '@/utils/add-exposure';
+import { useCreateExposure } from '@/hooks/mutations/use-exposure-mutations';
 import { NewExposure } from '@/types/exposure';
 
 interface CreateScheduleDialogProps {
@@ -44,10 +44,10 @@ export default function CreateScheduleDialog({
   patientId,
   onScheduleCreated,
 }: CreateScheduleDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [exposureStep, setExposureStep] = useState<'exposure' | 'medical'>(
     'exposure'
   );
+  const createExposureMutation = useCreateExposure();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
   const router = useRouter();
@@ -132,8 +132,6 @@ export default function CreateScheduleDialog({
     }
 
     // Both steps validated, create exposure and then schedule
-    setIsLoading(true);
-
     try {
       const formData = form.getValues();
 
@@ -157,10 +155,9 @@ export default function CreateScheduleDialog({
       };
 
       // Step 1: Create exposure
-      const exposureResponse = await addExposure({
-        setIsLoading: () => {}, // We handle loading state ourselves
-        newExposure,
-      });
+      const exposureResponse = await createExposureMutation.mutateAsync(
+        newExposure
+      );
 
       const createdExposureId = exposureResponse.data.id;
 
@@ -236,10 +233,10 @@ export default function CreateScheduleDialog({
         description: errorMessage,
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
+
+  const isLoading = createExposureMutation.isPending;
 
   const handleClose = (open: boolean) => {
     if (!open) {

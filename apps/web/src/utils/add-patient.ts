@@ -3,11 +3,6 @@ import { getSession } from '@/lib/auth/client';
 import { NewPatient, Patient } from '@/types/patient';
 import { Sex } from '@abc-admin/enums';
 
-interface AddPatientConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-  newPatient: NewPatient;
-}
-
 interface ApiResponse<T> {
   data: T;
   status: number;
@@ -43,25 +38,25 @@ const adaptToCreatePatientDto = (patient: NewPatient): any => {
   return adaptedPatient;
 };
 
-export const addPatient = async ({
-  setIsLoading,
-  newPatient,
-}: AddPatientConnectionProps): Promise<ApiResponse<Patient>> => {
-  setIsLoading(true);
+export const addPatient = async (
+  newPatient: NewPatient
+): Promise<ApiResponse<Patient>> => {
+  const { session } = await getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    throw new ApiError(
+      'No authentication token found. Please log in again.',
+      401
+    );
+  }
+
+  const config = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+    accessToken: accessToken,
+  });
 
   try {
-    const { session } = await getSession();
-    const accessToken = session?.access_token;
-
-    if (!accessToken) {
-      throw new ApiError('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
     const patientsApi = new PatientsApi(config);
     const response = await patientsApi.patientsControllerCreate(
       adaptToCreatePatientDto(newPatient)
@@ -94,7 +89,5 @@ export const addPatient = async ({
     throw new ApiError(
       error instanceof Error ? error.message : 'Unknown error occurred'
     );
-  } finally {
-    setIsLoading(false);
   }
 };

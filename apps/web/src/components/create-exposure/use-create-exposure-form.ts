@@ -9,7 +9,7 @@ import {
   FormValues,
   formSchema,
 } from '@/components/patient-registration/schema';
-import { addExposure } from '@/utils/add-exposure';
+import { useCreateExposure } from '@/hooks/mutations/use-exposure-mutations';
 import { NewExposure } from '@/types/exposure';
 import { AppRoutes } from '@/constants/routes';
 import { capitalizeFields } from '@/utils/string-utils';
@@ -70,9 +70,9 @@ const formatExposureData = (
 
 export function useCreateExposureForm(patientId: string) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const createExposureMutation = useCreateExposure();
 
   // Initialize the form with default values (only exposure-related fields)
   const form = useForm<FormValues>({
@@ -153,15 +153,12 @@ export function useCreateExposureForm(patientId: string) {
 
   // Handle form submission (without validation - validation is done before calling this)
   const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
-
     try {
       // Step 1: Create exposure
       const exposureData = formatExposureData(data, patientId);
-      const exposureResponse = await addExposure({
-        setIsLoading: setIsSubmitting,
-        newExposure: exposureData,
-      });
+      const exposureResponse = await createExposureMutation.mutateAsync(
+        exposureData
+      );
 
       const createdExposureId = exposureResponse.data.id;
 
@@ -224,8 +221,6 @@ export function useCreateExposureForm(patientId: string) {
         description: errorMessage,
         variant: 'destructive',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -250,7 +245,7 @@ export function useCreateExposureForm(patientId: string) {
   return {
     form,
     currentStep,
-    isSubmitting,
+    isSubmitting: createExposureMutation.isPending,
     handleNext,
     handlePrevious,
     onSubmit,
