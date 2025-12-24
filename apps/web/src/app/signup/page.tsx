@@ -20,9 +20,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { AppRoutes } from '@/constants/routes';
 import Link from 'next/link';
+import { validateInviteCode } from '@/utils/invite-codes';
 
 const signupSchema = z
   .object({
+    inviteCode: z.string().min(1, 'Invite code is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
@@ -38,22 +40,28 @@ export default function SignupPage() {
   const router = useRouter();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [serverError, setServerError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isCodeValid, setIsCodeValid] = useState(false);
   const supabase = createClient();
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
+      inviteCode: '',
       email: '',
       password: '',
       confirmPassword: '',
     },
   });
+
+  const inviteCode = watch('inviteCode');
 
   useEffect(() => {
     if (!authLoading && isLoggedIn) {
@@ -61,7 +69,46 @@ export default function SignupPage() {
     }
   }, [isLoggedIn, authLoading, router]);
 
+  // Validate invite code when it changes
+  useEffect(() => {
+    if (!inviteCode || inviteCode.trim() === '') {
+      setIsCodeValid(false);
+      setServerError('');
+      return;
+    }
+
+    const validateCode = async () => {
+      setIsValidatingCode(true);
+      setServerError('');
+      try {
+        const validation = await validateInviteCode(inviteCode.trim());
+        setIsCodeValid(validation.valid);
+        if (!validation.valid) {
+          setServerError(validation.message || 'Invalid invite code');
+        }
+      } catch (error) {
+        setIsCodeValid(false);
+        setServerError('Failed to validate invite code. Please try again.');
+        console.error('Failed to validate invite code:', error);
+      } finally {
+        setIsValidatingCode(false);
+      }
+    };
+
+    // Debounce validation
+    const timeoutId = setTimeout(() => {
+      validateCode();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [inviteCode]);
+
   const onSubmit = async (data: SignupFormValues) => {
+    if (!isCodeValid) {
+      setServerError('Please enter a valid invite code');
+      return;
+    }
+
     setIsLoading(true);
     setServerError('');
     setSuccessMessage('');
@@ -81,6 +128,10 @@ export default function SignupPage() {
       }
 
       if (authData.user) {
+        // Store invite code in localStorage to consume after email confirmation
+        // The invite code will be consumed when the user first authenticates
+        localStorage.setItem('pendingInviteCode', data.inviteCode.trim());
+
         setSuccessMessage(
           'Account created! Please check your email to verify your account before signing in.'
         );
@@ -132,6 +183,47 @@ export default function SignupPage() {
               </div>
             )}
             <div className="space-y-2">
+              <Label htmlFor="inviteCode">Invite Code</Label>
+              <div className="relative">
+                <Input
+                  id="inviteCode"
+                  type="text"
+                  placeholder="Enter your invite code"
+                  {...register('inviteCode')}
+                  aria-invalid={errors.inviteCode ? 'true' : 'false'}
+                  className={errors.inviteCode ? 'border-red-500' : ''}
+                />
+                {isValidatingCode && (
+                  <div className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                    Validating...
+                  </div>
+                )}
+                {!isValidatingCode && inviteCode && (
+                  <div className="absolute right-3 top-2.5">
+                    {isCodeValid ? (
+                      <span className="text-green-500 text-sm">✓</span>
+                    ) : (
+                      <span className="text-red-500 text-sm">✗</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              {errors.inviteCode && (
+                <p className="text-sm text-red-500">
+                  {errors.inviteCode.message}
+                </p>
+              )}
+              {inviteCode &&
+                !isValidatingCode &&
+                !isCodeValid &&
+                serverError && (
+                  <p className="text-sm text-red-500">{serverError}</p>
+                )}
+              <p className="text-xs text-muted-foreground">
+                Contact an administrator to receive an invite code.
+              </p>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -174,7 +266,11 @@ export default function SignupPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button className="w-full" type="submit" disabled={isLoading}>
+            <Button
+              className="w-full"
+              type="submit"
+              disabled={isLoading || !isCodeValid || isValidatingCode}
+            >
               {isLoading ? 'Creating account...' : 'Sign up'}
             </Button>
             <div className="text-sm text-center text-muted-foreground">

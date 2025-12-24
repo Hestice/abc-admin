@@ -20,6 +20,7 @@ import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@abc-admin/enums';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { InviteCodeGuard } from '../invite-codes/guards/invite-code.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -40,7 +41,7 @@ export class UsersController {
   }
 
   @Post()
-  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @UseGuards(SupabaseAuthGuard, RolesGuard, InviteCodeGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new user (admin only)' })

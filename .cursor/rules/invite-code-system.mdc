@@ -1,0 +1,200 @@
+---
+description: When working with invite codes or admin management features
+globs: 
+  - "**/invite-codes/**"
+  - "**/admin-management*"
+  - "**/generate-invite-code*"
+  - "**/signup*"
+alwaysApply: false
+---
+# Invite Code System & Admin Management
+
+## Overview
+
+The invite code system restricts user signups to invitation-only. Administrators generate one-time-use invite codes that users must provide during signup. This replaces the previous direct user creation flow.
+
+## Architecture
+
+### Backend Components
+
+#### Invite Codes Module
+- [apps/api/src/app/invite-codes](mdc:apps/api/src/app/invite-codes) - Main invite codes module
+  - [invite-codes.entity.ts](mdc:apps/api/src/app/invite-codes/entities/invite-code.entity.ts) - Database entity
+  - [invite-codes.service.ts](mdc:apps/api/src/app/invite-codes/invite-codes.service.ts) - Business logic
+  - [invite-codes.controller.ts](mdc:apps/api/src/app/invite-codes/invite-codes.controller.ts) - API endpoints
+  - [invite-code.guard.ts](mdc:apps/api/src/app/invite-codes/guards/invite-code.guard.ts) - Guard for validating codes
+
+#### Database Schema
+- [apps/api/src/db/migrations/1766546648442-invite-codes.ts](mdc:apps/api/src/db/migrations/1766546648442-invite-codes.ts) - Migration file
+- Table: `invite_codes`
+  - `id` (UUID, primary key)
+  - `code` (UUID, unique) - The actual invite code
+  - `created_by` (UUID, foreign key to users) - Admin who created it
+  - `created_at` (timestamp)
+  - `is_active` (boolean) - Whether code is still valid
+  - `consumed_by` (UUID, nullable, foreign key to users) - User who used it
+  - `consumed_at` (timestamp, nullable) - When it was consumed
+
+### Frontend Components
+
+#### Admin Management
+- [apps/web/src/components/admin-management.tsx](mdc:apps/web/src/components/admin-management.tsx) - Main admin management page
+- [apps/web/src/components/dialog/generate-invite-code.tsx](mdc:apps/web/src/components/dialog/generate-invite-code.tsx) - Dialog for generating codes
+- [apps/web/src/components/dialog/view-admin.tsx](mdc:apps/web/src/components/dialog/view-admin.tsx) - View admin details
+
+#### Signup Flow
+- [apps/web/src/app/signup/page.tsx](mdc:apps/web/src/app/signup/page.tsx) - Signup page with invite code input
+- [apps/web/src/utils/invite-codes.ts](mdc:apps/web/src/utils/invite-codes.ts) - API client utilities
+
+## API Endpoints
+
+### Admin Endpoints (Require Authentication + Admin Role)
+
+#### POST /invite-codes
+Generate a new invite code.
+- **Guards**: `SupabaseAuthGuard`, `RolesGuard` (ADMIN only)
+- **Request Body**: Empty object `{}`
+- **Response**: `InviteCode` entity with generated code
+- **Usage**: Called when admin clicks "Generate Invite Code"
+
+#### GET /invite-codes
+Get all invite codes with creator and consumer information.
+- **Guards**: `SupabaseAuthGuard`, `RolesGuard` (ADMIN only)
+- **Response**: Array of `InviteCode` entities
+- **Includes**: Relations to creator and consumer users
+
+#### GET /invite-codes/:id
+Get specific invite code details.
+- **Guards**: `SupabaseAuthGuard`, `RolesGuard` (ADMIN only)
+- **Response**: `InviteCode` entity
+
+### Public Endpoints
+
+#### POST /invite-codes/validate
+Validate an invite code without consuming it.
+- **No Authentication Required**
+- **Request Body**: `{ code: string }`
+- **Response**: `{ valid: boolean, message?: string }`
+- **Usage**: Called during signup to check if code is valid before allowing form submission
+
+### Authenticated Endpoints
+
+#### POST /invite-codes/consume
+Consume (use) an invite code.
+- **Guards**: `SupabaseAuthGuard` (any authenticated user)
+- **Request Body**: `{ code: string }`
+- **Response**: Updated `InviteCode` entity
+- **Behavior**: 
+  - Sets `consumedBy` to the authenticated user's ID
+  - Sets `consumedAt` to current timestamp
+  - Sets `isActive` to false
+- **Usage**: Called after successful Supabase signup
+
+## User Flow
+
+### Admin Flow: Generating Invite Codes
+
+1. Admin navigates to Admin Management page
+2. Clicks "Generate Invite Code" button
+3. Dialog opens with generate button
+4. Admin clicks "Generate Invite Code" in dialog
+5. System generates UUID v4 code
+6. Code is displayed with copy-to-clipboard functionality
+7. Admin shares code with intended user
+
+### User Flow: Signing Up with Invite Code
+
+1. User visits `/signup` page
+2. User enters invite code in the input field
+3. System validates code in real-time (debounced 500ms)
+4. Visual feedback shows ✓ for valid, ✗ for invalid
+5. If valid, user can fill out email and password
+6. User submits signup form
+7. Supabase creates authentication account
+8. After successful signup, system consumes the invite code
+9. User record is created in database (via `verifySupabaseToken`)
+10. User receives email verification link
+
+## Key Implementation Details
+
+### Invite Code Generation
+- Uses `crypto.randomUUID()` to generate UUID v4 codes
+- Codes are stored as-is (no encoding/decoding)
+- `createdBy` is automatically set from authenticated admin user
+- `isActive` defaults to `true`
+- `consumedBy` and `consumedAt` are `null` initially
+
+### Validation Logic
+- Checks if code exists in database
+- Verifies `isActive` is `true`
+- Verifies `consumedBy` is `null` (not already used)
+- Returns validation result without consuming code
+
+### Consumption Logic
+- Only authenticated users can consume codes
+- Validates code exists, is active, and not consumed
+- Atomically updates: `consumedBy`, `consumedAt`, `isActive`
+- Prevents double-consumption with database constraints
+
+### Security Considerations
+- Invite codes are UUIDs (hard to guess)
+- One-time use only (consumed codes cannot be reused)
+- Admin-only generation (protected by `RolesGuard`)
+- Validation endpoint is public but read-only (doesn't consume)
+- Consumption requires valid Supabase session
+- Codes are linked to specific users via `consumedBy`
+
+## Integration Points
+
+### Users Controller
+- [apps/api/src/app/users/users.controller.ts](mdc:apps/api/src/app/users/users.controller.ts)
+- `POST /users` endpoint has `InviteCodeGuard` (though this endpoint is for admin-created users, not signups)
+
+### Auth Service
+- [apps/api/src/app/auth/auth.service.ts](mdc:apps/api/src/app/auth/auth.service.ts)
+- User records are created via `verifySupabaseToken` when user first authenticates
+- Invite code consumption happens separately via the consume endpoint
+
+### Module Dependencies
+- `InviteCodesModule` imports `AuthModule` (for `SupabaseAuthGuard`)
+- `UsersModule` imports `InviteCodesModule` (for `InviteCodeGuard`)
+- Circular dependencies handled with `forwardRef`
+
+## Frontend Utilities
+
+### API Client
+- [apps/web/src/utils/invite-codes.ts](mdc:apps/web/src/utils/invite-codes.ts)
+- Uses generated API client from `@abc-admin/api-lib`
+- Functions:
+  - `createInviteCode()` - Generate new code (admin only)
+  - `getInviteCodes()` - List all codes (admin only)
+  - `validateInviteCode(code)` - Validate code (public)
+  - `consumeInviteCode(code)` - Consume code (authenticated)
+
+### Error Handling
+- Custom `ApiError` class for consistent error handling
+- Proper status code mapping and user-friendly messages
+- Handles network errors, validation errors, and authorization errors
+
+## Database Migration
+
+The invite codes table is created via migration:
+- File: [apps/api/src/db/migrations/1766546648442-invite-codes.ts](mdc:apps/api/src/db/migrations/1766546648442-invite-codes.ts)
+- Run manually with: `nx migration-run` (from api directory)
+- Includes foreign key constraints to `users` table
+
+## Important Notes
+
+1. **No Direct User Creation**: Admins can no longer directly create user accounts. They must generate invite codes instead.
+
+2. **Signup Requires Code**: Users cannot sign up without a valid invite code. The signup form is disabled until a valid code is entered.
+
+3. **One-Time Use**: Each invite code can only be used once. Once consumed, it cannot be reused.
+
+4. **Code Format**: Invite codes are UUIDs (e.g., `550e8400-e29b-41d4-a716-446655440000`). Users must enter the full code.
+
+5. **Real-Time Validation**: The signup page validates codes as users type (with 500ms debounce) to provide immediate feedback.
+
+6. **Consumption Timing**: Codes are consumed after successful Supabase signup, not during validation. This ensures the code is only used when a user account is actually created.
+
+7. **User Record Creation**: User records in the database are created automatically when `verifySupabaseToken` is called (typically on first API request after signup).
