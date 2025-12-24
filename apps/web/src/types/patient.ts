@@ -1,4 +1,4 @@
-import { Sex, Category, Status } from '@abc-admin/enums';
+import { Sex, Status } from '@abc-admin/enums';
 
 export interface Patient {
   id: string;
@@ -30,7 +30,6 @@ export interface PatientSummary {
 }
 
 export interface NewPatient {
-  id: string;
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -38,19 +37,6 @@ export interface NewPatient {
   sex: Sex;
   address: string;
   email?: string;
-  category: number;
-  bodyPartsAffected: string;
-  placeOfExposure: string;
-  dateOfExposure: string;
-  isExposureAtHome: boolean;
-  sourceOfExposure: string;
-  animalStatus: Status;
-  isWoundCleaned: boolean;
-  antiTetanusGiven: boolean;
-  dateOfAntiTetanus?: string;
-  briefHistory: string;
-  allergy: string;
-  medications: string;
 }
 
 export interface EditablePatient {
@@ -62,19 +48,6 @@ export interface EditablePatient {
   sex: Sex | number;
   address: string;
   email: string | null;
-  category: Category | number;
-  bodyPartsAffected: string;
-  placeOfExposure: string;
-  dateOfExposure: Date | string;
-  isExposureAtHome: boolean;
-  sourceOfExposure: string;
-  animalStatus: Status;
-  isWoundCleaned: boolean;
-  antiTetanusGiven: boolean;
-  dateOfAntiTetanus?: Date | string;
-  briefHistory: string;
-  allergy: string;
-  medications: string;
   scheduleStatus?: string;
   nextVaccinationDate?: Date | string;
   nextVaccinationDay?: string;

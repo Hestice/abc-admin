@@ -4,11 +4,23 @@ import { Type } from 'class-transformer';
 
 export class CreateScheduleDto {
   @ApiProperty({
-    description: 'The patient ID this schedule belongs to',
+    description: 'The exposure ID this schedule belongs to',
     example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
   })
   @IsUUID()
-  patientId!: string;
+  @IsOptional()
+  exposureId?: string;
+
+  @ApiProperty({
+    description:
+      'The patient ID (for backward compatibility - will use most recent exposure or create new one)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
+  })
+  @IsUUID()
+  @IsOptional()
+  patientId?: string;
 
   @ApiProperty({
     description:

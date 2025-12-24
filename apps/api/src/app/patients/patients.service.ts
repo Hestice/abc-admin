@@ -1,21 +1,15 @@
-import {
-  Injectable,
-  NotFoundException,
-  forwardRef,
-  Inject,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Patient } from './entities/patient.entity';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UsersService } from '../users/users.service';
-import { SchedulesService } from '../schedules/schedules.service';
 import { SimplifiedPatient } from './types/simplifiedPatients.type';
 import {
   Schedule,
   ScheduleStatus,
 } from '../schedules/entities/schedule.entity';
-import { Sex } from '@abc-admin/enums';
+import { Sex, Status } from '@abc-admin/enums';
 import { Logger } from '@nestjs/common';
 import { PatientSummaryDto } from './dto/patient-summary.dto';
 @Injectable()
@@ -24,9 +18,7 @@ export class PatientsService {
   constructor(
     @InjectRepository(Patient)
     private patientsRepository: Repository<Patient>,
-    private usersService: UsersService, // To track who manages patients
-    @Inject(forwardRef(() => SchedulesService))
-    private schedulesService: SchedulesService
+    private usersService: UsersService // To track who manages patients
   ) {}
 
   async create(
@@ -43,20 +35,9 @@ export class PatientsService {
     // Save the patient first to get an ID
     const savedPatient = await this.patientsRepository.save(patient);
 
-    // Create a vaccination schedule for the patient
-    if (userId) {
-      try {
-        await this.schedulesService.create(
-          { patientId: savedPatient.id },
-          userId
-        );
-      } catch (error) {
-        // Log the error but don't fail the patient creation
-        console.error('Failed to create vaccination schedule:', error);
-      }
-    }
-
-    // Return the patient with the newly added schedule
+    // Return the patient
+    // Note: Exposure and schedule creation should be handled separately
+    // by the frontend or through separate API calls
     this.logger.log('Patient created successfully: ', savedPatient);
     if (!userId) {
       throw new Error('User ID is required to create a patient');
@@ -113,31 +94,41 @@ export class PatientsService {
   }> {
     const [patients, total] = await this.patientsRepository.findAndCount({
       where: { managedBy: { id: userId } },
-      relations: ['managedBy', 'schedules'],
+      relations: ['managedBy', 'exposures', 'exposures.schedules'],
       skip: (page - 1) * limit,
       take: limit,
     });
 
-    const simplifiedPatients = patients.map((patient) => {
-      const mostRecentSchedule = this.getMostRecentSchedule(patient.schedules);
-      const nextVaccination = this.getNextVaccinationDate(
-        mostRecentSchedule || ({} as Schedule)
-      );
+    const simplifiedPatients = await Promise.all(
+      patients.map(async (patient) => {
+        // Get all schedules from all exposures
+        const allSchedules: Schedule[] = [];
+        for (const exposure of patient.exposures || []) {
+          if (exposure.schedules) {
+            allSchedules.push(...exposure.schedules);
+          }
+        }
 
-      return {
-        id: patient.id,
-        firstName: patient.firstName,
-        middleName: patient.middleName,
-        lastName: patient.lastName,
-        scheduleStatus: mostRecentSchedule?.status,
-        nextVaccinationDate: nextVaccination.date,
-        nextVaccinationDay: nextVaccination.day,
-        dateOfBirth: patient.dateOfBirth,
-        dateRegistered: patient.createdAt,
-        email: patient.email,
-        sex: patient.sex as Sex,
-      };
-    });
+        const mostRecentSchedule = this.getMostRecentSchedule(allSchedules);
+        const nextVaccination = this.getNextVaccinationDate(
+          mostRecentSchedule || ({} as Schedule)
+        );
+
+        return {
+          id: patient.id,
+          firstName: patient.firstName,
+          middleName: patient.middleName,
+          lastName: patient.lastName,
+          scheduleStatus: mostRecentSchedule?.status,
+          nextVaccinationDate: nextVaccination.date,
+          nextVaccinationDay: nextVaccination.day,
+          dateOfBirth: patient.dateOfBirth,
+          dateRegistered: patient.createdAt,
+          email: patient.email,
+          sex: patient.sex as Sex,
+        };
+      })
+    );
 
     return { patients: simplifiedPatients, total };
   }
@@ -145,7 +136,7 @@ export class PatientsService {
   async findOne(id: string, userId: string): Promise<Patient> {
     const patient = await this.patientsRepository.findOne({
       where: { id, managedBy: { id: userId } },
-      relations: ['managedBy', 'schedules'],
+      relations: ['managedBy', 'exposures', 'exposures.schedules'],
     });
 
     if (!patient) {
@@ -161,10 +152,21 @@ export class PatientsService {
   ): Promise<{ patient: PatientSummaryDto }> {
     const patient = await this.findOne(id, userId);
 
-    const mostRecentSchedule = this.getMostRecentSchedule(patient.schedules);
+    // Get all schedules from all exposures
+    const allSchedules: Schedule[] = [];
+    for (const exposure of patient.exposures || []) {
+      if (exposure.schedules) {
+        allSchedules.push(...exposure.schedules);
+      }
+    }
+
+    const mostRecentSchedule = this.getMostRecentSchedule(allSchedules);
     const nextVaccination = this.getNextVaccinationDate(
       mostRecentSchedule || ({} as Schedule)
     );
+
+    // Get exposure data from most recent exposure
+    const mostRecentExposure = patient.exposures?.[0] || null;
 
     const patientSummary: PatientSummaryDto = {
       id: patient.id,
@@ -172,9 +174,9 @@ export class PatientsService {
       middleName: patient.middleName || '',
       lastName: patient.lastName,
       dateOfBirth: patient.dateOfBirth,
-      animalStatus: patient.animalStatus,
-      antiTetanusGiven: patient.antiTetanusGiven,
-      dateOfAntiTetanus: patient.dateOfAntiTetanus || null,
+      animalStatus: mostRecentExposure?.animalStatus || Status.UNKNOWN,
+      antiTetanusGiven: mostRecentExposure?.antiTetanusGiven || false,
+      dateOfAntiTetanus: mostRecentExposure?.dateOfAntiTetanus || null,
       dateRegistered: patient.createdAt,
       scheduleStatus: mostRecentSchedule?.status || '',
       nextVaccinationDate: nextVaccination.date || null,

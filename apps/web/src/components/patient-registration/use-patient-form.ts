@@ -7,41 +7,50 @@ import { useForm, Resolver } from 'react-hook-form';
 import { Category, Sex, Status } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from './schema';
 import { addPatient } from '@/utils/add-patient';
+import { addExposure } from '@/utils/add-exposure';
 import { NewPatient } from '@/types/patient';
+import { NewExposure } from '@/types/exposure';
 import { AppRoutes } from '@/constants/routes';
 import { capitalizeFields } from '@/utils/string-utils';
+import { Configuration, SchedulesApi } from '@abc-admin/api-lib';
+import { getSession } from '@/lib/auth/client';
 
-// Helper to convert form data to NewPatient format
+// Helper to convert form data to NewPatient format (metadata only)
 const formatPatientData = (data: FormValues): NewPatient => {
-  // Define fields that should be capitalized
+  const fieldsToCapitalize = ['firstName', 'middleName', 'lastName', 'address'];
+  const capitalizedData = capitalizeFields(data, fieldsToCapitalize);
+
+  return {
+    firstName: capitalizedData.firstName,
+    middleName: capitalizedData.middleName || '',
+    lastName: capitalizedData.lastName,
+    dateOfBirth: capitalizedData.dateOfBirth.toISOString().split('T')[0],
+    sex: capitalizedData.sex as Sex,
+    address: capitalizedData.address,
+    email: capitalizedData.email || '',
+  };
+};
+
+// Helper to convert form data to NewExposure format
+const formatExposureData = (
+  data: FormValues,
+  patientId: string
+): NewExposure => {
   const fieldsToCapitalize = [
-    'firstName',
-    'middleName',
-    'lastName',
-    'address',
     'bodyPartsAffected',
     'placeOfExposure',
     'sourceOfExposure',
     'allergy',
     'medications',
   ];
-
-  // Capitalize relevant fields
   const capitalizedData = capitalizeFields(data, fieldsToCapitalize);
 
-  // Create base patient object with capitalized data
-  const patient: any = {
-    firstName: capitalizedData.firstName,
-    middleName: capitalizedData.middleName || '',
-    lastName: capitalizedData.lastName,
-    dateOfBirth: capitalizedData.dateOfBirth.toISOString().split('T')[0],
-    dateOfExposure: capitalizedData.dateOfExposure.toISOString().split('T')[0],
-    sex: capitalizedData.sex as Sex,
-    address: capitalizedData.address,
-    email: capitalizedData.email || '',
+  const exposure: NewExposure = {
+    patientId,
     category: Number(capitalizedData.category),
     bodyPartsAffected: capitalizedData.bodyPartsAffected,
     placeOfExposure: capitalizedData.placeOfExposure,
+    dateOfExposure: capitalizedData.dateOfExposure.toISOString().split('T')[0],
     isExposureAtHome: capitalizedData.isExposureAtHome,
     sourceOfExposure: capitalizedData.sourceOfExposure,
     animalStatus: capitalizedData.animalStatus,
@@ -54,11 +63,12 @@ const formatPatientData = (data: FormValues): NewPatient => {
 
   // Only include dateOfAntiTetanus if anti-tetanus was given and a date was selected
   if (capitalizedData.antiTetanusGiven && capitalizedData.dateOfAntiTetanus) {
-    patient.dateOfAntiTetanus = capitalizedData.dateOfAntiTetanus
+    exposure.dateOfAntiTetanus = capitalizedData.dateOfAntiTetanus
       .toISOString()
       .split('T')[0];
   }
-  return patient;
+
+  return exposure;
 };
 
 export function usePatientForm() {
@@ -141,25 +151,56 @@ export function usePatientForm() {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
 
-    const formattedData = formatPatientData(data);
-
     try {
-      const response = await addPatient({
+      // Step 1: Create patient
+      const patientData = formatPatientData(data);
+      const patientResponse = await addPatient({
         setIsLoading: setIsSubmitting,
-        newPatient: formattedData,
+        newPatient: patientData,
       });
 
-      type ApiResponse = { data: { id: string } };
-      const createdPatientId = (response as ApiResponse).data.id;
-      if (createdPatientId) {
-        router.push(
-          AppRoutes.PATIENT_SCHEDULES.replace(':id', createdPatientId)
-        );
-      } else {
-        router.push(AppRoutes.PATIENTS);
+      const createdPatientId = patientResponse.data.id;
+
+      if (!createdPatientId) {
+        throw new Error('Failed to create patient');
       }
+
+      // Step 2: Create exposure
+      const exposureData = formatExposureData(data, createdPatientId);
+      const exposureResponse = await addExposure({
+        setIsLoading: setIsSubmitting,
+        newExposure: exposureData,
+      });
+
+      const createdExposureId = exposureResponse.data.id;
+
+      if (!createdExposureId) {
+        throw new Error('Failed to create exposure');
+      }
+
+      // Step 3: Create schedule
+      const { session } = await getSession();
+      const accessToken = session?.access_token;
+
+      if (!accessToken) {
+        throw new Error('No authentication token found');
+      }
+
+      const config = new Configuration({
+        basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+        accessToken: accessToken,
+      });
+
+      const schedulesApi = new SchedulesApi(config);
+      await schedulesApi.schedulesControllerCreate({
+        exposureId: createdExposureId,
+      });
+
+      // Navigate to patient schedules page
+      router.push(AppRoutes.PATIENT_SCHEDULES.replace(':id', createdPatientId));
     } catch (error) {
       console.error('Error submitting patient data:', error);
+      // You might want to show an error toast here
     } finally {
       setIsSubmitting(false);
     }

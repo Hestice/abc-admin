@@ -51,13 +51,15 @@ export const getSchedule = async ({
       day3CompletedAt,
       day7CompletedAt,
       day28CompletedAt,
-      patient,
+      exposure,
       ...rest
     } = response.data as any;
 
     return {
       ...rest,
-      patientId: patient?.id || patientId,
+      exposureId: exposure?.id,
+      patientId: exposure?.patient?.id || patientId,
+      exposure: exposure,
       status:
         response.data.status === ScheduleStatus.completed
           ? ScheduleStatus.completed

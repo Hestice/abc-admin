@@ -64,10 +64,11 @@ export default function CreateScheduleDialog({
 
       const schedulesApi = new SchedulesApi(config);
       const createScheduleDto: {
-        patientId: string;
+        patientId?: string;
+        exposureId?: string;
         startDate?: string;
       } = {
-        patientId,
+        patientId, // Backend will find most recent exposure or create new one
       };
 
       // Only include startDate if it's provided

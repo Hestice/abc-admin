@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Patient } from '../../patients/entities/patient.entity';
+import { Exposure } from '../../exposures/entities/exposure.entity';
 
 export enum ScheduleStatus {
   IN_PROGRESS = 'in_progress',
@@ -26,9 +26,9 @@ export class Schedule {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => Patient, (patient) => patient.schedules)
-  @JoinColumn({ name: 'patientId' })
-  patient!: Patient;
+  @ManyToOne(() => Exposure, (exposure) => exposure.schedules)
+  @JoinColumn({ name: 'exposureId' })
+  exposure!: Exposure;
 
   @Column({
     type: 'enum',

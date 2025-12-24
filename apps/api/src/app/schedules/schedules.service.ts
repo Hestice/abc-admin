@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  BadRequestException,
   forwardRef,
   Inject,
   Logger,
@@ -15,6 +16,7 @@ import {
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { PatientsService } from '../patients/patients.service';
+import { ExposuresService } from '../exposures/exposures.service';
 import { Status } from '@abc-admin/enums';
 
 @Injectable()
@@ -25,22 +27,56 @@ export class SchedulesService {
     @InjectRepository(Schedule)
     private schedulesRepository: Repository<Schedule>,
     @Inject(forwardRef(() => PatientsService))
-    private patientsService: PatientsService
+    private patientsService: PatientsService,
+    @Inject(forwardRef(() => ExposuresService))
+    private exposuresService: ExposuresService
   ) {}
 
   async create(
     createScheduleDto: CreateScheduleDto,
     userId: string
   ): Promise<Schedule> {
-    this.logger.log(
-      `Creating schedule for patient: ${createScheduleDto.patientId}`
-    );
+    let exposure;
 
-    // Check if patient exists
-    const patient = await this.patientsService.findOne(
-      createScheduleDto.patientId,
-      userId
-    );
+    if (createScheduleDto.exposureId) {
+      // Use provided exposureId
+      this.logger.log(
+        `Creating schedule for exposure: ${createScheduleDto.exposureId}`
+      );
+      exposure = await this.exposuresService.findOne(
+        createScheduleDto.exposureId,
+        userId
+      );
+    } else if (createScheduleDto.patientId) {
+      // Backward compatibility: find most recent exposure or create new one
+      this.logger.log(
+        `Creating schedule for patient: ${createScheduleDto.patientId}`
+      );
+      // Verify patient exists
+      await this.patientsService.findOne(createScheduleDto.patientId, userId);
+
+      // Find most recent exposure for this patient
+      const exposures = await this.exposuresService.findAllByPatientId(
+        createScheduleDto.patientId,
+        userId
+      );
+
+      if (exposures.length > 0) {
+        // Use most recent exposure
+        exposure = exposures[0];
+        this.logger.log(
+          `Using existing exposure: ${exposure.id} for patient: ${createScheduleDto.patientId}`
+        );
+      } else {
+        throw new BadRequestException(
+          'No exposure found for patient. Please create an exposure first.'
+        );
+      }
+    } else {
+      throw new BadRequestException(
+        'Either exposureId or patientId must be provided'
+      );
+    }
 
     // Calculate the vaccination dates
     // Always set to current date in UTC to avoid timezone issues
@@ -79,7 +115,7 @@ export class SchedulesService {
 
     // Create schedule
     const schedule = this.schedulesRepository.create({
-      patient,
+      exposure,
       status: ScheduleStatus.IN_PROGRESS,
       day0Date,
       day3Date,
@@ -136,7 +172,7 @@ export class SchedulesService {
   async findAll(): Promise<Schedule[]> {
     this.logger.log('Finding all schedules');
     const schedules = await this.schedulesRepository.find({
-      relations: ['patient'],
+      relations: ['exposure', 'exposure.patient'],
     });
 
     // Log the first schedule's dates if available
@@ -173,7 +209,7 @@ export class SchedulesService {
     this.logger.log(`Finding schedule with ID: ${id}`);
     const schedule = await this.schedulesRepository.findOne({
       where: { id },
-      relations: ['patient'],
+      relations: ['exposure', 'exposure.patient'],
     });
 
     if (!schedule) {
@@ -211,8 +247,8 @@ export class SchedulesService {
   async findAllByPatientId(patientId: string): Promise<Schedule[]> {
     this.logger.log(`Finding all schedules for patient with ID: ${patientId}`);
     const schedules = await this.schedulesRepository.find({
-      where: { patient: { id: patientId } },
-      relations: ['patient'],
+      where: { exposure: { patient: { id: patientId } } },
+      relations: ['exposure', 'exposure.patient'],
       order: { createdAt: 'DESC' },
     });
 
@@ -326,8 +362,8 @@ export class SchedulesService {
 
   async updateVaccination(id: string, day: VaccinationDay): Promise<Schedule> {
     const schedule = await this.findOne(id);
-    // Patient is already loaded in the relation, use it directly
-    const isAnimalAlive = schedule.patient.animalStatus === Status.ALIVE;
+    // Exposure is already loaded in the relation, use it directly
+    const isAnimalAlive = schedule.exposure.animalStatus === Status.ALIVE;
 
     switch (day) {
       case VaccinationDay.DAY_0:

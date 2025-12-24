@@ -35,7 +35,7 @@ class ScheduleResponse {
   id!: string;
 
   @ApiProperty()
-  patient!: Record<string, any>;
+  exposure!: Record<string, any>;
 
   @ApiProperty()
   status!: string;
@@ -112,7 +112,11 @@ export class SchedulesController {
       }
 
       this.logger.log(
-        `Creating schedule for patient ${createScheduleDto.patientId} by user ${req.user.id}`
+        `Creating schedule ${
+          createScheduleDto.exposureId
+            ? `for exposure ${createScheduleDto.exposureId}`
+            : `for patient ${createScheduleDto.patientId}`
+        } by user ${req.user.id}`
       );
 
       return await this.schedulesService.create(createScheduleDto, req.user.id);
@@ -238,11 +242,19 @@ export class SchedulesController {
     // Get the schedule
     const schedule = await this.schedulesService.findOne(id);
 
-    // Verify that the schedule belongs to the patient
-    if (schedule.patient.id !== updateVaccinationDto.patientId) {
-      throw new BadRequestException(
-        'Schedule does not belong to the specified patient'
-      );
+    // Verify that the schedule belongs to the exposure or patient (for backward compatibility)
+    if (updateVaccinationDto.exposureId) {
+      if (schedule.exposure.id !== updateVaccinationDto.exposureId) {
+        throw new BadRequestException(
+          'Schedule does not belong to the specified exposure'
+        );
+      }
+    } else if (updateVaccinationDto.patientId) {
+      if (schedule.exposure.patient.id !== updateVaccinationDto.patientId) {
+        throw new BadRequestException(
+          'Schedule does not belong to the specified patient'
+        );
+      }
     }
 
     // Update the vaccination day
