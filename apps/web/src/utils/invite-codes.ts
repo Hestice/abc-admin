@@ -1,5 +1,5 @@
 import { InviteCodesApi, Configuration } from '@abc-admin/api-lib';
-import { createClient } from '@/lib/supabase/client';
+import { getSession } from '@/lib/auth/client';
 
 export class ApiError extends Error {
   status?: number;
@@ -12,10 +12,7 @@ export class ApiError extends Error {
 }
 
 async function getApiClient(): Promise<InviteCodesApi> {
-  const supabase = createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { session } = await getSession();
   const accessToken = session?.access_token;
 
   if (!accessToken) {

@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient } from '@/lib/supabase/client';
+import { signIn } from '@/lib/auth/client';
 import { AppRoutes } from '@/constants/routes';
 import Link from 'next/link';
 
@@ -33,7 +33,6 @@ export default function LoginPage() {
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
-  const supabase = createClient();
 
   const {
     register,
@@ -58,17 +57,9 @@ export default function LoginPage() {
     setServerError('');
 
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      const { user } = await signIn(data.email, data.password);
 
-      if (error) {
-        setServerError(error.message || 'An error occurred during login');
-        return;
-      }
-
-      if (authData.user) {
+      if (user) {
         router.push(AppRoutes.DASHBOARD);
         router.refresh();
       }

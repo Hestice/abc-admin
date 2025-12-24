@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient } from '@/lib/supabase/client';
+import { signUp } from '@/lib/auth/client';
 import { AppRoutes } from '@/constants/routes';
 import Link from 'next/link';
 import { validateInviteCode } from '@/utils/invite-codes';
@@ -44,7 +44,6 @@ export default function SignupPage() {
   const [serverError, setServerError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isCodeValid, setIsCodeValid] = useState(false);
-  const supabase = createClient();
 
   const {
     register,
@@ -114,20 +113,11 @@ export default function SignupPage() {
     setSuccessMessage('');
 
     try {
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const { user } = await signUp(data.email, data.password, {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       });
 
-      if (error) {
-        setServerError(error.message || 'An error occurred during signup');
-        return;
-      }
-
-      if (authData.user) {
+      if (user) {
         // Store invite code in localStorage to consume after email confirmation
         // The invite code will be consumed when the user first authenticates
         localStorage.setItem('pendingInviteCode', data.inviteCode.trim());

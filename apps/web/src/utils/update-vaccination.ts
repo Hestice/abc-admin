@@ -1,5 +1,5 @@
 import { Configuration, SchedulesApi } from '@abc-admin/api-lib';
-import { createClient } from '@/lib/supabase/client';
+import { getSession } from '@/lib/auth/client';
 import { VaccinationDay } from '@/types/schedule';
 
 interface UpdateVaccinationConnectionProps {
@@ -18,10 +18,7 @@ export const updateVaccination = async ({
   setIsLoading(true);
 
   try {
-    const supabase = createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const { session } = await getSession();
     const accessToken = session?.access_token;
 
     if (!accessToken) {
