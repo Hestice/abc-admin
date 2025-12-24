@@ -1,7 +1,7 @@
 import { PatientsApi, Configuration } from '@abc-admin/api-lib';
 import { getSession } from '@/lib/auth/client';
 import { NewPatient, Patient } from '@/types/patient';
-import { Category, Sex } from '@abc-admin/enums';
+import { Sex } from '@abc-admin/enums';
 
 interface AddPatientConnectionProps {
   setIsLoading: (isLoading: boolean) => void;

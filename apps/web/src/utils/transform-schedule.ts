@@ -11,9 +11,19 @@ export function transformScheduleData(
   antiTetanusGiven: boolean = false,
   dateOfAntiTetanus: Date = new Date()
 ): PatientVaccination {
+  // Get patientId from exposure if available, otherwise fall back to scheduleResponse.patientId
+  const patientId =
+    scheduleResponse.exposure?.patientId || scheduleResponse.patientId || '';
+
+  if (!patientId) {
+    throw new Error(
+      'Patient ID is required but not found in schedule or exposure data'
+    );
+  }
+
   return {
     id: scheduleResponse.id,
-    patientId: scheduleResponse.patientId,
+    patientId,
     patientName: getPatientName({
       firstName: patientFirstName,
       middleName: patientMiddleName,
