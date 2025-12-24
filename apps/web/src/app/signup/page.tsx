@@ -20,7 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { AppRoutes } from '@/constants/routes';
 import Link from 'next/link';
-import { validateInviteCode, consumeInviteCode } from '@/utils/invite-codes';
+import { validateInviteCode } from '@/utils/invite-codes';
 
 const signupSchema = z
   .object({
@@ -128,14 +128,9 @@ export default function SignupPage() {
       }
 
       if (authData.user) {
-        // Consume the invite code after successful signup
-        try {
-          await consumeInviteCode(data.inviteCode.trim());
-        } catch (consumeError) {
-          console.error('Failed to consume invite code:', consumeError);
-          // Don't fail the signup if consume fails - it might be consumed later
-          // The user record creation will handle it
-        }
+        // Store invite code in localStorage to consume after email confirmation
+        // The invite code will be consumed when the user first authenticates
+        localStorage.setItem('pendingInviteCode', data.inviteCode.trim());
 
         setSuccessMessage(
           'Account created! Please check your email to verify your account before signing in.'

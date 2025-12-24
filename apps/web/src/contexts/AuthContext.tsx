@@ -79,6 +79,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    const consumePendingInviteCode = async (accessToken: string) => {
+      try {
+        const pendingCode = localStorage.getItem('pendingInviteCode');
+        if (!pendingCode) {
+          return;
+        }
+
+        // First validate the code to make sure it's still valid
+        const { validateInviteCode, consumeInviteCode } = await import(
+          '@/utils/invite-codes'
+        );
+        const validation = await validateInviteCode(pendingCode);
+
+        if (!validation.valid) {
+          // Remove invalid code from localStorage
+          localStorage.removeItem('pendingInviteCode');
+          return;
+        }
+
+        // Code is valid, try to consume it
+        await consumeInviteCode(pendingCode);
+
+        // Remove from localStorage after successful consumption
+        localStorage.removeItem('pendingInviteCode');
+      } catch (error) {
+        console.error('Failed to consume pending invite code:', error);
+        // If code was already consumed or doesn't exist, remove from localStorage
+        if (error instanceof Error) {
+          if (
+            error.message.includes('already been used') ||
+            error.message.includes('not found')
+          ) {
+            localStorage.removeItem('pendingInviteCode');
+          }
+        }
+        // If it's a network error or auth error, keep it in localStorage to retry later
+      }
+    };
+
     const fetchUserFromBackend = async (accessToken: string) => {
       try {
         const { Configuration, UsersApi } = await import('@abc-admin/api-lib');
@@ -88,7 +127,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         const usersApi = new UsersApi(config);
         const response = await usersApi.usersControllerGetMe();
-        return response.data as any;
+        const userData = response.data as any;
+
+        // If user record was successfully created/fetched, consume pending invite code
+        if (userData) {
+          // Consume invite code if there's one pending
+          // This will work whether the user was just created or already existed
+          await consumePendingInviteCode(accessToken);
+        }
+
+        return userData;
       } catch (error) {
         console.error('Error fetching user from backend:', error);
         return null;
@@ -166,6 +214,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: session.user.email || null,
             role: null,
           });
+          // Even if user data fetch failed, try to consume invite code if user is authenticated
+          // This handles edge cases where the user record might already exist
+          if (session.access_token) {
+            await consumePendingInviteCode(session.access_token);
+          }
         }
       } else {
         setSupabaseUser(null);
