@@ -66,7 +66,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(emptyUser);
       }
     } catch (error) {
-      console.error('Error checking auth status:', error);
+      // Only log unexpected errors, not JSON parsing or network errors
+      if (
+        error instanceof Error &&
+        !error.message.includes('JSON') &&
+        !error.message.includes('status')
+      ) {
+        console.error('Error checking auth status:', error);
+      }
       setSupabaseUser(null);
       setAccessToken(null);
       setUser(emptyUser);
@@ -194,7 +201,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await updateAuthState(null);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        // Silently handle auth errors - user is just not logged in
+        // Only log if it's not a network/JSON parsing error
+        if (
+          error instanceof Error &&
+          !error.message.includes('JSON') &&
+          !error.message.includes('status')
+        ) {
+          console.error('Error initializing auth:', error);
+        }
         if (mounted) {
           await updateAuthState(null);
         }
@@ -218,12 +233,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await updateAuthState(null);
         }
       } catch (error) {
-        console.error('Error polling auth state:', error);
+        // Silently handle polling errors - don't spam console
+        // Only update state if we get a clear "not authenticated" signal
+        if (error instanceof Error && error.message.includes('401')) {
+          // Clear auth state on 401 (unauthorized)
+          if (mounted) {
+            await updateAuthState(null);
+          }
+        }
+        // Don't log JSON parsing errors or network errors during polling
       }
     };
 
-    // Set up polling interval
-    pollingIntervalRef.current = setInterval(pollAuthState, 10000); // Poll every 10 seconds
+    // Set up polling interval - reduced frequency to reduce load
+    // Poll every 30 seconds instead of 10
+    pollingIntervalRef.current = setInterval(pollAuthState, 30000); // Poll every 30 seconds
 
     // Also poll on window focus and visibility change
     const handleFocus = () => {

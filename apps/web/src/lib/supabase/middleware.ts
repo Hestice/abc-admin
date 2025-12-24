@@ -49,6 +49,11 @@ export async function updateSession(request: NextRequest) {
   const publicRoutes = ['/login', '/signup', '/'];
   const pathname = request.nextUrl.pathname;
 
+  // Skip middleware for API routes - they handle their own auth
+  if (pathname.startsWith('/api/')) {
+    return response;
+  }
+
   const isPublicRoute =
     publicRoutes.includes(pathname) || pathname.startsWith('/auth');
 

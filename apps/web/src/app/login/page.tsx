@@ -53,11 +53,13 @@ export default function LoginPage() {
   }, [isLoggedIn, authLoading, router]);
 
   const onSubmit = async (data: LoginFormValues) => {
+    console.log('Form submitted, calling signIn...');
     setIsLoading(true);
     setServerError('');
 
     try {
       const { user } = await signIn(data.email, data.password);
+      console.log('Sign in successful, user:', user);
 
       if (user) {
         router.push(AppRoutes.DASHBOARD);
@@ -88,14 +90,7 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen p-4 w-full">
       <Card className="w-full max-w-md">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(onSubmit)(e);
-          }}
-          action="#"
-          method="post"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">Login</CardTitle>
             <CardDescription>

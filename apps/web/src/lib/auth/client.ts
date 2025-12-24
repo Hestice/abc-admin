@@ -89,7 +89,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   // For successful responses, they must be JSON
+  // But also check if it looks like HTML (common for error pages)
   if (!contentType.includes('application/json')) {
+    // If it looks like HTML, it's probably an error page even with 200 status
+    if (text.trim().startsWith('<!') || text.trim().startsWith('<html')) {
+      throw new Error(
+        `Received HTML response instead of JSON. This usually means the API endpoint doesn't exist or there's a routing issue.`
+      );
+    }
     throw new Error('Response is not JSON');
   }
 
@@ -129,7 +136,12 @@ export async function signIn(
   email: string,
   password: string
 ): Promise<SignInResponse> {
-  const response = await fetch('/api/auth/signin', {
+  // Use absolute URL to ensure we're hitting the API route, not the page
+  const apiUrl = '/api/auth/signin';
+
+  console.log('Signing in to:', apiUrl);
+
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -137,6 +149,8 @@ export async function signIn(
     credentials: 'include',
     body: JSON.stringify({ email, password }),
   });
+
+  console.log('Sign in response status:', response.status, response.url);
 
   return handleResponse<SignInResponse>(response);
 }
