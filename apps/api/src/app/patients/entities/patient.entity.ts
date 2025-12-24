@@ -3,7 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Schedule } from '../../schedules/entities/schedule.entity';
@@ -87,8 +87,8 @@ export class Patient {
   @ManyToOne(() => User, { nullable: true })
   managedBy?: User;
 
-  @OneToOne(() => Schedule, (schedule) => schedule.patient, { nullable: true })
-  schedule?: Schedule;
+  @OneToMany(() => Schedule, (schedule) => schedule.patient)
+  schedules!: Schedule[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;

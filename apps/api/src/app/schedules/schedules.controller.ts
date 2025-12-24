@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -87,12 +88,13 @@ export class SchedulesController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid input or patient already has a schedule.',
+    description: 'Invalid input.',
   })
   async create(
-    @Body() createScheduleDto: CreateScheduleDto
+    @Body() createScheduleDto: CreateScheduleDto,
+    @Request() req: any
   ): Promise<Schedule> {
-    return this.schedulesService.create(createScheduleDto);
+    return this.schedulesService.create(createScheduleDto, req.user.id);
   }
 
   @Get()
@@ -119,10 +121,23 @@ export class SchedulesController {
   }
 
   @Get('patient/:patientId')
-  @ApiOperation({ summary: 'Get a schedule by patient ID' })
+  @ApiOperation({ summary: 'Get all schedules for a patient' })
   @ApiResponse({
     status: 200,
-    description: 'Return the schedule for the patient.',
+    description: 'Return all schedules for the patient.',
+    type: [ScheduleResponse],
+  })
+  async findAllByPatientId(
+    @Param('patientId') patientId: string
+  ): Promise<Schedule[]> {
+    return this.schedulesService.findAllByPatientId(patientId);
+  }
+
+  @Get('patient/:patientId/latest')
+  @ApiOperation({ summary: 'Get the most recent schedule for a patient' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the most recent schedule for the patient.',
     type: ScheduleResponse,
   })
   @ApiResponse({

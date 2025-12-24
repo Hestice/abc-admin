@@ -153,7 +153,7 @@ export function usePatientForm() {
       const createdPatientId = (response as ApiResponse).data.id;
       if (createdPatientId) {
         router.push(
-          AppRoutes.PATIENT_SCHEDULE.replace(':id', createdPatientId)
+          AppRoutes.PATIENT_SCHEDULES.replace(':id', createdPatientId)
         );
       } else {
         router.push(AppRoutes.PATIENTS);

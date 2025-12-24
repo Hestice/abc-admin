@@ -11,7 +11,10 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { UsersService } from '../users/users.service';
 import { SchedulesService } from '../schedules/schedules.service';
 import { SimplifiedPatient } from './types/simplifiedPatients.type';
-import { Schedule } from '../schedules/entities/schedule.entity';
+import {
+  Schedule,
+  ScheduleStatus,
+} from '../schedules/entities/schedule.entity';
 import { Sex } from '@abc-admin/enums';
 import { Logger } from '@nestjs/common';
 import { PatientSummaryDto } from './dto/patient-summary.dto';
@@ -41,11 +44,16 @@ export class PatientsService {
     const savedPatient = await this.patientsRepository.save(patient);
 
     // Create a vaccination schedule for the patient
-    try {
-      await this.schedulesService.create({ patientId: savedPatient.id });
-    } catch (error) {
-      // Log the error but don't fail the patient creation
-      console.error('Failed to create vaccination schedule:', error);
+    if (userId) {
+      try {
+        await this.schedulesService.create(
+          { patientId: savedPatient.id },
+          userId
+        );
+      } catch (error) {
+        // Log the error but don't fail the patient creation
+        console.error('Failed to create vaccination schedule:', error);
+      }
     }
 
     // Return the patient with the newly added schedule
@@ -83,6 +91,18 @@ export class PatientsService {
     return { date: undefined, day: 'Completed' };
   }
 
+  private getMostRecentSchedule(schedules: Schedule[]): Schedule | null {
+    if (!schedules || schedules.length === 0) {
+      return null;
+    }
+    // Return the most recent schedule (assuming they're ordered by createdAt DESC)
+    // Or find the most recent in-progress schedule, otherwise the most recent overall
+    const inProgressSchedule = schedules.find(
+      (s) => s.status === ScheduleStatus.IN_PROGRESS
+    );
+    return inProgressSchedule || schedules[0];
+  }
+
   async findAll(
     page = 1,
     limit = 10,
@@ -93,14 +113,15 @@ export class PatientsService {
   }> {
     const [patients, total] = await this.patientsRepository.findAndCount({
       where: { managedBy: { id: userId } },
-      relations: ['managedBy', 'schedule'],
+      relations: ['managedBy', 'schedules'],
       skip: (page - 1) * limit,
       take: limit,
     });
 
     const simplifiedPatients = patients.map((patient) => {
+      const mostRecentSchedule = this.getMostRecentSchedule(patient.schedules);
       const nextVaccination = this.getNextVaccinationDate(
-        patient.schedule || ({} as Schedule)
+        mostRecentSchedule || ({} as Schedule)
       );
 
       return {
@@ -108,7 +129,7 @@ export class PatientsService {
         firstName: patient.firstName,
         middleName: patient.middleName,
         lastName: patient.lastName,
-        scheduleStatus: patient.schedule?.status,
+        scheduleStatus: mostRecentSchedule?.status,
         nextVaccinationDate: nextVaccination.date,
         nextVaccinationDay: nextVaccination.day,
         dateOfBirth: patient.dateOfBirth,
@@ -124,7 +145,7 @@ export class PatientsService {
   async findOne(id: string, userId: string): Promise<Patient> {
     const patient = await this.patientsRepository.findOne({
       where: { id, managedBy: { id: userId } },
-      relations: ['managedBy', 'schedule'],
+      relations: ['managedBy', 'schedules'],
     });
 
     if (!patient) {
@@ -140,8 +161,9 @@ export class PatientsService {
   ): Promise<{ patient: PatientSummaryDto }> {
     const patient = await this.findOne(id, userId);
 
+    const mostRecentSchedule = this.getMostRecentSchedule(patient.schedules);
     const nextVaccination = this.getNextVaccinationDate(
-      patient.schedule || ({} as Schedule)
+      mostRecentSchedule || ({} as Schedule)
     );
 
     const patientSummary: PatientSummaryDto = {
@@ -154,7 +176,7 @@ export class PatientsService {
       antiTetanusGiven: patient.antiTetanusGiven,
       dateOfAntiTetanus: patient.dateOfAntiTetanus || null,
       dateRegistered: patient.createdAt,
-      scheduleStatus: patient.schedule?.status || '',
+      scheduleStatus: mostRecentSchedule?.status || '',
       nextVaccinationDate: nextVaccination.date || null,
       nextVaccinationDay: nextVaccination.day,
     };

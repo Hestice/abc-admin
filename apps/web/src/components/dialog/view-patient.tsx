@@ -62,7 +62,7 @@ export default function ViewPatientDialog({
   };
 
   const handleEditPatient = () =>
-    navigateTo(AppRoutes.EDIT_PATIENT.replace(':id', selectedPatient.id));
+    navigateTo(AppRoutes.PATIENT_SCHEDULES.replace(':id', selectedPatient.id));
 
   const handleViewSchedule = () =>
     navigateTo(AppRoutes.PATIENT_SCHEDULE.replace(':id', selectedPatient.id));

@@ -11,9 +11,13 @@ import { useVaccinationSchedule } from '@/hooks/use-vaccination-schedule';
 
 interface VaccinationScheduleProps {
   patientId: string;
+  scheduleId?: string;
 }
 
-export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
+export function VaccinationSchedule({
+  patientId,
+  scheduleId,
+}: VaccinationScheduleProps) {
   const router = useRouter();
   const {
     isLoading,
@@ -23,7 +27,7 @@ export function VaccinationSchedule({ patientId }: VaccinationScheduleProps) {
     nextVaccination,
     handleVaccinationToggle,
     handleAntiTetanusUpdate,
-  } = useVaccinationSchedule(patientId);
+  } = useVaccinationSchedule(patientId, scheduleId);
 
   const handleBack = () => {
     router.push(`/patients/${patientId}`);

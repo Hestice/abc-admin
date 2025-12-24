@@ -8,7 +8,7 @@ import { PatientVaccination } from '@/types/vaccinations';
 import { updatePatientAntiTetanus } from '@/utils/update-patient';
 import { Status } from '@abc-admin/enums';
 
-export function useVaccinationSchedule(patientId: string) {
+export function useVaccinationSchedule(patientId: string, scheduleId?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [scheduleData, setScheduleData] = useState<PatientVaccination | null>(
@@ -35,10 +35,11 @@ export function useVaccinationSchedule(patientId: string) {
         // Store the animal status
         setAnimalStatus(patientData.animalStatus);
 
-        // Use the retrieved patient data directly
+        // Use scheduleId if provided, otherwise fetch by patientId
         const scheduleResponse = await getSchedule({
           setIsLoading: () => {},
           patientId: patientData.id,
+          scheduleId,
         });
 
         const transformedData = transformScheduleData(
@@ -64,7 +65,7 @@ export function useVaccinationSchedule(patientId: string) {
     };
 
     fetchData();
-  }, [patientId]);
+  }, [patientId, scheduleId]);
 
   const handleVaccinationToggle = async (day: number, completed: boolean) => {
     if (!scheduleData) return;

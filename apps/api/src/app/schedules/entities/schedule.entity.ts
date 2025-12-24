@@ -2,7 +2,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToOne,
+  ManyToOne,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -26,8 +26,8 @@ export class Schedule {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @OneToOne(() => Patient, (patient) => patient.schedule)
-  @JoinColumn()
+  @ManyToOne(() => Patient, (patient) => patient.schedules)
+  @JoinColumn({ name: 'patientId' })
   patient!: Patient;
 
   @Column({

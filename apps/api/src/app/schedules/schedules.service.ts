@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
   forwardRef,
   Inject,
   Logger,
@@ -29,22 +28,19 @@ export class SchedulesService {
     private patientsService: PatientsService
   ) {}
 
-  async create(createScheduleDto: CreateScheduleDto): Promise<Schedule> {
+  async create(
+    createScheduleDto: CreateScheduleDto,
+    userId: string
+  ): Promise<Schedule> {
     this.logger.log(
       `Creating schedule for patient: ${createScheduleDto.patientId}`
     );
 
     // Check if patient exists
     const patient = await this.patientsService.findOne(
-      createScheduleDto.patientId
+      createScheduleDto.patientId,
+      userId
     );
-
-    // Check if patient already has a schedule
-    if (patient.schedule) {
-      throw new BadRequestException(
-        'Patient already has a vaccination schedule'
-      );
-    }
 
     // Calculate the vaccination dates
     // Always set to current date in UTC to avoid timezone issues
@@ -212,45 +208,34 @@ export class SchedulesService {
     return schedule;
   }
 
-  async findByPatientId(patientId: string): Promise<Schedule> {
-    this.logger.log(`Finding schedule for patient with ID: ${patientId}`);
-    const schedule = await this.schedulesRepository.findOne({
+  async findAllByPatientId(patientId: string): Promise<Schedule[]> {
+    this.logger.log(`Finding all schedules for patient with ID: ${patientId}`);
+    const schedules = await this.schedulesRepository.find({
       where: { patient: { id: patientId } },
       relations: ['patient'],
+      order: { createdAt: 'DESC' },
     });
 
-    if (!schedule) {
+    this.logger.debug(
+      `Found ${schedules.length} schedule(s) for patient ${patientId}`
+    );
+    return schedules;
+  }
+
+  async findByPatientId(patientId: string): Promise<Schedule> {
+    // Keep this method for backward compatibility, but it will return the most recent schedule
+    this.logger.log(`Finding schedule for patient with ID: ${patientId}`);
+    const schedules = await this.findAllByPatientId(patientId);
+
+    if (schedules.length === 0) {
       this.logger.error(`Schedule not found for patient with ID: ${patientId}`);
       throw new NotFoundException(
         `Schedule not found for patient ${patientId}`
       );
     }
 
-    // Log the schedule's dates
-    this.logger.debug(`Patient ${patientId} schedule dates:
-      day0Date: ${
-        schedule.day0Date instanceof Date
-          ? schedule.day0Date.toISOString()
-          : schedule.day0Date
-      }
-      day3Date: ${
-        schedule.day3Date instanceof Date
-          ? schedule.day3Date.toISOString()
-          : schedule.day3Date
-      }
-      day7Date: ${
-        schedule.day7Date instanceof Date
-          ? schedule.day7Date.toISOString()
-          : schedule.day7Date
-      }
-      day28Date: ${
-        schedule.day28Date instanceof Date
-          ? schedule.day28Date.toISOString()
-          : schedule.day28Date
-      }
-    `);
-
-    return schedule;
+    // Return the most recent schedule (first in DESC order)
+    return schedules[0];
   }
 
   async update(
@@ -341,8 +326,8 @@ export class SchedulesService {
 
   async updateVaccination(id: string, day: VaccinationDay): Promise<Schedule> {
     const schedule = await this.findOne(id);
-    const patient = await this.patientsService.findOne(schedule.patient.id);
-    const isAnimalAlive = patient.animalStatus === Status.ALIVE;
+    // Patient is already loaded in the relation, use it directly
+    const isAnimalAlive = schedule.patient.animalStatus === Status.ALIVE;
 
     switch (day) {
       case VaccinationDay.DAY_0:
