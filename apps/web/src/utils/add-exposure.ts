@@ -6,11 +6,6 @@ import {
 import { getSession } from '@/lib/auth/client';
 import { NewExposure, Exposure } from '@/types/exposure';
 
-interface AddExposureConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-  newExposure: NewExposure;
-}
-
 interface ApiResponse<T> {
   data: T;
   status: number;
@@ -30,25 +25,25 @@ export class ApiError extends Error {
   }
 }
 
-export const addExposure = async ({
-  setIsLoading,
-  newExposure,
-}: AddExposureConnectionProps): Promise<ApiResponse<Exposure>> => {
-  setIsLoading(true);
+export const addExposure = async (
+  newExposure: NewExposure
+): Promise<ApiResponse<Exposure>> => {
+  const { session } = await getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    throw new ApiError(
+      'No authentication token found. Please log in again.',
+      401
+    );
+  }
+
+  const config = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+    accessToken: accessToken,
+  });
 
   try {
-    const { session } = await getSession();
-    const accessToken = session?.access_token;
-
-    if (!accessToken) {
-      throw new ApiError('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
     // Adapt NewExposure to CreateExposureDto format expected by API
     const createExposureDto: CreateExposureDto = {
       patientId: newExposure.patientId,
@@ -108,7 +103,5 @@ export const addExposure = async ({
     throw new ApiError(
       error instanceof Error ? error.message : 'Unknown error occurred'
     );
-  } finally {
-    setIsLoading(false);
   }
 };

@@ -2,11 +2,6 @@ import { UsersApi, Configuration } from '@abc-admin/api-lib';
 import { Admin, NewAdmin } from '@/types/admin';
 import { getSession } from '@/lib/auth/client';
 
-interface AddUserConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-  newAdmin: NewAdmin;
-}
-
 export class ApiError extends Error {
   status?: number;
 
@@ -17,25 +12,23 @@ export class ApiError extends Error {
   }
 }
 
-export const addUser = async ({
-  setIsLoading,
-  newAdmin,
-}: AddUserConnectionProps): Promise<Admin[]> => {
-  setIsLoading(true);
+export const addUser = async (newAdmin: NewAdmin): Promise<Admin[]> => {
+  const { session } = await getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    throw new ApiError(
+      'No authentication token found. Please log in again.',
+      401
+    );
+  }
+
+  const config = new Configuration({
+    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
+    accessToken: accessToken,
+  });
 
   try {
-    const { session } = await getSession();
-    const accessToken = session?.access_token;
-
-    if (!accessToken) {
-      throw new ApiError('No authentication token found. Please log in again.');
-    }
-
-    const config = new Configuration({
-      basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-      accessToken: accessToken,
-    });
-
     const usersApi = new UsersApi(config);
     const response = await usersApi.usersControllerCreate(newAdmin);
     return (response as unknown as { data: Admin[] }).data;
@@ -66,7 +59,5 @@ export const addUser = async ({
     throw new ApiError(
       error instanceof Error ? error.message : 'Unknown error occurred'
     );
-  } finally {
-    setIsLoading(false);
   }
 };

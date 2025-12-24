@@ -3,24 +3,6 @@ import { getSession } from '@/lib/auth/client';
 import { EditablePatient, NewPatient } from '@/types/patient';
 import { ApiError } from './add-patient';
 
-interface GetPatientConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-  patientId: string;
-}
-
-interface UpdatePatientConnectionProps {
-  setIsLoading: (isLoading: boolean) => void;
-  patientId: string;
-  updatedPatient: Partial<NewPatient>;
-}
-
-interface UpdateAntiTetanusProps {
-  setIsLoading: (isLoading: boolean) => void;
-  patientId: string;
-  administered: boolean;
-  date?: Date;
-}
-
 // Create a shared API client
 async function getApiClient() {
   const { session } = await getSession();
@@ -87,30 +69,22 @@ const adaptToUpdatePatientDto = (patient: Partial<NewPatient>): any => {
   return adaptedPatient;
 };
 
-export const getPatient = async ({
-  setIsLoading,
-  patientId,
-}: GetPatientConnectionProps): Promise<EditablePatient> => {
-  setIsLoading(true);
-
+export const getPatient = async (
+  patientId: string
+): Promise<EditablePatient> => {
   try {
     const patientsApi = await getApiClient();
     const response = await patientsApi.patientsControllerFindOne(patientId);
     return (response as any).data as EditablePatient;
   } catch (error: any) {
     handleApiError(error, 'retrieving the patient');
-  } finally {
-    setIsLoading(false);
   }
 };
 
-export const updatePatient = async ({
-  setIsLoading,
-  patientId,
-  updatedPatient,
-}: UpdatePatientConnectionProps): Promise<EditablePatient> => {
-  setIsLoading(true);
-
+export const updatePatient = async (
+  patientId: string,
+  updatedPatient: Partial<NewPatient>
+): Promise<EditablePatient> => {
   try {
     const patientsApi = await getApiClient();
     const adaptedPatient = adaptToUpdatePatientDto(updatedPatient);
@@ -121,17 +95,14 @@ export const updatePatient = async ({
     return (response as any).data as EditablePatient;
   } catch (error: any) {
     handleApiError(error, 'updating the patient');
-  } finally {
-    setIsLoading(false);
   }
 };
 
-export const updatePatientAntiTetanus = async ({
-  setIsLoading,
-  patientId,
-  administered,
-  date,
-}: UpdateAntiTetanusProps): Promise<EditablePatient> => {
+export const updatePatientAntiTetanus = async (
+  patientId: string,
+  administered: boolean,
+  date?: Date
+): Promise<EditablePatient> => {
   // Note: Anti-tetanus is now part of exposure, not patient
   // This function should be updated to update the exposure instead
   // For now, this is a placeholder that will need to be refactored

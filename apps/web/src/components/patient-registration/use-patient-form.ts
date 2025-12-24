@@ -6,8 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Resolver } from 'react-hook-form';
 import { Category, Sex, Status } from '@abc-admin/enums';
 import { FormValues, formSchema, steps } from './schema';
-import { addPatient } from '@/utils/add-patient';
-import { addExposure } from '@/utils/add-exposure';
+import { useCreatePatient } from '@/hooks/mutations/use-patient-mutations';
+import { useCreateExposure } from '@/hooks/mutations/use-exposure-mutations';
 import { NewPatient } from '@/types/patient';
 import { NewExposure } from '@/types/exposure';
 import { AppRoutes } from '@/constants/routes';
@@ -73,8 +73,9 @@ const formatExposureData = (
 
 export function usePatientForm() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const createPatientMutation = useCreatePatient();
+  const createExposureMutation = useCreateExposure();
 
   // Initialize the form with default values
   const form = useForm<FormValues>({
@@ -149,15 +150,12 @@ export function usePatientForm() {
 
   // Handle form submission
   const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
-
     try {
       // Step 1: Create patient
       const patientData = formatPatientData(data);
-      const patientResponse = await addPatient({
-        setIsLoading: setIsSubmitting,
-        newPatient: patientData,
-      });
+      const patientResponse = await createPatientMutation.mutateAsync(
+        patientData
+      );
 
       const createdPatientId = patientResponse.data.id;
 
@@ -167,10 +165,9 @@ export function usePatientForm() {
 
       // Step 2: Create exposure
       const exposureData = formatExposureData(data, createdPatientId);
-      const exposureResponse = await addExposure({
-        setIsLoading: setIsSubmitting,
-        newExposure: exposureData,
-      });
+      const exposureResponse = await createExposureMutation.mutateAsync(
+        exposureData
+      );
 
       const createdExposureId = exposureResponse.data.id;
 
@@ -201,10 +198,11 @@ export function usePatientForm() {
     } catch (error) {
       console.error('Error submitting patient data:', error);
       // You might want to show an error toast here
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const isSubmitting =
+    createPatientMutation.isPending || createExposureMutation.isPending;
 
   return {
     form,

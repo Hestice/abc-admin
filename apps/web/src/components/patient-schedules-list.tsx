@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,50 +12,27 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Calendar, CheckCircle2, Clock } from 'lucide-react';
-import { getPatientSchedules } from '@/utils/get-patient-schedules';
-import { getPatient } from '@/utils/get-patients';
+import { usePatientSchedules } from '@/hooks/queries/use-schedules';
+import { usePatientSummary } from '@/hooks/queries/use-patients';
 import { Schedule } from '@/types/schedule';
-import { PatientSummary } from '@/types/patient';
 import { ScheduleStatus } from '@/enums/schedule-status';
 import { formatDate } from '@/utils/date-utils';
 import { AppRoutes } from '@/constants/routes';
-import { useToast } from '@/hooks/use-toast';
 
 interface PatientSchedulesListProps {
   patientId: string;
 }
 
 export function PatientSchedulesList({ patientId }: PatientSchedulesListProps) {
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [patient, setPatient] = useState<PatientSummary | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { toast } = useToast();
 
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const [schedulesData, patientData] = await Promise.all([
-        getPatientSchedules({ setIsLoading: () => {}, patientId }),
-        getPatient({ setIsLoading: () => {}, patientId }),
-      ]);
-      setSchedules(schedulesData);
-      setPatient(patientData.patient);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load schedules. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: schedules = [], isLoading: isLoadingSchedules } =
+    usePatientSchedules(patientId);
+  const { data: patientData, isLoading: isLoadingPatient } =
+    usePatientSummary(patientId);
 
-  useEffect(() => {
-    fetchData();
-  }, [patientId, toast]);
+  const isLoading = isLoadingSchedules || isLoadingPatient;
+  const patient = patientData?.patient || null;
 
   const handleCreateSchedule = () => {
     router.push(AppRoutes.CREATE_EXPOSURE.replace(':id', patientId));

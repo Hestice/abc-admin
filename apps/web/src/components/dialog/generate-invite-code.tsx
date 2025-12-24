@@ -10,7 +10,7 @@ import {
 import { Button } from '../ui/button';
 import { UserPlus, Copy, Check } from 'lucide-react';
 import { DialogFooter } from '../ui/dialog';
-import { createInviteCode, ApiError } from '@/utils/invite-codes';
+import { useCreateInviteCode } from '@/hooks/mutations/use-invite-code-mutations';
 import Link from 'next/link';
 
 interface GenerateInviteCodeProps {
@@ -24,32 +24,23 @@ export default function GenerateInviteCode({
   setIsDialogOpen,
   onInviteCodeGenerated,
 }: GenerateInviteCodeProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const createInviteCodeMutation = useCreateInviteCode();
 
   const handleGenerate = async () => {
-    setIsLoading(true);
-    setError(null);
     setGeneratedCode(null);
     setCopied(false);
 
     try {
-      const inviteCode = await createInviteCode();
+      const inviteCode = await createInviteCodeMutation.mutateAsync();
       setGeneratedCode(inviteCode.code);
       if (onInviteCodeGenerated) {
         onInviteCodeGenerated();
       }
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else {
-        setError('Failed to generate invite code. Please try again.');
-      }
+    } catch (err: any) {
       console.error('Failed to generate invite code:', err);
-    } finally {
-      setIsLoading(false);
+      // Error is handled by React Query's error handler
     }
   };
 
@@ -69,12 +60,18 @@ export default function GenerateInviteCode({
     if (!open) {
       setIsDialogOpen(false);
       setGeneratedCode(null);
-      setError(null);
       setCopied(false);
     } else {
       setIsDialogOpen(true);
     }
   };
+
+  const error = createInviteCodeMutation.error
+    ? createInviteCodeMutation.error instanceof Error
+      ? createInviteCodeMutation.error.message
+      : 'Failed to generate invite code. Please try again.'
+    : null;
+  const isLoading = createInviteCodeMutation.isPending;
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleClose}>
