@@ -175,7 +175,7 @@ begin
   end if;
 
   insert into public.invite_codes (code, created_by, is_active)
-  values (uuid_generate_v4(), auth.uid(), true)
+  values (pg_catalog.gen_random_uuid(), auth.uid(), true)
   returning * into v_invite;
 
   return v_invite;
