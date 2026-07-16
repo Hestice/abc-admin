@@ -204,10 +204,6 @@ export function AdminManagement() {
                                 </>
                               )}
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <span className="mr-2">🔑</span>
-                              Reset Password
-                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                           </DropdownMenuContent>
                         </DropdownMenu>
