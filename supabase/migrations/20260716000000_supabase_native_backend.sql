@@ -2,8 +2,6 @@
 -- This migration is additive: the Nest API can continue to use the same tables
 -- during the frontend cutover, while browser clients use RLS and RPCs directly.
 
-begin;
-
 create index if not exists patients_managed_by_id_idx
   on public.patients ("managedById");
 create index if not exists exposures_patient_id_idx
@@ -298,8 +296,8 @@ begin
     raise exception 'Unsupported vaccination day';
   end if;
 
-  select s, e."animalStatus"::text = 'alive'
-  into v_schedule, v_animal_alive
+  select s.*
+  into v_schedule
   from public.schedules s
   join public.exposures e on e.id = s."exposureId"
   join public.patients p on p.id = e."patientId"
@@ -310,6 +308,11 @@ begin
   if not found then
     raise exception 'Schedule not found' using errcode = 'P0002';
   end if;
+
+  select "animalStatus"::text = 'alive'
+  into v_animal_alive
+  from public.exposures
+  where id = v_schedule."exposureId";
 
   if p_day = 0 then
     v_schedule."day0Completed" := not v_schedule."day0Completed";
@@ -454,5 +457,3 @@ grant execute on function public.toggle_vaccination(uuid, integer) to authentica
 grant execute on function public.patient_summary(uuid) to authenticated;
 grant execute on function public.list_patient_summaries(integer, integer) to authenticated;
 grant execute on function public.validate_invite_code(uuid) to anon, authenticated;
-
-commit;
