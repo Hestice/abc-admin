@@ -45,9 +45,6 @@
   "references": [
     {
       "path": "../../libs/enums"
-    },
-    {
-      "path": "../../libs/api-lib"
     }
   ]
 }
