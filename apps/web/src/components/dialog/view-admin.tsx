@@ -82,10 +82,6 @@ export default function ViewAdmin({
                       </>
                     )}
                   </Button>
-                  <Button variant="outline" size="sm">
-                    <span className="mr-2">🔑</span>
-                    Reset Password
-                  </Button>
                 </div>
               </div>
             </div>
