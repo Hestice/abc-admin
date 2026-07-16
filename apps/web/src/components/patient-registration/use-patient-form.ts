@@ -12,8 +12,7 @@ import { NewPatient } from '@/types/patient';
 import { NewExposure } from '@/types/exposure';
 import { AppRoutes } from '@/constants/routes';
 import { capitalizeFields } from '@/utils/string-utils';
-import { Configuration, SchedulesApi } from '@abc-admin/api-lib';
-import { getSession } from '@/lib/auth/client';
+import { createVaccinationSchedule } from '@/utils/schedules';
 
 // Helper to convert form data to NewPatient format (metadata only)
 const formatPatientData = (data: FormValues): NewPatient => {
@@ -175,23 +174,7 @@ export function usePatientForm() {
         throw new Error('Failed to create exposure');
       }
 
-      // Step 3: Create schedule
-      const { session } = await getSession();
-      const accessToken = session?.access_token;
-
-      if (!accessToken) {
-        throw new Error('No authentication token found');
-      }
-
-      const config = new Configuration({
-        basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-        accessToken: accessToken,
-      });
-
-      const schedulesApi = new SchedulesApi(config);
-      await schedulesApi.schedulesControllerCreate({
-        exposureId: createdExposureId,
-      });
+      await createVaccinationSchedule(createdExposureId);
 
       // Navigate to patient schedules page
       router.push(AppRoutes.PATIENT_SCHEDULES.replace(':id', createdPatientId));

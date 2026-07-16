@@ -13,8 +13,7 @@ import { useCreateExposure } from '@/hooks/mutations/use-exposure-mutations';
 import { NewExposure } from '@/types/exposure';
 import { AppRoutes } from '@/constants/routes';
 import { capitalizeFields } from '@/utils/string-utils';
-import { Configuration, SchedulesApi } from '@abc-admin/api-lib';
-import { getSession } from '@/lib/auth/client';
+import { createVaccinationSchedule } from '@/utils/schedules';
 import { useToast } from '@/hooks/use-toast';
 
 const exposureStepFields = [
@@ -166,34 +165,9 @@ export function useCreateExposureForm(patientId: string) {
         throw new Error('Failed to create exposure');
       }
 
-      // Step 2: Create schedule for the exposure
-      const { session } = await getSession();
-      const accessToken = session?.access_token;
-
-      if (!accessToken) {
-        throw new Error('No authentication token found');
-      }
-
-      const config = new Configuration({
-        basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-        accessToken: accessToken,
-      });
-
-      const schedulesApi = new SchedulesApi(config);
-      const createScheduleDto: {
-        exposureId?: string;
-        startDate?: string;
-      } = {
-        exposureId: createdExposureId,
-      };
-
-      // Use dateOfExposure as start date
-      if (data.dateOfExposure) {
-        createScheduleDto.startDate = data.dateOfExposure.toISOString();
-      }
-
-      const scheduleResponse = await schedulesApi.schedulesControllerCreate(
-        createScheduleDto
+      const schedule = await createVaccinationSchedule(
+        createdExposureId,
+        data.dateOfExposure?.toISOString()
       );
 
       toast({
@@ -205,7 +179,7 @@ export function useCreateExposureForm(patientId: string) {
       router.push(
         AppRoutes.EDIT_PATIENT.replace(':id', patientId).replace(
           ':scheduleId',
-          scheduleResponse.data.id
+          schedule.id
         )
       );
     } catch (error: any) {

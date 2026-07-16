@@ -10,9 +10,11 @@ workflows into Postgres RPC functions:
 - `patient_summary`
 - `list_patient_summaries`
 
-The web app should call table queries and these RPC functions through
-`@supabase/supabase-js`. Keep the Nest API deployed until the frontend has been
-cut over and validated.
+The web app calls table queries and these RPC functions through
+`@supabase/supabase-js`. Configure `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` for the web deployment before enabling the
+cutover. Keep the Nest API deployed until the migration is applied and the
+Supabase-backed frontend has been validated.
 
 ## Deployment
 

@@ -13,8 +13,7 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Loader2, Calendar, AlertCircle } from 'lucide-react';
 import CustomDatePicker from '@/components/custom-fields/custom-date-picker';
-import { Configuration, SchedulesApi } from '@abc-admin/api-lib';
-import { getSession } from '@/lib/auth/client';
+import { createVaccinationSchedule } from '@/utils/schedules';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { AppRoutes } from '@/constants/routes';
@@ -161,36 +160,9 @@ export default function CreateScheduleDialog({
 
       const createdExposureId = exposureResponse.data.id;
 
-      // Step 2: Create schedule for the exposure
-      const { session } = await getSession();
-      const accessToken = session?.access_token;
-
-      if (!accessToken) {
-        throw new Error('No authentication token found. Please log in again.');
-      }
-
-      const config = new Configuration({
-        basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-        accessToken: accessToken,
-      });
-
-      const schedulesApi = new SchedulesApi(config);
-      const createScheduleDto: {
-        exposureId?: string;
-        startDate?: string;
-      } = {
-        exposureId: createdExposureId,
-      };
-
-      // Use startDate if provided, otherwise use dateOfExposure
-      if (startDate) {
-        createScheduleDto.startDate = startDate.toISOString();
-      } else if (formData.dateOfExposure) {
-        createScheduleDto.startDate = formData.dateOfExposure.toISOString();
-      }
-
-      const scheduleResponse = await schedulesApi.schedulesControllerCreate(
-        createScheduleDto
+      const schedule = await createVaccinationSchedule(
+        createdExposureId,
+        startDate?.toISOString() || formData.dateOfExposure?.toISOString()
       );
 
       toast({
@@ -213,7 +185,7 @@ export default function CreateScheduleDialog({
       router.push(
         AppRoutes.EDIT_PATIENT.replace(':id', patientId).replace(
           ':scheduleId',
-          scheduleResponse.data.id
+          schedule.id
         )
       );
     } catch (error: any) {
