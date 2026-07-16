@@ -1,4 +1,4 @@
-import { AuthApi, Configuration } from '@abc-admin/api-lib';
+import { createClient } from '@/lib/supabase/client';
 
 interface UserProfile {
   id: string;
@@ -7,24 +7,23 @@ interface UserProfile {
 }
 
 export async function getCurrentUser(): Promise<UserProfile | null> {
-  try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-    
-    const configuration = new Configuration({
-      basePath: backendUrl,
-      baseOptions: {
-        withCredentials: true
-      }
-    });
-    
-    const authApi = new AuthApi(configuration);
-    const response = await authApi.authControllerGetProfile();
-    
-    return response.data as unknown as UserProfile;
-  } catch (error) {
-    console.error('Failed to get user profile:', error);
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return null;
   }
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, email, role')
+    .eq('id', user.id)
+    .single();
+  if (error || !data) {
+    return null;
+  }
+  return data as UserProfile;
 }
 
 export function isAdmin(userRole: string | null): boolean {
@@ -32,20 +31,8 @@ export function isAdmin(userRole: string | null): boolean {
 }
 
 export async function verifyAuthentication(): Promise<boolean> {
-  try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-    
-    const configuration = new Configuration({
-      basePath: backendUrl,
-      baseOptions: {
-        withCredentials: true
-      }
-    });
-    
-    const authApi = new AuthApi(configuration);
-    await authApi.authControllerVerifyToken();
-    return true;
-  } catch (error) {
-    return false;
-  }
-} 
+  const {
+    data: { user },
+  } = await createClient().auth.getUser();
+  return Boolean(user);
+}

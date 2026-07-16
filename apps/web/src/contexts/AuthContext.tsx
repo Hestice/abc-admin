@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { getSession } from '@/lib/auth/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 
 interface User {
   id: string | null;
@@ -124,20 +125,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const fetchUserFromBackend = async (accessToken: string) => {
+    const fetchUserFromSupabase = async (userId: string) => {
       try {
-        const { Configuration, UsersApi } = await import('@abc-admin/api-lib');
-        const config = new Configuration({
-          basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-          accessToken: accessToken,
-        });
-        const usersApi = new UsersApi(config);
-        const response = await usersApi.usersControllerGetMe();
-        const userData = response.data as any;
-
-        return userData;
+        const { data, error } = await createClient()
+          .from('users')
+          .select('id, email, role')
+          .eq('id', userId)
+          .single();
+        return error ? null : data;
       } catch (error) {
-        console.error('Error fetching user from backend:', error);
+        console.error('Error fetching user from Supabase:', error);
         return null;
       }
     };
@@ -151,11 +148,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSupabaseUser(session.user);
         setAccessToken(session.access_token);
 
-        // Provision an invited user before accessing any protected API endpoint.
+        // Provision an invited user before querying protected Supabase tables.
         await consumePendingInviteCode();
 
-        // Call /me endpoint to fetch the local user and role.
-        const userData = await fetchUserFromBackend(session.access_token);
+        const userData = await fetchUserFromSupabase(session.user.id);
         if (userData) {
           setUser({
             id: userData.id,

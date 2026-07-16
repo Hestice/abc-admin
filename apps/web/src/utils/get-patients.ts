@@ -1,64 +1,31 @@
-import { Configuration, PatientsApi } from '@abc-admin/api-lib';
-import { getSession } from '@/lib/auth/client';
 import { Patient, PatientSummary } from '@/types/patient';
-import { ApiError } from './add-patient';
+import { ApiError, getSupabaseClient, throwOnSupabaseError } from './supabase';
 
 export const getPatients = async (
   page: number
-): Promise<{
-  patients: Patient[];
-  total: number;
-}> => {
-  const { session } = await getSession();
-  const accessToken = session?.access_token;
+): Promise<{ patients: Patient[]; total: number }> => {
+  const { data, error } = await getSupabaseClient().rpc(
+    'list_patient_summaries',
+    { p_page: page, p_page_size: 10 }
+  );
+  throwOnSupabaseError(error, 'Failed to fetch patients');
 
-  if (!accessToken) {
-    throw new ApiError(
-      'No authentication token found. Please log in again.',
-      401
-    );
-  }
-
-  const config = new Configuration({
-    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-    accessToken: accessToken,
-  });
-
-  const patientsApi = new PatientsApi(config);
-  const response = await patientsApi.patientsControllerFindAll(page);
-  const typedResponse = response.data as unknown as {
-    patients: Patient[];
-    total: number;
+  const result = data as { patients?: Patient[]; total?: number } | null;
+  return {
+    patients: result?.patients || [],
+    total: result?.total || 0,
   };
-
-  return typedResponse;
 };
 
 export const getPatientSummary = async (
   patientId: string
 ): Promise<{ patient: PatientSummary | null }> => {
-  const { session } = await getSession();
-  const accessToken = session?.access_token;
-
-  if (!accessToken) {
-    throw new ApiError(
-      'No authentication token found. Please log in again.',
-      401
-    );
-  }
-
-  const config = new Configuration({
-    basePath: process.env.NEXT_PUBLIC_BACKEND_URL,
-    accessToken: accessToken,
+  const { data, error } = await getSupabaseClient().rpc('patient_summary', {
+    p_patient_id: patientId,
   });
-
-  const patientsApi = new PatientsApi(config);
-  const response = await patientsApi.patientsControllerFindOneAsSummary(
-    patientId
-  );
-  const typedResponse = response.data as unknown as {
-    patient: PatientSummary;
-  };
-
-  return typedResponse;
+  throwOnSupabaseError(error, 'Failed to fetch patient summary');
+  if (!data) {
+    throw new ApiError('Patient not found', 404);
+  }
+  return { patient: data as PatientSummary };
 };
