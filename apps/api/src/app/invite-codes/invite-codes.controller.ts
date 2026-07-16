@@ -19,6 +19,7 @@ import { CreateInviteCodeDto } from './dto/create-invite-code.dto';
 import { ConsumeInviteCodeDto } from './dto/consume-invite-code.dto';
 import { ValidateInviteCodeDto } from './dto/validate-invite-code.dto';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { SupabaseIdentityGuard } from '../auth/guards/supabase-identity.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@abc-admin/enums';
@@ -89,7 +90,7 @@ export class InviteCodesController {
   }
 
   @Post('consume')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(SupabaseIdentityGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Consume an invite code (requires authentication)',
@@ -106,9 +107,9 @@ export class InviteCodesController {
     @Body() consumeDto: ConsumeInviteCodeDto,
     @Request() req: any
   ): Promise<InviteCode> {
-    // req.user.id is the Supabase user ID (from the token)
-    // This will be the same ID used when the user record is created
-    const consumedBy = req.user.id;
-    return this.inviteCodesService.consume(consumeDto.code, consumedBy);
+    return this.inviteCodesService.consumeAndProvision(
+      consumeDto.code,
+      req.identity
+    );
   }
 }

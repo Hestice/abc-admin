@@ -8,6 +8,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { InviteCode } from './entities/invite-code.entity';
+import { User } from '../users/entities/user.entity';
+import { UserRole } from '@abc-admin/enums';
+import { SupabaseIdentity } from '../auth/auth.service';
 
 @Injectable()
 export class InviteCodesService {
@@ -92,5 +95,53 @@ export class InviteCodesService {
     inviteCode.isActive = false;
 
     return this.inviteCodesRepository.save(inviteCode);
+  }
+
+  async consumeAndProvision(
+    code: string,
+    identity: SupabaseIdentity
+  ): Promise<InviteCode> {
+    return this.inviteCodesRepository.manager.transaction(async (manager) => {
+      const inviteCode = await manager.findOne(InviteCode, {
+        where: { code },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!inviteCode) {
+        throw new NotFoundException('Invite code not found');
+      }
+      if (!inviteCode.isActive) {
+        throw new BadRequestException('Invite code is no longer active');
+      }
+      if (inviteCode.consumedBy) {
+        throw new ConflictException('Invite code has already been used');
+      }
+
+      const existingUser = await manager.findOne(User, {
+        where: { id: identity.id },
+      });
+      if (!existingUser) {
+        const emailOwner = await manager.findOne(User, {
+          where: { email: identity.email },
+        });
+        if (emailOwner) {
+          throw new ConflictException('Email already belongs to another user');
+        }
+
+        await manager.save(
+          manager.create(User, {
+            id: identity.id,
+            email: identity.email,
+            role: UserRole.ADMIN,
+            isActive: true,
+          })
+        );
+      }
+
+      inviteCode.consumedBy = identity.id;
+      inviteCode.consumedAt = new Date();
+      inviteCode.isActive = false;
+      return manager.save(inviteCode);
+    });
   }
 }

@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Body,
   Res,
   UseGuards,
   Get,
@@ -59,7 +58,7 @@ export class AuthController {
     }
 
     const token = authorization.substring(7);
-    const user = await this.authService.verifySupabaseToken(token);
+    const user = await this.authService.getAuthenticatedUser(token);
 
     if (!user) {
       throw new UnauthorizedException('Invalid token');

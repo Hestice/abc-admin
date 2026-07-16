@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    const consumePendingInviteCode = async (accessToken: string) => {
+    const consumePendingInviteCode = async () => {
       try {
         const pendingCode = localStorage.getItem('pendingInviteCode');
         if (!pendingCode) {
@@ -135,13 +135,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await usersApi.usersControllerGetMe();
         const userData = response.data as any;
 
-        // If user record was successfully created/fetched, consume pending invite code
-        if (userData) {
-          // Consume invite code if there's one pending
-          // This will work whether the user was just created or already existed
-          await consumePendingInviteCode(accessToken);
-        }
-
         return userData;
       } catch (error) {
         console.error('Error fetching user from backend:', error);
@@ -158,7 +151,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSupabaseUser(session.user);
         setAccessToken(session.access_token);
 
-        // Call /me endpoint to ensure user exists in database and get role
+        // Provision an invited user before accessing any protected API endpoint.
+        await consumePendingInviteCode();
+
+        // Call /me endpoint to fetch the local user and role.
         const userData = await fetchUserFromBackend(session.access_token);
         if (userData) {
           setUser({
@@ -172,11 +168,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: session.user.email || null,
             role: null,
           });
-          // Even if user data fetch failed, try to consume invite code if user is authenticated
-          // This handles edge cases where the user record might already exist
-          if (session.access_token) {
-            await consumePendingInviteCode(session.access_token);
-          }
         }
       } else {
         setSupabaseUser(null);

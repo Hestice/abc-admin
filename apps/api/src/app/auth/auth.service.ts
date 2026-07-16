@@ -1,8 +1,12 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 import { UsersService } from '../users/users.service';
-import { UserRole } from '@abc-admin/enums';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+
+export interface SupabaseIdentity {
+  id: string;
+  email: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -10,77 +14,84 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private configService: ConfigService
   ) {}
 
-  async verifySupabaseToken(supabaseToken: string): Promise<any> {
-    this.logger.debug(`🔍 Verifying Supabase token...`);
+  async verifySupabaseToken(
+    supabaseToken: string
+  ): Promise<SupabaseIdentity | null> {
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    const supabaseAnonKey = this.configService.get<string>(
+      'SUPABASE_ANON_KEY'
+    );
 
-    try {
-      // Decode the token to get user info
-      // Note: In production, you should verify the token signature with Supabase's public key
-      const decoded = this.jwtService.decode(supabaseToken) as any;
-
-      if (!decoded || !decoded.sub) {
-        this.logger.warn('❌ Invalid token: missing sub claim');
-        return null;
-      }
-
-      let user = await this.usersService.findBySupabaseId(decoded.sub);
-
-      // If user doesn't exist in our database but exists in Supabase auth, create them
-      if (!user) {
-        this.logger.log(
-          `🆕 Creating new user record for Supabase user: ${decoded.sub}`
-        );
-
-        const email = decoded.email || decoded.user_email;
-        if (!email) {
-          this.logger.warn('❌ Cannot create user: email not found in token');
-          return null;
-        }
-
-        // Check if user with this email already exists (edge case)
-        const existingUserByEmail = await this.usersService.findByEmail(email);
-        if (existingUserByEmail) {
-          this.logger.warn(
-            `⚠️ User with email ${email} already exists but with different ID. Using existing user.`
-          );
-          user = existingUserByEmail;
-        } else {
-          // Create new user record
-          const createUserDto: CreateUserDto = {
-            id: decoded.sub, // Use Supabase user ID
-            email: email,
-            role: UserRole.ADMIN, // Default role for new users
-            isActive: true,
-          };
-
-          try {
-            user = await this.usersService.createUser(createUserDto);
-            this.logger.log(`✅ Created new user: ${user.email} (${user.id})`);
-          } catch (error) {
-            this.logger.error(
-              `❌ Failed to create user record: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
-            return null;
-          }
-        }
-      }
-
-      if (!user.isActive) {
-        this.logger.warn(`❌ User account is inactive: ${user.email}`);
-        return null;
-      }
-
-      this.logger.log(`✅ User authenticated via Supabase: ${user.email}`);
-      return user;
-    } catch (error) {
-      this.logger.error('❌ Token verification failed:', error);
+    if (!supabaseUrl || !supabaseAnonKey) {
+      this.logger.error(
+        'SUPABASE_URL and SUPABASE_ANON_KEY must be configured'
+      );
       return null;
     }
+
+    const normalizedUrl = supabaseUrl.replace(/\/$/, '');
+
+    try {
+      const response = await axios.get(`${normalizedUrl}/auth/v1/user`, {
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseToken}`,
+        },
+        validateStatus: () => true,
+      });
+
+      if (response.status < 200 || response.status >= 300) {
+        this.logger.warn('Supabase rejected the access token');
+        return null;
+      }
+
+      const payload: unknown = response.data;
+      if (!this.hasRequiredClaims(payload)) {
+        this.logger.warn('Supabase user response is missing required claims');
+        return null;
+      }
+
+      return { id: payload.id, email: payload.email };
+    } catch (error) {
+      this.logger.warn(
+        `Supabase token verification failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return null;
+    }
+  }
+
+  async getAuthenticatedUser(supabaseToken: string) {
+    const identity = await this.verifySupabaseToken(supabaseToken);
+
+    if (!identity) {
+      return null;
+    }
+
+    const user = await this.usersService.findBySupabaseId(identity.id);
+
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    return user;
+  }
+
+  private hasRequiredClaims(
+    payload: unknown
+  ): payload is { id: string; email: string } {
+    return (
+      typeof payload === 'object' &&
+      payload !== null &&
+      'id' in payload &&
+      'email' in payload &&
+      typeof payload.id === 'string' &&
+      typeof payload.email === 'string'
+    );
   }
 
   async getUserFromSupabaseId(supabaseUserId: string) {
