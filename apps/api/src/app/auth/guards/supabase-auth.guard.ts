@@ -3,14 +3,11 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  Logger,
 } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
-  private readonly logger = new Logger(SupabaseAuthGuard.name);
-
   constructor(private authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -24,7 +21,7 @@ export class SupabaseAuthGuard implements CanActivate {
     }
 
     const token = authHeader.substring(7);
-    const user = await this.authService.verifySupabaseToken(token);
+    const user = await this.authService.getAuthenticatedUser(token);
 
     if (!user) {
       throw new UnauthorizedException('Invalid or expired token');
