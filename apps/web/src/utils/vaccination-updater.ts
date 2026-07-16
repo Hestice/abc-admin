@@ -27,12 +27,7 @@ export async function updateVaccinationStatus({
     const vaccinationDay = mapDayToVaccinationDay(day);
 
     // Update vaccination in the backend
-    await updateVaccination({
-      setIsLoading: setIsSaving,
-      patientId,
-      vaccinationDay,
-      scheduleId: scheduleData.id,
-    });
+    await updateVaccination(patientId, scheduleData.id, vaccinationDay);
 
     // Update local state
     const updatedVaccinations = scheduleData.vaccinations.map((vaccination) => {
