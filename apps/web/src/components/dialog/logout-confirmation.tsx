@@ -10,8 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
-import { AppRoutes } from '@/constants/routes';
-import { logout } from '@/utils/login';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LogoutConfirmationProps {
   isOpen: boolean;
@@ -23,13 +22,14 @@ export function LogoutConfirmation({
   onOpenChange,
 }: LogoutConfirmationProps) {
   const router = useRouter();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     try {
       await logout();
-      setTimeout(() => {
-        router.push(AppRoutes.HOME);
-      }, 0);
+      onOpenChange(false);
+      router.replace('/login');
+      router.refresh();
     } catch (error) {
       console.error('Failed to logout:', error);
     }
