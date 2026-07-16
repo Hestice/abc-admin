@@ -224,7 +224,7 @@ begin
     raise exception 'Invite code is no longer valid' using errcode = '23505';
   end if;
 
-  select email into v_email from auth.users where id = auth.uid();
+  v_email := auth.jwt() ->> 'email';
   if v_email is null then
     raise exception 'Authenticated user has no email address';
   end if;
