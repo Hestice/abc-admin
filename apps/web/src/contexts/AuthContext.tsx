@@ -8,7 +8,7 @@ import {
   useRef,
   ReactNode,
 } from 'react';
-import { getSession } from '@/lib/auth/client';
+import { getSession, signOut as signOutServerSession } from '@/lib/auth/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
@@ -23,6 +23,7 @@ interface AuthContextType {
   user: User;
   isLoading: boolean;
   checkAuthStatus: () => Promise<void>;
+  logout: () => Promise<void>;
   supabaseUser: SupabaseUser | null;
   accessToken: string | null;
 }
@@ -38,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   user: emptyUser,
   isLoading: true,
   checkAuthStatus: async () => {},
+  logout: async () => {},
   supabaseUser: null,
   accessToken: null,
 });
@@ -79,6 +81,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAccessToken(null);
       setUser(emptyUser);
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    const { error } = await createClient().auth.signOut();
+    if (error) {
+      throw error;
+    }
+
+    try {
+      // Also clear the server-side Supabase cookies used by middleware.
+      await signOutServerSession();
+    } catch (error) {
+      // The browser session has already been cleared. Keep the UI signed out
+      // even if the cookie-clearing request is interrupted.
+      console.warn('Failed to clear the server-side session:', error);
+    } finally {
+      setSupabaseUser(null);
+      setAccessToken(null);
+      setUser(emptyUser);
       setIsLoading(false);
     }
   };
@@ -265,6 +288,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     isLoading,
     checkAuthStatus,
+    logout,
     supabaseUser,
     accessToken,
   };
